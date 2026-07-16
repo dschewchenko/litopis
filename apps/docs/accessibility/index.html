@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Litopis accessibility contract." />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | Accessibility</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/" aria-label="Litopis documentation home">
+          <span class="brand-mark" aria-hidden="true">L</span>
+          <span>Litopis</span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link" href="/litopis/styling/">Styling</a>
+          <a class="nav-link active" href="/litopis/accessibility/" aria-current="page"
+            >Accessibility</a
+          >
+          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+        </nav>
+      </header>
+
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/adapters/">Adapters</a>
+            <a class="sidebar-link active" href="/litopis/accessibility/" aria-current="page"
+              >Accessibility</a
+            >
+          </nav>
+        </aside>
+
+        <main class="vp-doc" tabindex="-1">
+          <section class="page-intro">
+            <h1>Accessibility</h1>
+            <p>
+              The accessibility contract is product scope, not a polish task. Every adapter must
+              preserve it.
+            </p>
+          </section>
+
+          <section id="contract">
+            <h2>Contract</h2>
+            <ul>
+              <li>Roving focus inside the calendar grid.</li>
+              <li>Arrow, Home, End, PageUp and PageDown navigation.</li>
+              <li>Full date labels for screen readers.</li>
+              <li>Live month announcements after navigation.</li>
+              <li>Disabled state for min, max and custom rules.</li>
+              <li>Input and calendar relationship semantics.</li>
+            </ul>
+          </section>
+
+          <section id="reference-lessons">
+            <h2>Reference lessons</h2>
+            <p>
+              Cally documents tested browser and screen-reader pairs and names known
+              range-announcement issues. Litopis should do the same instead of claiming universal
+              accessibility.
+            </p>
+          </section>
+
+          <section id="automation">
+            <h2>Automation</h2>
+            <p>
+              Use unit tests for calendar math, browser tests for keyboard flows and axe checks for
+              static violations. Manual assistive-technology notes stay in the docs until automation
+              can cover them.
+            </p>
+          </section>
+        </main>
+
+        <aside class="outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a class="outline-link" href="#contract">Contract</a>
+            <a class="outline-link" href="#reference-lessons">Reference lessons</a>
+            <a class="outline-link" href="#automation">Automation</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

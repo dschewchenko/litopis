@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config/schema.json",
+  "access": "public",
+  "baseBranch": "main",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [["@litopis/*"]],
+  "linked": [],
+  "privatePackages": {
+    "tag": false,
+    "version": false
+  },
+  "updateInternalDependencies": "patch"
+}

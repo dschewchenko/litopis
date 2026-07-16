@@ -1,0 +1,28 @@
+{
+  "name": "@litopis/dom",
+  "version": "0.0.0",
+  "description": "DOM bindings for Litopis date and calendar primitives.",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./iife": "./dist/index.global.js"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@litopis/core": "workspace:*"
+  }
+}

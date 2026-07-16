@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Litopis date picker guides." />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | Date picker guides</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/" aria-label="Litopis documentation home">
+          <span class="brand-mark" aria-hidden="true">L</span>
+          <span>Litopis</span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link active" href="/litopis/guides/" aria-current="page">Guides</a>
+          <a class="nav-link" href="/litopis/styling/">Styling</a>
+          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
+          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+        </nav>
+      </header>
+
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link active" href="/litopis/guides/" aria-current="page"
+              >Date picker guides</a
+            >
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/adapters/">Adapters</a>
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+          </nav>
+        </aside>
+
+        <main class="vp-doc" tabindex="-1">
+          <section class="page-intro">
+            <h1>Date picker guides</h1>
+            <p>
+              Use the DOM binding directly, then constrain selection with min and max dates. These
+              examples use the current API.
+            </p>
+          </section>
+
+          <section id="single-date">
+            <h2>Single date</h2>
+            <p>
+              Mount a picker on any element. The controller returns the current form value in
+              <code>YYYY-MM-DD</code> format.
+            </p>
+            <div class="demo-block">
+              <div data-litopis-picker="single"></div>
+            </div>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>import { getToday } from "@litopis/core";
+import { createDatePicker } from "@litopis/dom";
+
+const picker = createDatePicker(root, {
+  label: "Appointment date",
+  today: getToday(),
+});
+
+picker.getValue();</code></pre>
+            </div>
+          </section>
+
+          <section id="min-max">
+            <h2>Min and max</h2>
+            <p>
+              Calendar cells outside the allowed range are disabled by the shared state layer, so
+              adapters do not implement the rule again.
+            </p>
+            <div class="demo-block">
+              <div data-litopis-picker="bounds"></div>
+            </div>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>import { addDays, getToday } from "@litopis/core";
+
+const today = getToday();
+
+createDatePicker(root, {
+  label: "Booking date",
+  min: addDays(today, -15),
+  max: addDays(today, 15),
+});</code></pre>
+            </div>
+          </section>
+
+          <section id="formats">
+            <h2>Date format and week start</h2>
+            <p>
+              Display format is explicit. Week start follows <code>locale</code> by default and can
+              be overridden.
+            </p>
+            <div class="demo-block">
+              <div data-litopis-picker="weekStart"></div>
+            </div>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>createDatePicker(root, {
+  firstDayOfWeek: 6,
+  inputFormat: "mm/dd/yyyy",
+  label: "Weekend trip",
+});</code></pre>
+            </div>
+          </section>
+
+          <section id="localization">
+            <h2>Localization</h2>
+            <p>
+              <code>locale</code> is a BCP 47 tag used for month names, weekday labels and ARIA text
+              through native <code>Intl</code>. Unsupported or invalid locales fall back to
+              <code>en-US</code>. Week start uses native locale data when available, with compact
+              region data only for browsers that do not expose it. Calendar math is proleptic
+              Gregorian, so historical Julian/Gregorian cutovers are not modeled.
+            </p>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>createDatePicker(root, {
+  inputFormat: "dd.mm.yyyy",
+  label: "Date",
+  locale: "uk-UA",
+});
+
+createDatePicker(root, {
+  firstDayOfWeek: 1,
+  locale: "en-US",
+});</code></pre>
+            </div>
+          </section>
+
+          <section id="popover">
+            <h2>Input popover</h2>
+            <p>
+              Use popover mode when the calendar should open over the page. It uses the browser
+              popover top layer and CSS anchor positioning.
+            </p>
+            <div class="demo-block">
+              <div data-litopis-picker="popover"></div>
+            </div>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>createDatePicker(root, {
+  calendarMode: "popover",
+  inputFormat: "dd.mm.yyyy",
+  showOutsideDays: false,
+  showSeason: true,
+  targetSize: "comfortable",
+});</code></pre>
+            </div>
+          </section>
+
+          <section id="programmatic-state">
+            <h2>Programmatic state</h2>
+            <p>
+              Controllers can update value, visible month and options without remounting the
+              calendar.
+            </p>
+            <div class="demo-block">
+              <div class="demo-actions" aria-label="Programmatic date picker actions">
+                <button
+                  class="demo-action"
+                  type="button"
+                  data-litopis-action="set-date"
+                  data-litopis-target="programmatic"
+                >
+                  Set date
+                </button>
+                <button
+                  class="demo-action"
+                  type="button"
+                  data-litopis-action="jump"
+                  data-litopis-target="programmatic"
+                >
+                  Jump month
+                </button>
+                <button
+                  class="demo-action"
+                  type="button"
+                  data-litopis-action="today"
+                  data-litopis-target="programmatic"
+                >
+                  Today
+                </button>
+                <button
+                  class="demo-action"
+                  type="button"
+                  data-litopis-action="season"
+                  data-litopis-target="programmatic"
+                >
+                  Toggle season
+                </button>
+                <button
+                  class="demo-action"
+                  type="button"
+                  data-litopis-action="clear"
+                  data-litopis-target="programmatic"
+                >
+                  Clear
+                </button>
+              </div>
+              <div data-litopis-picker="programmatic"></div>
+            </div>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>import { addDays, addMonths, getToday } from "@litopis/core";
+
+const today = getToday();
+const picker = createDatePicker(root, { today });
+
+picker.setDate(addDays(today, 9));
+picker.setVisibleMonth(startOfMonth(addMonths(today, 6)));
+picker.goToToday();
+picker.setOptions({ showSeason: true, showOutsideDays: false });</code></pre>
+            </div>
+          </section>
+
+          <section id="typed-values">
+            <h2>Typed values</h2>
+            <p>
+              Litopis uses plain date values internally and converts at the boundary. That avoids
+              local time shifts while still leaving room for JavaScript Date integration.
+            </p>
+            <table>
+              <tbody>
+                <tr>
+                  <th>Internal value</th>
+                  <td>
+                    <code>{ day, month, year }</code>, years <code>0001</code> to <code>9999</code>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Form value</th>
+                  <td><code>YYYY-MM-DD</code></td>
+                </tr>
+                <tr>
+                  <th>Input masks</th>
+                  <td><code>yyyy-mm-dd</code>, <code>dd.mm.yyyy</code>, <code>mm/dd/yyyy</code></td>
+                </tr>
+                <tr>
+                  <th>Adapter value</th>
+                  <td><code>DateValue</code>; adapters can convert at the app boundary</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+        </main>
+
+        <aside class="outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a class="outline-link" href="#single-date">Single date</a>
+            <a class="outline-link" href="#min-max">Min and max</a>
+            <a class="outline-link" href="#formats">Format and week start</a>
+            <a class="outline-link" href="#localization">Localization</a>
+            <a class="outline-link" href="#popover">Input popover</a>
+            <a class="outline-link" href="#programmatic-state">Programmatic state</a>
+            <a class="outline-link" href="#typed-values">Typed values</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

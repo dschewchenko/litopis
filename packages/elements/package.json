@@ -1,0 +1,27 @@
+{
+  "name": "@litopis/elements",
+  "version": "0.0.0",
+  "description": "Web Components for Litopis date and calendar primitives.",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": true,
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./iife": "./dist/index.global.js"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@litopis/core": "workspace:*",
+    "@litopis/dom": "workspace:*"
+  }
+}

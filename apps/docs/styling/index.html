@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Litopis styling guide." />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | Styling</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/" aria-label="Litopis documentation home">
+          <span class="brand-mark" aria-hidden="true">L</span>
+          <span>Litopis</span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link active" href="/litopis/styling/" aria-current="page">Styling</a>
+          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
+          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+        </nav>
+      </header>
+
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link active" href="/litopis/styling/" aria-current="page">Styling</a>
+            <a class="sidebar-link" href="/litopis/adapters/">Adapters</a>
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+          </nav>
+        </aside>
+
+        <main class="vp-doc" tabindex="-1">
+          <section class="page-intro">
+            <h1>Styling</h1>
+            <p>Litopis should publish stable anatomy and let consumer CSS do the work.</p>
+          </section>
+
+          <section id="anatomy">
+            <h2>Anatomy</h2>
+            <p>
+              The default DOM output exposes predictable class names and data attributes. These
+              selectors are the styling contract, not implementation details.
+            </p>
+            <div class="demo-block compact-demo">
+              <div data-litopis-picker="styling"></div>
+            </div>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>.litopis
+.litopis[data-calendar-mode="popover"]
+.litopis[data-target-size="comfortable"]
+.litopis-input
+.litopis-grid
+.litopis-day[data-selected]
+.litopis-day[data-today]
+.litopis-day[data-outside-month]
+.litopis-month-button
+.litopis-year-button</code></pre>
+            </div>
+          </section>
+
+          <section id="popover-css">
+            <h2>Popover CSS</h2>
+            <p>The popover variant uses the browser top layer and CSS anchors.</p>
+            <div class="demo-block compact-demo">
+              <div data-litopis-picker="popover"></div>
+            </div>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>.litopis[data-calendar-mode="popover"] .litopis-calendar {
+  position: fixed;
+  inset: 12px auto auto 12px;
+  max-width: calc(100vw - 24px);
+  z-index: var(--litopis-popover-z-index, 2147483647);
+}
+
+.litopis-calendar[popover]:not(:popover-open) {
+  display: none;
+}
+
+@supports (top: anchor(bottom)) {
+  .litopis[data-calendar-mode="popover"] .litopis-calendar {
+    top: anchor(bottom);
+    left: anchor(left);
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+}</code></pre>
+            </div>
+          </section>
+
+          <section id="tailwind-daisyui">
+            <h2>Tailwind and daisyUI</h2>
+            <p>
+              Consumer apps can include Litopis package files in their Tailwind source scan and
+              style generated anatomy directly. No Litopis daisyUI package is needed.
+            </p>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>@import "tailwindcss";
+@plugin "daisyui";
+@source "../node_modules/@litopis";</code></pre>
+            </div>
+          </section>
+
+          <section id="bootstrap">
+            <h2>Bootstrap</h2>
+            <p>Bootstrap can style Litopis through stable selectors and ordinary CSS.</p>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>.litopis-input {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  padding: .375rem .75rem;
+}
+
+.litopis-day-button {
+  border-radius: var(--bs-border-radius-sm);
+}</code></pre>
+            </div>
+          </section>
+
+          <section id="decision">
+            <h2>Decision</h2>
+            <p>
+              Ship stable classes, data states and CSS variables. Do not require first-party theme
+              packages.
+            </p>
+          </section>
+        </main>
+
+        <aside class="outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a class="outline-link" href="#anatomy">Anatomy</a>
+            <a class="outline-link" href="#popover-css">Popover CSS</a>
+            <a class="outline-link" href="#tailwind-daisyui">Tailwind and daisyUI</a>
+            <a class="outline-link" href="#bootstrap">Bootstrap</a>
+            <a class="outline-link" href="#decision">Decision</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
