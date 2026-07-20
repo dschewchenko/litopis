@@ -1,10 +1,10 @@
 import { createDatePicker, parseDateFieldValue, type DatePickerController } from "@litopis/dom";
-import type { DatePickerOptions } from "@litopis/dom";
+import { toIsoDate } from "@litopis/core";
+import type { DatePickerOptions, DateValue } from "@litopis/dom";
 
 type ElementDateFieldFormat = "dd.mm.yyyy" | "mm/dd/yyyy" | "yyyy-mm-dd";
 type ElementFirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 type ElementCalendarMode = "inline" | "popover";
-type ElementDateValue = NonNullable<ReturnType<typeof parseDateFieldValue>>;
 type ElementTargetSize = "comfortable" | "compact";
 
 const dateFieldFormats = new Set<ElementDateFieldFormat>([
@@ -15,6 +15,7 @@ const dateFieldFormats = new Set<ElementDateFieldFormat>([
 
 export class LitopisDatePickerElement extends HTMLElement {
   #controller: DatePickerController | null = null;
+  #value: DateValue | null = null;
 
   static get observedAttributes(): string[] {
     return [
@@ -30,10 +31,16 @@ export class LitopisDatePickerElement extends HTMLElement {
       "show-today-button",
       "target-size",
       "today-label",
+      "value",
     ];
   }
 
-  attributeChangedCallback(): void {
+  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
+    if (name === "value") {
+      this.value = newValue ?? "";
+      return;
+    }
+
     if (this.#controller) {
       this.#controller.setOptions(this.#getOptions());
     }
@@ -48,16 +55,18 @@ export class LitopisDatePickerElement extends HTMLElement {
   }
 
   disconnectedCallback(): void {
+    this.#value = this.#controller?.getDate() ?? this.#value;
     this.#controller?.destroy();
     this.#controller = null;
   }
 
   get value(): string {
-    return this.#controller?.getValue() ?? "";
+    return this.#controller?.getValue() ?? (this.#value ? toIsoDate(this.#value) : "");
   }
 
   set value(value: string) {
-    this.#controller?.setDate(parseDateFieldValue(value, "yyyy-mm-dd"));
+    this.#value = parseDateFieldValue(value, "yyyy-mm-dd");
+    this.#controller?.setDate(this.#value);
   }
 
   #mount(): void {
@@ -82,6 +91,10 @@ export class LitopisDatePickerElement extends HTMLElement {
       ...(locale === null ? {} : { locale }),
       ...(max === undefined ? {} : { max }),
       ...(min === undefined ? {} : { min }),
+      onValueChange: (value) => {
+        this.#value = value;
+      },
+      selected: this.#value,
       ...(this.hasAttribute("show-outside-days")
         ? { showOutsideDays: getBooleanAttribute(this.getAttribute("show-outside-days")) }
         : {}),
@@ -99,7 +112,7 @@ export class LitopisDatePickerElement extends HTMLElement {
   }
 }
 
-function getDateAttribute(value: string | null): ElementDateValue | undefined {
+function getDateAttribute(value: string | null): DateValue | undefined {
   if (!value) {
     return undefined;
   }

@@ -7,6 +7,6 @@ export default defineConfig({
     neverBundle: ["@litopis/dom", "vue"],
   },
   entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  format: ["esm"],
   sourcemap: true,
 });

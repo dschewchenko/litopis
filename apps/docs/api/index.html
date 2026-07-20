@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Litopis DOM controller, date value and calendar core API reference."
+    />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | API reference</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/" aria-label="Litopis documentation home">
+          <span class="brand-mark" aria-hidden="true">L</span>
+          <span>Litopis</span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/examples/">Examples</a>
+          <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
+          <a class="nav-link active" href="/litopis/api/" aria-current="page">API</a>
+          <a class="nav-link" href="/litopis/styling/">Styling</a>
+          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
+          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+        </nav>
+      </header>
+
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
+            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <a class="sidebar-link active" href="/litopis/api/" aria-current="page"
+              >API reference</a
+            >
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+          </nav>
+        </aside>
+
+        <main class="vp-doc" tabindex="-1">
+          <section class="page-intro">
+            <p class="eyebrow">@litopis/dom and @litopis/core</p>
+            <h1>API reference</h1>
+            <p>
+              Public values, options and controller methods for the headless core and imperative DOM
+              binding. Framework adapters expose the same option and value contract.
+            </p>
+          </section>
+
+          <section id="date-value">
+            <h2>DateValue</h2>
+            <p>
+              Litopis represents a calendar date without a time or time zone. Months and days are
+              one-based; supported years are <code>1</code> through <code>9999</code>.
+            </p>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>interface DateValue {
+  readonly day: number;
+  readonly month: number;
+  readonly year: number;
+}</code></pre>
+            </div>
+            <div class="note-callout">
+              <strong>Form boundary</strong>
+              <p>
+                <code>getValue()</code> returns an ISO <code>YYYY-MM-DD</code> string. Use
+                <code>getDate()</code> when the application should keep a typed value.
+              </p>
+            </div>
+          </section>
+
+          <section id="create-date-picker">
+            <h2>createDatePicker</h2>
+            <p>Mounts a date field and calendar into an existing element.</p>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>function createDatePicker(
+  root: HTMLElement,
+  options?: DatePickerOptions,
+): DatePickerController;</code></pre>
+            </div>
+
+            <h3 id="date-picker-options">DatePickerOptions</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>calendarMode</code></td>
+                  <td><code>"inline" | "popover"</code></td>
+                  <td><code>"inline"</code></td>
+                  <td>Renders the calendar in flow or in the browser top layer.</td>
+                </tr>
+                <tr>
+                  <td><code>firstDayOfWeek</code></td>
+                  <td><code>0 | 1 | … | 6</code></td>
+                  <td>Locale-derived</td>
+                  <td>Overrides the first weekday; Sunday is <code>0</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>inputFormat</code></td>
+                  <td><code>DateFieldFormat</code></td>
+                  <td><code>"yyyy-mm-dd"</code></td>
+                  <td>Visible input mask and parsing format.</td>
+                </tr>
+                <tr>
+                  <td><code>label</code></td>
+                  <td><code>string</code></td>
+                  <td><code>"Date"</code></td>
+                  <td>Visible label and accessible name.</td>
+                </tr>
+                <tr>
+                  <td><code>locale</code></td>
+                  <td><code>string</code></td>
+                  <td><code>"en-US"</code></td>
+                  <td>BCP 47 locale for labels, names and week data.</td>
+                </tr>
+                <tr>
+                  <td><code>min</code></td>
+                  <td><code>DateValue</code></td>
+                  <td>—</td>
+                  <td>Earliest selectable date.</td>
+                </tr>
+                <tr>
+                  <td><code>max</code></td>
+                  <td><code>DateValue</code></td>
+                  <td>—</td>
+                  <td>Latest selectable date.</td>
+                </tr>
+                <tr>
+                  <td><code>onValueChange</code></td>
+                  <td><code>(value) =&gt; void</code></td>
+                  <td>—</td>
+                  <td>Runs after the selected typed value changes.</td>
+                </tr>
+                <tr>
+                  <td><code>selected</code></td>
+                  <td><code>DateValue | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Initial selected value.</td>
+                </tr>
+                <tr>
+                  <td><code>showOutsideDays</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>true</code></td>
+                  <td>Shows dates that fill the first and last calendar week.</td>
+                </tr>
+                <tr>
+                  <td><code>showSeason</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Adds the season label below the month caption.</td>
+                </tr>
+                <tr>
+                  <td><code>showTodayButton</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>Adds a footer action that selects today.</td>
+                </tr>
+                <tr>
+                  <td><code>targetSize</code></td>
+                  <td><code>"compact" | "comfortable"</code></td>
+                  <td><code>"compact"</code></td>
+                  <td>Comfortable controls are at least 44 by 44 CSS pixels.</td>
+                </tr>
+                <tr>
+                  <td><code>today</code></td>
+                  <td><code>DateValue</code></td>
+                  <td>Local current date</td>
+                  <td>Overrides today for deterministic UI or testing.</td>
+                </tr>
+                <tr>
+                  <td><code>todayLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>"Today"</code></td>
+                  <td>Visible text for the today action.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3 id="date-picker-controller">DatePickerController</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Result</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>open()</code></td>
+                  <td><code>void</code></td>
+                  <td>Opens a popover calendar.</td>
+                </tr>
+                <tr>
+                  <td><code>close()</code></td>
+                  <td><code>void</code></td>
+                  <td>Closes a popover calendar and restores its closed state.</td>
+                </tr>
+                <tr>
+                  <td><code>toggle()</code></td>
+                  <td><code>void</code></td>
+                  <td>Toggles popover visibility.</td>
+                </tr>
+                <tr>
+                  <td><code>getDate()</code></td>
+                  <td><code>DateValue | null</code></td>
+                  <td>Returns the selected typed value.</td>
+                </tr>
+                <tr>
+                  <td><code>getValue()</code></td>
+                  <td><code>string</code></td>
+                  <td>Returns ISO <code>YYYY-MM-DD</code> or an empty string.</td>
+                </tr>
+                <tr>
+                  <td><code>setDate(value)</code></td>
+                  <td><code>void</code></td>
+                  <td>Sets or clears selection and updates the input.</td>
+                </tr>
+                <tr>
+                  <td><code>setVisibleMonth(value)</code></td>
+                  <td><code>void</code></td>
+                  <td>Changes the month currently displayed.</td>
+                </tr>
+                <tr>
+                  <td><code>setOptions(options)</code></td>
+                  <td><code>void</code></td>
+                  <td>
+                    Replaces options without remounting; selection is preserved unless supplied.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>goToToday()</code></td>
+                  <td><code>void</code></td>
+                  <td>Focuses and reveals today within configured bounds.</td>
+                </tr>
+                <tr>
+                  <td><code>destroy()</code></td>
+                  <td><code>void</code></td>
+                  <td>Removes listeners, generated DOM and Litopis state attributes.</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section id="date-field">
+            <h2>createDateField</h2>
+            <p>
+              Mounts only the masked text field. It is useful when the application provides its own
+              calendar surface or needs typed date entry without a picker.
+            </p>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>const field = createDateField(root, {
+  format: "dd.mm.yyyy",
+  label: "Invoice date",
+  min: { day: 1, month: 1, year: 2026 },
+});
+
+field.getDate();
+field.getValue();
+field.isValid();
+field.setDate({ day: 16, month: 7, year: 2026 });
+field.destroy();</code></pre>
+            </div>
+          </section>
+
+          <section id="core-exports">
+            <h2>Core exports</h2>
+            <p>
+              <code>@litopis/core</code> has no DOM dependency and can be used for custom renderers,
+              server-side validation and deterministic calendar calculations.
+            </p>
+            <div class="api-groups">
+              <article>
+                <h3>Date math</h3>
+                <p>
+                  <code>addDays</code>, <code>addMonths</code>, <code>addYears</code>,
+                  <code>startOfMonth</code>, <code>endOfMonth</code>, <code>getDaysInMonth</code>
+                </p>
+              </article>
+              <article>
+                <h3>Comparison and validation</h3>
+                <p>
+                  <code>compareDates</code>, <code>clampDate</code>, <code>isSameDate</code>,
+                  <code>isValidDateValue</code>, <code>isDateDisabled</code>
+                </p>
+              </article>
+              <article>
+                <h3>Formatting</h3>
+                <p>
+                  <code>formatDate</code>, <code>toIsoDate</code>, <code>toLocalDate</code>,
+                  <code>getToday</code>
+                </p>
+              </article>
+              <article>
+                <h3>Calendar state</h3>
+                <p>
+                  <code>createCalendarState</code>, <code>createCalendarGrid</code>,
+                  <code>moveFocus</code>, <code>focusDate</code>, <code>selectDate</code>,
+                  <code>selectFocusedDate</code>
+                </p>
+              </article>
+            </div>
+          </section>
+        </main>
+
+        <aside class="page-outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#date-value">DateValue</a>
+            <a class="outline-link" href="#create-date-picker">createDatePicker</a>
+            <a class="outline-link outline-nested" href="#date-picker-options">Options</a>
+            <a class="outline-link outline-nested" href="#date-picker-controller">Controller</a>
+            <a class="outline-link" href="#date-field">createDateField</a>
+            <a class="outline-link" href="#core-exports">Core exports</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

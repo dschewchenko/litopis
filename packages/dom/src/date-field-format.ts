@@ -1,8 +1,7 @@
 import {
   compareDates,
   getDaysInMonth,
-  MAX_YEAR,
-  MIN_YEAR,
+  isValidDateValue,
   toIsoDate,
   type DateValue,
 } from "@litopis/core";
@@ -81,7 +80,7 @@ export function parseDateFieldValue(value: string, format: DateFieldFormat): Dat
     year: Number(parts.year),
   };
 
-  if (!isValidDate(date)) {
+  if (!isValidDateValue(date)) {
     return null;
   }
 
@@ -261,20 +260,6 @@ function getFormatParts(value: string, format: DateFieldFormat): FormatParts | n
         year: digits.slice(0, 4),
       };
   }
-}
-
-function isValidDate(value: DateValue): boolean {
-  return (
-    Number.isInteger(value.day) &&
-    Number.isInteger(value.month) &&
-    Number.isInteger(value.year) &&
-    value.year >= MIN_YEAR &&
-    value.year <= MAX_YEAR &&
-    value.month >= 1 &&
-    value.month <= 12 &&
-    value.day >= 1 &&
-    value.day <= getDaysInMonth(value)
-  );
 }
 
 function clampNumber(value: number, min: number, max: number): number {

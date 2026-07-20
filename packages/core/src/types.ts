@@ -6,15 +6,8 @@ export interface DateValue {
 
 export type FirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-export type SelectionMode = "single" | "range";
-
-export interface DateRangeValue {
-  readonly end: DateValue | null;
-  readonly start: DateValue | null;
-}
-
 export interface CalendarGridCell {
-  readonly date: DateValue;
+  readonly date: DateValue | null;
   readonly disabled: boolean;
   readonly outsideMonth: boolean;
   readonly selected: boolean;
@@ -31,8 +24,7 @@ export interface CalendarStateOptions {
   readonly locale?: string;
   readonly max?: DateValue;
   readonly min?: DateValue;
-  readonly mode?: SelectionMode;
-  readonly selected?: DateValue | DateRangeValue | null;
+  readonly selected?: DateValue | null;
   readonly today?: DateValue;
 }
 
@@ -43,8 +35,7 @@ export interface CalendarState {
   readonly locale: string;
   readonly max: DateValue | null;
   readonly min: DateValue | null;
-  readonly mode: SelectionMode;
-  readonly selected: DateValue | DateRangeValue | null;
+  readonly selected: DateValue | null;
   readonly today: DateValue;
   readonly visibleMonth: DateValue;
 }
@@ -54,8 +45,8 @@ export type CalendarMove =
   | "previous-day"
   | "next-week"
   | "previous-week"
-  | "month-start"
-  | "month-end"
+  | "week-start"
+  | "week-end"
   | "next-month"
   | "previous-month"
   | "next-year"

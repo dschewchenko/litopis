@@ -1,24 +1,18 @@
 import {
-  addDays,
-  compareDates,
-  endOfMonth,
   formatDate,
+  getDaysInMonth,
   isDateDisabled,
   isSameDate,
+  MAX_YEAR,
+  MIN_YEAR,
   startOfMonth,
   toLocalDate,
 } from "./date";
-import type {
-  CalendarGrid,
-  CalendarGridCell,
-  DateRangeValue,
-  DateValue,
-  FirstDayOfWeek,
-} from "./types";
+import type { CalendarGrid, CalendarGridCell, DateValue, FirstDayOfWeek } from "./types";
 
 export function createCalendarGrid(
   visibleMonth: DateValue,
-  selected: DateValue | DateRangeValue | null,
+  selected: DateValue | null,
   today: DateValue,
   locale: string,
   firstDayOfWeek: FirstDayOfWeek,
@@ -26,28 +20,27 @@ export function createCalendarGrid(
   max: DateValue | null,
 ): CalendarGrid {
   const monthStart = startOfMonth(visibleMonth);
-  const monthEnd = endOfMonth(visibleMonth);
   const firstDayOffset = (toLocalDate(monthStart).getDay() - firstDayOfWeek + 7) % 7;
-  let weekStart = addDays(monthStart, -firstDayOffset);
+  const monthDays = getDaysInMonth(monthStart);
+  const cellCount = Math.ceil((firstDayOffset + monthDays) / 7) * 7;
   const weeks: CalendarGridCell[][] = [];
 
-  while (compareDates(weekStart, monthEnd) <= 0) {
+  for (let cellIndex = 0; cellIndex < cellCount; cellIndex += 7) {
     const week: CalendarGridCell[] = [];
 
     for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
-      const date = addDays(weekStart, dayIndex);
+      const date = getGridDate(monthStart, cellIndex + dayIndex - firstDayOffset);
 
       week.push({
         date,
-        disabled: isDateDisabled(date, min, max),
-        outsideMonth: date.month !== visibleMonth.month,
-        selected: isSelected(date, selected),
-        today: isSameDate(date, today),
+        disabled: !date || isDateDisabled(date, min, max),
+        outsideMonth: !date || date.month !== visibleMonth.month,
+        selected: date ? isSameDate(date, selected) : false,
+        today: date ? isSameDate(date, today) : false,
       });
     }
 
     weeks.push(week);
-    weekStart = addDays(weekStart, 7);
   }
 
   return {
@@ -56,14 +49,18 @@ export function createCalendarGrid(
   };
 }
 
-function isSelected(date: DateValue, selected: DateValue | DateRangeValue | null): boolean {
-  if (!selected) {
-    return false;
+function getGridDate(monthStart: DateValue, dayOffset: number): DateValue | null {
+  const date = toLocalDate(monthStart);
+  date.setDate(date.getDate() + dayOffset);
+  const year = date.getFullYear();
+
+  if (year < MIN_YEAR || year > MAX_YEAR) {
+    return null;
   }
 
-  if ("day" in selected) {
-    return isSameDate(date, selected);
-  }
-
-  return isSameDate(date, selected.start) || isSameDate(date, selected.end);
+  return {
+    day: date.getDate(),
+    month: date.getMonth() + 1,
+    year,
+  };
 }

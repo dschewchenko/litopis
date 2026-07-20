@@ -15,7 +15,10 @@
           <span>Litopis</span>
         </a>
         <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/examples/">Examples</a>
           <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
+          <a class="nav-link" href="/litopis/api/">API</a>
           <a class="nav-link" href="/litopis/styling/">Styling</a>
           <a class="nav-link active" href="/litopis/accessibility/" aria-current="page"
             >Accessibility</a
@@ -26,12 +29,14 @@
 
       <div class="docs-layout">
         <aside class="sidebar" aria-label="Documentation sections">
-          <nav class="sidebar-nav">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
-            <a class="sidebar-link" href="/litopis/adapters/">Adapters</a>
             <a class="sidebar-link active" href="/litopis/accessibility/" aria-current="page"
               >Accessibility</a
             >
@@ -40,50 +45,147 @@
 
         <main class="vp-doc" tabindex="-1">
           <section class="page-intro">
+            <p class="eyebrow">Behavior contract</p>
             <h1>Accessibility</h1>
             <p>
-              The accessibility contract is product scope, not a polish task. Every adapter must
-              preserve it.
+              Keyboard, focus and announcement behavior is implemented once in the DOM binding and
+              preserved by every framework adapter.
             </p>
           </section>
 
           <section id="contract">
-            <h2>Contract</h2>
+            <h2>What Litopis provides</h2>
             <ul>
-              <li>Roving focus inside the calendar grid.</li>
-              <li>Arrow, Home, End, PageUp and PageDown navigation.</li>
-              <li>Full date labels for screen readers.</li>
-              <li>Live month announcements after navigation.</li>
-              <li>Disabled state for min, max and custom rules.</li>
-              <li>Input and calendar relationship semantics.</li>
+              <li>One active tab stop inside the calendar grid.</li>
+              <li>A labelled input with expanded, controls and invalid-state semantics.</li>
+              <li>Full localized date labels on day controls.</li>
+              <li>Live announcements after month and focused-date changes.</li>
+              <li>
+                Selected, current, outside-month and disabled states in ARIA and
+                <code>data-*</code>.
+              </li>
+              <li>Predictable focus restoration after selection or Escape.</li>
             </ul>
           </section>
 
-          <section id="reference-lessons">
-            <h2>Reference lessons</h2>
-            <p>
-              Cally documents tested browser and screen-reader pairs and names known
-              range-announcement issues. Litopis should do the same instead of claiming universal
-              accessibility.
-            </p>
+          <section id="keyboard">
+            <h2>Keyboard support</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>From</th>
+                  <th>Behavior</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><kbd>ArrowDown</kbd></td>
+                  <td>Input</td>
+                  <td>Opens the calendar when needed and moves focus to the active date.</td>
+                </tr>
+                <tr>
+                  <td><kbd>ArrowLeft</kbd> / <kbd>ArrowRight</kbd></td>
+                  <td>Calendar</td>
+                  <td>Moves one day backward or forward.</td>
+                </tr>
+                <tr>
+                  <td><kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd></td>
+                  <td>Calendar</td>
+                  <td>Moves one week backward or forward.</td>
+                </tr>
+                <tr>
+                  <td><kbd>Home</kbd> / <kbd>End</kbd></td>
+                  <td>Calendar</td>
+                  <td>Moves to the start or end of the configured week.</td>
+                </tr>
+                <tr>
+                  <td><kbd>PageUp</kbd> / <kbd>PageDown</kbd></td>
+                  <td>Calendar</td>
+                  <td>Moves to the previous or next month.</td>
+                </tr>
+                <tr>
+                  <td><kbd>Shift</kbd> + <kbd>PageUp</kbd> / <kbd>PageDown</kbd></td>
+                  <td>Calendar</td>
+                  <td>Moves to the previous or next year.</td>
+                </tr>
+                <tr>
+                  <td><kbd>Enter</kbd> / <kbd>Space</kbd></td>
+                  <td>Calendar</td>
+                  <td>Selects the focused date.</td>
+                </tr>
+                <tr>
+                  <td><kbd>Escape</kbd></td>
+                  <td>Popover</td>
+                  <td>Closes the calendar and restores focus to its input.</td>
+                </tr>
+              </tbody>
+            </table>
           </section>
 
           <section id="automation">
-            <h2>Automation</h2>
+            <h2>Release testing</h2>
             <p>
-              Use unit tests for calendar math, browser tests for keyboard flows and axe checks for
-              static violations. Manual assistive-technology notes stay in the docs until automation
-              can cover them.
+              Accessibility checks are part of <code>bun run check:release</code>, not a separate
+              optional audit.
             </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Layer</th>
+                  <th>Coverage</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Core and DOM</td>
+                  <td>Date math, bounds, input masking, focus and selection</td>
+                  <td><strong>Automated</strong></td>
+                </tr>
+                <tr>
+                  <td>Real browsers</td>
+                  <td>Chromium, Firefox and WebKit keyboard flows</td>
+                  <td><strong>Automated</strong></td>
+                </tr>
+                <tr>
+                  <td>Static analysis</td>
+                  <td>axe on every docs page and open picker states</td>
+                  <td><strong>Automated</strong></td>
+                </tr>
+                <tr>
+                  <td>Assistive technology</td>
+                  <td>VoiceOver, NVDA and JAWS speech and interaction</td>
+                  <td><strong>Pending</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section id="manual-status">
+            <h2>Manual status</h2>
+            <p>
+              VoiceOver, NVDA and JAWS verification is still pending. Until those combinations are
+              recorded, releases must describe accessibility support as tested automation rather
+              than universal compatibility.
+            </p>
+            <div class="note-callout">
+              <strong>No universal claim yet</strong>
+              <p>
+                The public matrix records exact browser, operating system and screen-reader
+                versions, including known issues and reproduction steps.
+              </p>
+            </div>
           </section>
         </main>
 
-        <aside class="outline" aria-label="On this page">
+        <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
-          <nav>
-            <a class="outline-link" href="#contract">Contract</a>
-            <a class="outline-link" href="#reference-lessons">Reference lessons</a>
-            <a class="outline-link" href="#automation">Automation</a>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#contract">What Litopis provides</a>
+            <a class="outline-link" href="#keyboard">Keyboard support</a>
+            <a class="outline-link" href="#automation">Release testing</a>
+            <a class="outline-link" href="#manual-status">Manual status</a>
           </nav>
         </aside>
       </div>

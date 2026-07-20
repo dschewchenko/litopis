@@ -1,0 +1,37 @@
+@import "./foundation.css";
+
+.litopis,
+.litopis-field {
+  --litopis-accent: #3451b2;
+  --litopis-accent-foreground: #ffffff;
+  --litopis-background: #ffffff;
+  --litopis-border: #d4d4d8;
+  --litopis-border-width: 1px;
+  --litopis-calendar-radius: 20px;
+  --litopis-calendar-shadow:
+    inset 0 0 0 var(--litopis-border-width) var(--litopis-border), 0 1px 2px rgb(0 0 0 / 4%);
+  --litopis-danger: #b42318;
+  --litopis-disabled: #a1a1aa;
+  --litopis-focus-ring: rgb(52 81 178 / 20%);
+  --litopis-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --litopis-foreground: #18181b;
+  --litopis-muted: #f4f4f5;
+  --litopis-muted-foreground: #71717a;
+  --litopis-popover-shadow:
+    0 0 0 1px rgb(0 0 0 / 6%), 0 2px 4px rgb(0 0 0 / 4%), 0 18px 48px rgb(0 0 0 / 12%);
+  --litopis-radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .litopis,
+  .litopis-field {
+    --litopis-background: #18181b;
+    --litopis-border: #3f3f46;
+    --litopis-calendar-shadow: inset 0 0 0 var(--litopis-border-width) var(--litopis-border);
+    --litopis-disabled: #71717a;
+    --litopis-foreground: #fafafa;
+    --litopis-muted: #27272a;
+    --litopis-muted-foreground: #a1a1aa;
+    --litopis-popover-shadow: 0 0 0 1px rgb(255 255 255 / 8%);
+  }
+}

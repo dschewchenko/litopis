@@ -15,7 +15,10 @@
           <span>Litopis</span>
         </a>
         <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/examples/">Examples</a>
           <a class="nav-link active" href="/litopis/guides/" aria-current="page">Guides</a>
+          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
+          <a class="nav-link" href="/litopis/api/">API</a>
           <a class="nav-link" href="/litopis/styling/">Styling</a>
           <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
           <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
@@ -24,24 +27,27 @@
 
       <div class="docs-layout">
         <aside class="sidebar" aria-label="Documentation sections">
-          <nav class="sidebar-nav">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link active" href="/litopis/guides/" aria-current="page"
               >Date picker guides</a
             >
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
-            <a class="sidebar-link" href="/litopis/adapters/">Adapters</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
 
         <main class="vp-doc" tabindex="-1">
           <section class="page-intro">
+            <p class="eyebrow">Working examples</p>
             <h1>Date picker guides</h1>
             <p>
-              Use the DOM binding directly, then constrain selection with min and max dates. These
-              examples use the current API.
+              Copy complete patterns for single dates, bounded booking windows, localized input,
+              popovers and programmatic control. Every example below runs the current DOM API.
             </p>
           </section>
 
@@ -159,7 +165,8 @@ createDatePicker(root, {
             <h2>Programmatic state</h2>
             <p>
               Controllers can update value, visible month and options without remounting the
-              calendar.
+              calendar. <code>setOptions</code> replaces the option object while preserving the
+              current selected value unless a new <code>selected</code> value is supplied.
             </p>
             <div class="demo-block">
               <div class="demo-actions" aria-label="Programmatic date picker actions">
@@ -208,7 +215,7 @@ createDatePicker(root, {
             </div>
             <div class="language-ts vp-code-group">
               <span class="lang">ts</span>
-              <pre><code>import { addDays, addMonths, getToday } from "@litopis/core";
+              <pre><code>import { addDays, addMonths, getToday, startOfMonth } from "@litopis/core";
 
 const today = getToday();
 const picker = createDatePicker(root, { today });
@@ -251,9 +258,9 @@ picker.setOptions({ showSeason: true, showOutsideDays: false });</code></pre>
           </section>
         </main>
 
-        <aside class="outline" aria-label="On this page">
+        <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
-          <nav>
+          <nav aria-label="Page outline">
             <a class="outline-link" href="#single-date">Single date</a>
             <a class="outline-link" href="#min-max">Min and max</a>
             <a class="outline-link" href="#formats">Format and week start</a>

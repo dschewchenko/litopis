@@ -22,7 +22,7 @@ export interface DatePickerController {
   goToToday(): void;
   open(): void;
   setDate(value: DateValue | null): void;
-  setOptions(options: Partial<DatePickerOptions>): void;
+  setOptions(options: DatePickerOptions): void;
   setVisibleMonth(value: DateValue): void;
   toggle(): void;
 }

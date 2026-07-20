@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Install and use the controlled Litopis date picker component in React."
+    />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | React integration</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/" aria-label="Litopis documentation home">
+          <span class="brand-mark" aria-hidden="true">L</span><span>Litopis</span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/examples/">Examples</a>
+          <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link active" href="/litopis/integrations/" aria-current="page"
+            >Integrations</a
+          >
+          <a class="nav-link" href="/litopis/api/">API</a>
+          <a class="nav-link" href="/litopis/styling/">Styling</a>
+          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
+          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+        </nav>
+      </header>
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
+            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link active" href="/litopis/integrations/" aria-current="page"
+              >Integrations</a
+            >
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+          </nav>
+        </aside>
+        <main class="vp-doc integration-doc" tabindex="-1">
+          <section class="page-intro">
+            <p class="eyebrow"><a href="/litopis/integrations/">Integrations</a> / React</p>
+            <h1>React</h1>
+            <p>
+              <code>@litopis/react</code> provides the <code>LitopisDatePicker</code> component.
+            </p>
+          </section>
+          <section id="install">
+            <h2>Installation</h2>
+            <div class="language-sh vp-code-group">
+              <span class="lang">sh</span>
+              <pre><code>npm install @litopis/react react react-dom</code></pre>
+            </div>
+            <div class="language-tsx vp-code-group">
+              <span class="lang">tsx</span>
+              <pre><code>import { LitopisDatePicker } from "@litopis/react";
+import "@litopis/dom/styles/base.css";</code></pre>
+            </div>
+          </section>
+          <section id="live-example">
+            <h2>Example</h2>
+            <div class="demo-block integration-demo">
+              <div data-integration-demo="react"></div>
+              <p class="demo-value" data-integration-value aria-live="polite">
+                Value: current date
+              </p>
+            </div>
+          </section>
+          <section id="controlled-value">
+            <h2>Controlled value</h2>
+            <p>
+              <code>value</code> accepts <code>LitopisDateValue | null</code>.
+              <code>onValueChange</code> receives the selected date.
+            </p>
+            <div class="language-tsx vp-code-group">
+              <span class="lang">tsx</span>
+              <pre><code>import { useState } from "react";
+import { LitopisDatePicker, type LitopisDateValue } from "@litopis/react";
+
+const [date, setDate] = useState&lt;LitopisDateValue | null&gt;(null);
+
+&lt;LitopisDatePicker
+  calendarMode="popover"
+  label="Start date"
+  value={date}
+  onValueChange={setDate}
+/&gt;</code></pre>
+            </div>
+          </section>
+          <section id="controller-ref">
+            <h2>Controller ref</h2>
+            <p>
+              The forwarded ref implements <code>DatePickerController</code>. Use it to call methods
+              such as <code>open()</code>, <code>close()</code> and <code>getValue()</code>.
+            </p>
+            <div class="language-tsx vp-code-group">
+              <span class="lang">tsx</span>
+              <pre><code>import { useRef } from "react";
+import type { DatePickerController } from "@litopis/dom";
+
+const pickerRef = useRef&lt;DatePickerController | null&gt;(null);
+
+&lt;LitopisDatePicker ref={pickerRef} /&gt;
+&lt;button onClick={() =&gt; pickerRef.current?.open()}&gt;Open calendar&lt;/button&gt;</code></pre>
+            </div>
+          </section>
+          <section id="styling">
+            <h2>Styling</h2>
+            <p>
+              Pass <code>className</code> to the component root. Import one Litopis stylesheet in
+              your application entry.
+            </p>
+            <a class="text-action" href="/litopis/styling/">Styling guide →</a>
+          </section>
+        </main>
+        <aside class="page-outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#install">Installation</a>
+            <a class="outline-link" href="#live-example">Example</a>
+            <a class="outline-link" href="#controlled-value">Controlled value</a>
+            <a class="outline-link" href="#controller-ref">Controller ref</a>
+            <a class="outline-link" href="#styling">Styling</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/integrations/react.ts"></script>
+  </body>
+</html>

@@ -1,29 +1,48 @@
 {
   "name": "@litopis/svelte",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Svelte actions for Litopis date and calendar primitives.",
+  "keywords": [
+    "accessibility",
+    "calendar",
+    "date-picker",
+    "svelte",
+    "typescript"
+  ],
+  "homepage": "https://dschewchenko.github.io/litopis/",
+  "bugs": {
+    "url": "https://github.com/dschewchenko/litopis/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Dmytro Shevchenko",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dschewchenko/litopis.git",
+    "directory": "packages/svelte"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "type": "module",
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.mjs"
     }
   },
   "scripts": {
     "build": "tsdown"
   },
   "dependencies": {
-    "@litopis/dom": "workspace:*"
+    "@litopis/dom": "^0.1.0"
   },
   "peerDependencies": {
     "svelte": ">=4.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

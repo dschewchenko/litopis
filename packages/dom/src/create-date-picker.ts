@@ -7,6 +7,8 @@ import {
   focusDate,
   formatDate,
   getDaysInMonth,
+  MAX_YEAR,
+  MIN_YEAR,
   moveFocus,
   selectDate,
   selectFocusedDate,
@@ -19,6 +21,7 @@ import {
 import {
   clampDateFieldValue,
   formatDateFieldValue,
+  getDateFieldError,
   getDateFieldPlaceholder,
   isDateInRange,
   maskDateFieldEdit,
@@ -38,8 +41,8 @@ const keyMoves = new Map<string, CalendarMove>([
   ["ArrowLeft", "previous-day"],
   ["ArrowDown", "next-week"],
   ["ArrowUp", "previous-week"],
-  ["Home", "month-start"],
-  ["End", "month-end"],
+  ["Home", "week-start"],
+  ["End", "week-end"],
   ["PageDown", "next-month"],
   ["PageUp", "previous-month"],
 ]);
@@ -59,6 +62,7 @@ export function createDatePicker(
   let monthYearPanelOpen = false;
   let panelMode: PanelMode = "month";
   let yearPageStart = getYearPageStart(state.visibleMonth.year);
+  let suppressInputOpen = false;
   const id = `litopis-date-picker-${datePickerId}`;
   const anchorName = `--${id}-anchor`;
   datePickerId += 1;
@@ -72,12 +76,13 @@ export function createDatePicker(
 
   const input = document.createElement("input");
   input.autocomplete = "off";
-  input.className = "litopis-input input";
+  input.className = "litopis-input";
   input.id = `${id}-input`;
   input.inputMode = "numeric";
   input.type = "text";
   input.setAttribute("role", "combobox");
-  input.setAttribute("aria-controls", `${id}-calendar`);
+  input.setAttribute("aria-autocomplete", "none");
+  input.setAttribute("aria-controls", `${id}-grid`);
   input.setAttribute("aria-haspopup", "grid");
 
   const calendar = document.createElement("div");
@@ -87,6 +92,12 @@ export function createDatePicker(
   const liveRegion = document.createElement("p");
   liveRegion.className = "litopis-live";
   liveRegion.setAttribute("aria-live", "polite");
+
+  const fieldMessage = document.createElement("p");
+  fieldMessage.className = "litopis-field-message";
+  fieldMessage.id = `${id}-message`;
+  fieldMessage.setAttribute("aria-live", "polite");
+  input.setAttribute("aria-describedby", fieldMessage.id);
 
   const calendarHeader = document.createElement("div");
   calendarHeader.className = "litopis-calendar-header";
@@ -143,12 +154,13 @@ export function createDatePicker(
 
   const panelGrid = document.createElement("div");
   panelGrid.className = "litopis-panel-grid litopis-month-grid";
-  panelGrid.setAttribute("role", "grid");
+  panelGrid.setAttribute("role", "group");
 
   monthYearPanel.append(monthYearHeader, panelGrid);
 
   const grid = document.createElement("div");
-  grid.className = "litopis-grid react-day-picker";
+  grid.className = "litopis-grid";
+  grid.id = `${id}-grid`;
   grid.setAttribute("role", "grid");
 
   const calendarFooter = document.createElement("div");
@@ -160,7 +172,7 @@ export function createDatePicker(
 
   calendarFooter.append(todayButton);
   calendar.append(calendarHeader, liveRegion, monthYearPanel, grid, calendarFooter);
-  root.append(label, input, calendar);
+  root.append(label, input, fieldMessage, calendar);
 
   function render(
     nextState: CalendarState = state,
@@ -184,6 +196,7 @@ export function createDatePicker(
     }
     input.setAttribute("aria-expanded", String(calendarOpen));
     input.setAttribute("aria-invalid", String(inputStatus === "invalid"));
+    fieldMessage.textContent = inputStatus === "invalid" ? "Enter a valid date." : "";
     calendar.hidden = calendarMode === "popover" && !supportsNativePopover() && !calendarOpen;
     captionLabel.textContent = state.grid.label;
     caption.setAttribute("aria-expanded", String(monthYearPanelOpen));
@@ -210,12 +223,21 @@ export function createDatePicker(
 
     for (const week of state.grid.weeks) {
       const row = document.createElement("div");
-      row.className = "litopis-week rdp-week";
+      row.className = "litopis-week";
       row.setAttribute("role", "row");
 
       for (const cell of week) {
         const gridcell = document.createElement("div");
-        gridcell.className = "litopis-day rdp-day";
+        gridcell.className = "litopis-day";
+
+        if (!cell.date) {
+          gridcell.classList.add("litopis-day-empty");
+          gridcell.setAttribute("aria-hidden", "true");
+          gridcell.setAttribute("role", "presentation");
+          row.append(gridcell);
+          continue;
+        }
+
         gridcell.dataset.isoDate = toIsoDate(cell.date);
 
         if (cell.outsideMonth && currentOptions.showOutsideDays === false) {
@@ -230,7 +252,7 @@ export function createDatePicker(
         gridcell.setAttribute("role", "gridcell");
 
         const button = document.createElement("button");
-        button.className = "litopis-day-button rdp-day_button";
+        button.className = "litopis-day-button";
         button.disabled = cell.disabled;
         button.tabIndex = toIsoDate(cell.date) === toIsoDate(state.focusedDate) ? 0 : -1;
         button.textContent = String(cell.date.day);
@@ -241,22 +263,16 @@ export function createDatePicker(
         );
 
         if (cell.outsideMonth) {
-          gridcell.classList.add("rdp-outside");
           gridcell.dataset.outsideMonth = "";
         }
 
         if (cell.selected) {
-          gridcell.classList.add("rdp-selected");
           gridcell.dataset.selected = "";
         }
 
         if (cell.today) {
-          gridcell.classList.add("rdp-today");
           gridcell.dataset.today = "";
-        }
-
-        if (cell.disabled) {
-          gridcell.classList.add("rdp-disabled");
+          button.setAttribute("aria-current", "date");
         }
 
         gridcell.append(button);
@@ -299,10 +315,12 @@ export function createDatePicker(
         : "litopis-panel-grid litopis-year-grid";
 
     if (panelMode === "year") {
+      panelGrid.setAttribute("aria-label", "Choose year");
       renderYearPanel();
       return;
     }
 
+    panelGrid.setAttribute("aria-label", "Choose month");
     renderMonthPanel();
   }
 
@@ -328,7 +346,7 @@ export function createDatePicker(
       monthButton.type = "button";
 
       if (month === state.visibleMonth.month) {
-        monthButton.classList.add("selected");
+        monthButton.dataset.selected = "";
         monthButton.setAttribute("aria-pressed", "true");
       }
 
@@ -358,7 +376,7 @@ export function createDatePicker(
       yearButton.type = "button";
 
       if (year === state.visibleMonth.year) {
-        yearButton.classList.add("selected");
+        yearButton.dataset.selected = "";
         yearButton.setAttribute("aria-pressed", "true");
       }
 
@@ -372,6 +390,10 @@ export function createDatePicker(
   }
 
   function isMonthDisabled(month: number, year: number, calendarState: CalendarState): boolean {
+    if (year < MIN_YEAR || year > MAX_YEAR) {
+      return true;
+    }
+
     const monthStart = { day: 1, month, year };
     const monthEnd = { day: getDaysInMonth(monthStart), month, year };
 
@@ -387,13 +409,19 @@ export function createDatePicker(
 
   function isYearRangeDisabled(startYear: number, endYear: number): boolean {
     return Boolean(
-      (state.min && endYear < state.min.year) || (state.max && startYear > state.max.year),
+      endYear < MIN_YEAR ||
+      startYear > MAX_YEAR ||
+      (state.min && endYear < state.min.year) ||
+      (state.max && startYear > state.max.year),
     );
   }
 
   function isAdjacentMonthDisabled(direction: -1 | 1): boolean {
     const month = addMonths(state.visibleMonth, direction);
-    return isMonthDisabled(month.month, month.year, state);
+    return (
+      (month.month === state.visibleMonth.month && month.year === state.visibleMonth.year) ||
+      isMonthDisabled(month.month, month.year, state)
+    );
   }
 
   function getSeasonLabel(month: number): string {
@@ -441,9 +469,9 @@ export function createDatePicker(
     render(nextState);
   }
 
-  function setOptions(nextOptions: Partial<DatePickerOptions>): void {
+  function setOptions(nextOptions: DatePickerOptions): void {
     const previousMode = getCalendarMode(currentOptions);
-    currentOptions = { ...currentOptions, ...nextOptions };
+    currentOptions = nextOptions;
     const selected = Object.hasOwn(nextOptions, "selected")
       ? (nextOptions.selected ?? null)
       : state.selected;
@@ -465,8 +493,22 @@ export function createDatePicker(
 
     if (move) {
       event.preventDefault();
-      render(moveFocus(state, event.shiftKey && move === "next-month" ? "next-year" : move));
+      const keyboardMove = event.shiftKey
+        ? move === "next-month"
+          ? "next-year"
+          : move === "previous-month"
+            ? "previous-year"
+            : move
+        : move;
+      render(moveFocus(state, keyboardMove));
       focusCurrentDay();
+      return;
+    }
+
+    if (event.key === "Escape" && getCalendarMode(currentOptions) === "popover") {
+      event.preventDefault();
+      closeCalendar();
+      focusInputWithoutOpening();
       return;
     }
 
@@ -519,6 +561,7 @@ export function createDatePicker(
     if (parsed) {
       if (!isDateInRange(parsed, state.min, state.max)) {
         input.setAttribute("aria-invalid", "true");
+        fieldMessage.textContent = getDateFieldError(parsed, state.min, state.max);
         return;
       }
 
@@ -540,6 +583,7 @@ export function createDatePicker(
     }
 
     input.setAttribute("aria-invalid", "false");
+    fieldMessage.textContent = "";
   }
 
   function applyInputMask(inputFormat: DateFieldFormat): void {
@@ -562,6 +606,7 @@ export function createDatePicker(
     if (input.value.length === 0) {
       setSelectedDate(null);
       input.setAttribute("aria-invalid", "false");
+      fieldMessage.textContent = "";
       return;
     }
 
@@ -571,18 +616,28 @@ export function createDatePicker(
       const selected = getSelectedDate(state);
       input.value = selected ? formatDateFieldValue(selected, inputFormat) : "";
       input.setAttribute("aria-invalid", "false");
+      fieldMessage.textContent = "";
       return;
     }
 
     setSelectedDate(clampDateFieldValue(parsed, state.min, state.max));
     input.setAttribute("aria-invalid", "false");
+    fieldMessage.textContent = "";
   }
 
   function onInputFocus(): void {
+    if (suppressInputOpen) {
+      return;
+    }
+
     openCalendar();
   }
 
-  function onInputBlur(): void {
+  function onInputBlur(event: FocusEvent): void {
+    if (event.relatedTarget instanceof Node && calendar.contains(event.relatedTarget)) {
+      return;
+    }
+
     commitInputValue();
   }
 
@@ -688,7 +743,17 @@ export function createDatePicker(
   function closeAfterSelection(): void {
     if (getCalendarMode(currentOptions) === "popover") {
       closeCalendar();
+      focusInputWithoutOpening();
+      return;
     }
+
+    focusCurrentDay();
+  }
+
+  function focusInputWithoutOpening(): void {
+    suppressInputOpen = true;
+    input.focus();
+    suppressInputOpen = false;
   }
 
   function syncPopoverMode(calendarMode: DatePickerCalendarMode): void {
@@ -840,14 +905,13 @@ function getCalendarStateOptions(
     ...(options.locale === undefined ? {} : { locale: options.locale }),
     ...(options.max === undefined ? {} : { max: options.max }),
     ...(options.min === undefined ? {} : { min: options.min }),
-    ...(options.mode === undefined ? {} : { mode: options.mode }),
     selected,
     ...(options.today === undefined ? {} : { today: options.today }),
   };
 }
 
 function getSelectedDate(state: CalendarState): DateValue | null {
-  return state.selected && "day" in state.selected ? state.selected : null;
+  return state.selected;
 }
 
 function getCalendarMode(options: DatePickerOptions): DatePickerCalendarMode {

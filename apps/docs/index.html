@@ -18,7 +18,10 @@
           <span>Litopis</span>
         </a>
         <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/examples/">Examples</a>
           <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
+          <a class="nav-link" href="/litopis/api/">API</a>
           <a class="nav-link" href="/litopis/styling/">Styling</a>
           <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
           <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
@@ -27,118 +30,125 @@
 
       <div class="docs-layout">
         <aside class="sidebar" aria-label="Documentation sections">
-          <nav class="sidebar-nav">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link active" href="/litopis/" aria-current="page">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
-            <a class="sidebar-link" href="/litopis/adapters/">Adapters</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
 
-        <main class="vp-doc" tabindex="-1">
-          <section class="page-intro">
-            <h1>Getting started</h1>
-            <p>
-              Litopis is a portable calendar engine for date fields, date pickers and calendars
-              across DOM, Web Components and framework adapters.
+        <main class="vp-doc home-doc" tabindex="-1">
+          <section class="home-hero">
+            <h1>Litopis date picker</h1>
+            <p class="hero-lead">
+              Date fields and calendars for plain DOM, Web Components, React, Vue, Solid and Svelte.
             </p>
+            <div class="hero-actions">
+              <a class="btn btn-neutral primary-action" href="#quick-start">Install and mount</a>
+              <a class="btn btn-ghost secondary-action" href="/litopis/examples/">Examples</a>
+            </div>
           </section>
 
-          <section id="why-litopis">
-            <h2>Why Litopis</h2>
-            <ul class="feature-list">
-              <li><strong>Headless core.</strong> Shared date math, focus and validation.</li>
-              <li>
-                <strong>Portable.</strong> DOM, Web Components, frameworks and static bundles.
-              </li>
-              <li>
-                <strong>Easy to style.</strong> Classes, <code>data-*</code> states and CSS
-                variables.
-              </li>
-              <li><strong>A11y standards.</strong> Built for WCAG and WAI-ARIA patterns.</li>
-              <li>
-                <strong>Input ready.</strong> Masks, date formats and configurable week starts.
-              </li>
+          <section id="quick-start" class="workbench">
+            <div class="workbench-example">
+              <h2>Example</h2>
+              <p>
+                Type a date using the <code>DD.MM.YYYY</code> mask or move through the calendar with
+                Arrow keys, Home, End, PageUp and PageDown.
+              </p>
+              <div class="demo-block hero-demo">
+                <div data-litopis-picker="overview"></div>
+                <p class="demo-value" data-overview-value aria-live="polite">No date selected</p>
+              </div>
+            </div>
+
+            <div class="quick-start-panel">
+              <h2>Install and mount</h2>
+              <div class="language-sh vp-code-group">
+                <span class="lang">sh</span>
+                <pre><code>npm install @litopis/dom</code></pre>
+              </div>
+              <div class="language-ts vp-code-group">
+                <span class="lang">ts</span>
+                <pre><code>import { createDatePicker } from "@litopis/dom";
+import "@litopis/dom/styles/base.css";
+
+const root = document.querySelector&lt;HTMLElement&gt;("#travel-date");
+
+if (root) {
+  createDatePicker(root, {
+    calendarMode: "popover",
+    inputFormat: "dd.mm.yyyy",
+    label: "Travel date",
+    locale: "uk-UA",
+  });
+}</code></pre>
+              </div>
+              <p class="panel-note">
+                CSS is optional. Without it, behavior and accessible semantics still work.
+              </p>
+            </div>
+          </section>
+
+          <section id="integrations">
+            <h2>Integrations</h2>
+            <ul class="integration-links">
+              <li><a href="/litopis/integrations/#plain-dom">Plain DOM</a></li>
+              <li><a href="/litopis/integrations/web-components/">Web Components</a></li>
+              <li><a href="/litopis/integrations/react/">React</a></li>
+              <li><a href="/litopis/integrations/vue/">Vue</a></li>
+              <li><a href="/litopis/integrations/solid/">Solid</a></li>
+              <li><a href="/litopis/integrations/svelte/">Svelte</a></li>
             </ul>
           </section>
 
-          <section id="live-demo">
-            <h2>Live demo</h2>
-            <p>
-              The DOM binding and Web Component package share the same headless calendar state from
-              <code>@litopis/core</code>. This demo uses Monday as the first day of week and a
-              <code>DD.MM.YYYY</code> input mask.
-            </p>
-            <div class="demo-block">
-              <div data-litopis-picker="overview"></div>
+          <section id="styling-model" class="split-callout">
+            <div>
+              <h2>Styling</h2>
+              <p>
+                Import foundation, base, daisyUI, shadcn or Bootstrap styles from
+                <code>@litopis/dom/styles</code>.
+              </p>
+              <a class="text-action" href="/litopis/styling/">Styling guide →</a>
+            </div>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>/* Example: use the host shadcn tokens */
+@import "@litopis/dom/styles/shadcn.css";
+
+.litopis {
+  --litopis-control-size: 44px;
+  --litopis-width: 22rem;
+}</code></pre>
             </div>
           </section>
 
-          <section id="mobile">
-            <h2>Mobile picker</h2>
-            <p>Bottom sheet, fullscreen dialog, popover and native input patterns.</p>
-            <div class="mobile-demo" aria-label="Mobile date picker bottom sheet example">
-              <div class="mobile-demo-header">
-                <span></span>
-              </div>
-              <div class="mobile-demo-sheet">
-                <div data-litopis-picker="mobile"></div>
-              </div>
+          <section id="accessibility-status" class="alert alert-outline status-callout">
+            <div>
+              <h2>Accessibility status</h2>
+              <p>
+                Automated tests cover keyboard interaction, focus restoration and axe in Chromium,
+                Firefox and WebKit. The manual VoiceOver, NVDA and JAWS matrix is not complete.
+              </p>
             </div>
-          </section>
-
-          <section id="accessibility-status">
-            <h2>Accessibility status</h2>
-            <p>
-              Foundation exists: keyboard navigation, roving focus, labels, disabled states and live
-              announcements. Final claims need axe, browser and screen-reader verification.
-            </p>
-          </section>
-
-          <section id="package-shape">
-            <h2>Package shape</h2>
-            <p>
-              The public API is split by responsibility. UI adapters should stay thin and avoid
-              copying calendar behavior.
-            </p>
-            <div class="language-txt vp-code-group">
-              <span class="lang">txt</span>
-              <pre><code>@litopis/core       Headless calendar state
-@litopis/dom        Imperative DOM binding
-@litopis/elements   Web Components
-@litopis/react      React component
-@litopis/vue        Vue component
-@litopis/solid      Solid component
-@litopis/svelte     Svelte action</code></pre>
-            </div>
-          </section>
-
-          <section id="research-baseline">
-            <h2>Research baseline</h2>
-            <p>
-              The product baseline combines the best parts of DayPicker, Cally, React Aria and Zag
-              without becoming a full design-system kit.
-            </p>
-            <ul>
-              <li><a href="https://daypicker.dev/">DayPicker</a></li>
-              <li><a href="https://wicky.nillia.ms/cally/">Cally</a></li>
-              <li><a href="https://react-aria.adobe.com/DatePicker">React Aria DatePicker</a></li>
-              <li><a href="https://zagjs.com/components/react/date-picker">Zag Date Picker</a></li>
-            </ul>
+            <a class="btn btn-ghost secondary-action" href="/litopis/accessibility/"
+              >Accessibility testing</a
+            >
           </section>
         </main>
 
-        <aside class="outline" aria-label="On this page">
+        <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
-          <nav>
-            <a class="outline-link" href="#why-litopis">Why Litopis</a>
-            <a class="outline-link" href="#live-demo">Live demo</a>
-            <a class="outline-link" href="#mobile">Mobile picker</a>
-            <a class="outline-link" href="#accessibility-status">Accessibility status</a>
-            <a class="outline-link" href="#package-shape">Package shape</a>
-            <a class="outline-link" href="#research-baseline">Research baseline</a>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#quick-start">Quick start</a>
+            <a class="outline-link" href="#integrations">Integrations</a>
+            <a class="outline-link" href="#styling-model">Styling</a>
+            <a class="outline-link" href="#accessibility-status">Accessibility</a>
           </nav>
         </aside>
       </div>

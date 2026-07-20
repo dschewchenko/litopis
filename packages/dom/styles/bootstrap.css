@@ -1,0 +1,23 @@
+@import "./foundation.css";
+
+.litopis,
+.litopis-field {
+  --litopis-accent: var(--bs-primary);
+  --litopis-accent-foreground: var(--bs-white);
+  --litopis-background: var(--bs-body-bg);
+  --litopis-border: var(--bs-border-color);
+  --litopis-border-width: var(--bs-border-width);
+  --litopis-calendar-radius: var(--bs-border-radius-lg);
+  --litopis-calendar-shadow: inset 0 0 0 var(--bs-border-width) var(--bs-border-color);
+  --litopis-danger: var(--bs-danger);
+  --litopis-disabled: var(--bs-tertiary-color);
+  --litopis-focus-color: var(--bs-primary);
+  --litopis-focus-ring: var(--bs-focus-ring-color);
+  --litopis-font-family: var(--bs-body-font-family);
+  --litopis-font-size: var(--bs-body-font-size);
+  --litopis-foreground: var(--bs-body-color);
+  --litopis-muted: var(--bs-tertiary-bg);
+  --litopis-muted-foreground: var(--bs-secondary-color);
+  --litopis-popover-shadow: var(--bs-box-shadow);
+  --litopis-radius: var(--bs-border-radius);
+}

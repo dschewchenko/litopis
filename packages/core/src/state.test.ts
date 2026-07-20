@@ -78,6 +78,38 @@ describe("calendar state", () => {
     });
 
     expect(moveFocus(state, "next-week").focusedDate).toEqual({ day: 2, month: 7, year: 2026 });
+    expect(moveFocus(state, "week-start").focusedDate).toEqual({
+      day: 21,
+      month: 6,
+      year: 2026,
+    });
+    expect(moveFocus(state, "week-end").focusedDate).toEqual({
+      day: 27,
+      month: 6,
+      year: 2026,
+    });
+  });
+
+  it("uses placeholders instead of dates outside the supported range", () => {
+    const minimum = createCalendarState({
+      firstDayOfWeek: 0,
+      today: { day: 1, month: 1, year: 1 },
+    });
+    const maximum = createCalendarState({
+      today: { day: 31, month: 12, year: 9999 },
+    });
+
+    expect(minimum.grid.weeks[0]?.[0]?.date).toBeNull();
+    expect(maximum.grid.weeks.at(-1)?.at(-1)?.date).toBeNull();
+  });
+
+  it("rejects an inverted date range", () => {
+    expect(() =>
+      createCalendarState({
+        max: { day: 1, month: 1, year: 2026 },
+        min: { day: 2, month: 1, year: 2026 },
+      }),
+    ).toThrow(/minimum date/);
   });
 
   it("selects the focused date in single mode", () => {

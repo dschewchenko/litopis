@@ -1,28 +1,55 @@
 {
   "name": "@litopis/dom",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "DOM bindings for Litopis date and calendar primitives.",
+  "keywords": [
+    "accessibility",
+    "calendar",
+    "date-picker",
+    "dom",
+    "typescript"
+  ],
+  "homepage": "https://dschewchenko.github.io/litopis/",
+  "bugs": {
+    "url": "https://github.com/dschewchenko/litopis/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Dmytro Shevchenko",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dschewchenko/litopis.git",
+    "directory": "packages/dom"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "styles"
   ],
   "type": "module",
-  "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "sideEffects": [
+    "./styles/*.css"
+  ],
   "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.mjs"
     },
-    "./iife": "./dist/index.global.js"
+    "./iife": "./dist/index.global.js",
+    "./styles/base.css": "./styles/base.css",
+    "./styles/bootstrap.css": "./styles/bootstrap.css",
+    "./styles/daisyui.css": "./styles/daisyui.css",
+    "./styles/foundation.css": "./styles/foundation.css",
+    "./styles/shadcn.css": "./styles/shadcn.css"
   },
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
   },
   "dependencies": {
-    "@litopis/core": "workspace:*"
+    "@litopis/core": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
