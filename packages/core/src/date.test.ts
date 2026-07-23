@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { addDays, addMonths, formatDate, getDaysInMonth, toIsoDate, toLocalDate } from "./date";
+import {
+  addDays,
+  addMonths,
+  addYears,
+  formatDate,
+  getDaysInMonth,
+  toIsoDate,
+  toLocalDate,
+} from "./date";
 
 describe("date utilities", () => {
   it("keeps years 1 through 99 as written", () => {
@@ -19,6 +27,32 @@ describe("date utilities", () => {
     expect(addMonths({ day: 31, month: 12, year: 9998 }, 1)).toEqual({
       day: 31,
       month: 1,
+      year: 9999,
+    });
+  });
+
+  it("clamps month and year arithmetic to valid calendar dates", () => {
+    expect(addMonths({ day: 31, month: 1, year: 2026 }, 1)).toEqual({
+      day: 28,
+      month: 2,
+      year: 2026,
+    });
+    expect(addYears({ day: 29, month: 2, year: 2024 }, 1)).toEqual({
+      day: 28,
+      month: 2,
+      year: 2025,
+    });
+  });
+
+  it("does not leave the supported public range", () => {
+    expect(addDays({ day: 1, month: 1, year: 1 }, -1)).toEqual({
+      day: 1,
+      month: 1,
+      year: 1,
+    });
+    expect(addDays({ day: 31, month: 12, year: 9999 }, 1)).toEqual({
+      day: 31,
+      month: 12,
       year: 9999,
     });
   });

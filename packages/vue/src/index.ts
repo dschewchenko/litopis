@@ -1,14 +1,9 @@
 import { defineComponent, h, onBeforeUnmount, onMounted, ref, watch, type PropType } from "vue";
 import { createDatePicker, type DatePickerController } from "@litopis/dom";
-import type { DatePickerOptions } from "@litopis/dom";
+import type { DatePickerOptions, DateValue } from "@litopis/dom";
 
 export type LitopisDatePickerOptions = DatePickerOptions;
-
-export interface LitopisDateValue {
-  readonly day: number;
-  readonly month: number;
-  readonly year: number;
-}
+export type { DateValue as LitopisDateValue } from "@litopis/dom";
 
 export const LitopisDatePicker = defineComponent({
   name: "LitopisDatePicker",
@@ -23,7 +18,7 @@ export const LitopisDatePicker = defineComponent({
     },
     value: {
       default: null,
-      type: Object as PropType<LitopisDateValue | null>,
+      type: Object as PropType<DateValue | null>,
     },
   },
   emits: ["valueChange"],

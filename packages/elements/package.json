@@ -1,13 +1,31 @@
 {
   "name": "@litopis/elements",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Web Components for Litopis date and calendar primitives.",
+  "keywords": [
+    "accessibility",
+    "calendar",
+    "date-picker",
+    "typescript",
+    "web-components"
+  ],
+  "homepage": "https://dschewchenko.github.io/litopis/",
+  "bugs": {
+    "url": "https://github.com/dschewchenko/litopis/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Dmytro Shevchenko",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dschewchenko/litopis.git",
+    "directory": "packages/elements"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "type": "module",
   "sideEffects": true,
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": {
@@ -21,7 +39,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@litopis/core": "workspace:*",
-    "@litopis/dom": "workspace:*"
+    "@litopis/core": "^0.1.0",
+    "@litopis/dom": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

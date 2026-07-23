@@ -1,29 +1,24 @@
 import { createEffect, onCleanup, onMount, type JSX } from "solid-js";
 import { createDatePicker, type DatePickerController } from "@litopis/dom";
-import type { DatePickerOptions } from "@litopis/dom";
+import type { DatePickerOptions, DateValue } from "@litopis/dom";
 
-export interface LitopisDateValue {
-  readonly day: number;
-  readonly month: number;
-  readonly year: number;
-}
+export type { DateValue as LitopisDateValue } from "@litopis/dom";
 
 export interface LitopisDatePickerProps extends Omit<DatePickerOptions, "selected"> {
   readonly class?: string;
   readonly controllerRef?: (controller: DatePickerController | null) => void;
-  readonly value?: LitopisDateValue | null;
+  readonly value?: DateValue | null;
 }
 
 export function LitopisDatePicker(props: LitopisDatePickerProps): JSX.Element {
   const root = document.createElement("div");
   let controller: DatePickerController | null = null;
+  let appliedClassNames: string[] = [];
 
   onMount(() => {
     const { class: className, controllerRef, value, ...options } = props;
 
-    if (className) {
-      root.className = className;
-    }
+    updateClassName(className);
 
     controller = createDatePicker(root, {
       ...options,
@@ -44,13 +39,22 @@ export function LitopisDatePicker(props: LitopisDatePickerProps): JSX.Element {
 
   createEffect(() => {
     const { class: className, controllerRef, value, ...options } = props;
+    updateClassName(className);
     controller?.setOptions({
       ...options,
       selected: value ?? null,
     });
-    void className;
     void controllerRef;
   });
 
   return root;
+
+  function updateClassName(className: string | undefined): void {
+    for (const appliedClassName of appliedClassNames) {
+      root.classList.remove(appliedClassName);
+    }
+
+    appliedClassNames = (className ?? "").split(/\s+/).filter(Boolean);
+    root.classList.add(...appliedClassNames);
+  }
 }

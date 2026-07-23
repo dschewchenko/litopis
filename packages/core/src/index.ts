@@ -9,6 +9,7 @@ export {
   getDaysInMonth,
   getToday,
   isDateDisabled,
+  isValidDateValue,
   isSameDate,
   MAX_YEAR,
   MIN_YEAR,
@@ -25,8 +26,6 @@ export type {
   CalendarMove,
   CalendarState,
   CalendarStateOptions,
-  DateRangeValue,
   DateValue,
   FirstDayOfWeek,
-  SelectionMode,
 } from "./types";

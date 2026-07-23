@@ -14,6 +14,8 @@ export type {
   DateFieldController,
   DateFieldFormat,
   DateFieldOptions,
+  DatePickerCalendarMode,
   DatePickerController,
   DatePickerOptions,
+  DatePickerTargetSize,
 } from "./types";

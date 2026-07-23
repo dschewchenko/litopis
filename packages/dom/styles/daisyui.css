@@ -1,0 +1,23 @@
+@import "./foundation.css";
+
+.litopis,
+.litopis-field {
+  --litopis-accent: var(--color-primary);
+  --litopis-accent-foreground: var(--color-primary-content);
+  --litopis-background: var(--color-base-100);
+  --litopis-border: var(--color-base-300);
+  --litopis-border-width: var(--border);
+  --litopis-calendar-radius: var(--radius-box);
+  --litopis-calendar-shadow: inset 0 0 0 var(--border) var(--color-base-300);
+  --litopis-danger: var(--color-error);
+  --litopis-disabled: color-mix(in oklab, var(--color-base-content) 35%, transparent);
+  --litopis-focus-ring: color-mix(in oklab, var(--color-primary) 24%, transparent);
+  --litopis-foreground: var(--color-base-content);
+  --litopis-muted: var(--color-base-200);
+  --litopis-muted-foreground: color-mix(in oklab, var(--color-base-content) 62%, transparent);
+  --litopis-radius: var(--radius-field);
+  --litopis-popover-shadow:
+    0 0 0 var(--border) var(--color-base-300),
+    0 18px 48px color-mix(in oklab, var(--color-base-content) 14%, transparent),
+    0 2px 8px color-mix(in oklab, var(--color-base-content) 10%, transparent);
+}

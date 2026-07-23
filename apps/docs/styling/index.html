@@ -15,7 +15,10 @@
           <span>Litopis</span>
         </a>
         <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/examples/">Examples</a>
           <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
+          <a class="nav-link" href="/litopis/api/">API</a>
           <a class="nav-link active" href="/litopis/styling/" aria-current="page">Styling</a>
           <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
           <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
@@ -24,20 +27,161 @@
 
       <div class="docs-layout">
         <aside class="sidebar" aria-label="Documentation sections">
-          <nav class="sidebar-nav">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link active" href="/litopis/styling/" aria-current="page">Styling</a>
-            <a class="sidebar-link" href="/litopis/adapters/">Adapters</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
 
         <main class="vp-doc" tabindex="-1">
           <section class="page-intro">
+            <p class="eyebrow">CSS architecture</p>
             <h1>Styling</h1>
-            <p>Litopis should publish stable anatomy and let consumer CSS do the work.</p>
+            <p>
+              Start fully unstyled, use a small neutral base, or map Litopis to an existing design
+              system without changing behavior or generated markup.
+            </p>
+          </section>
+
+          <section id="base-styles">
+            <h2>Unstyled by default</h2>
+            <p>
+              Importing Litopis JavaScript adds behavior and accessible semantics only. It never
+              loads CSS, so the same DOM anatomy can be the foundation of your own design system.
+            </p>
+          </section>
+
+          <section id="base-stylesheet">
+            <h2>Four styling layers</h2>
+            <p>
+              Choose exactly one stylesheet. The base is ready to use; the foundation is for a
+              design system that wants complete control; adapters consume variables already provided
+              by the host UI library.
+            </p>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>@import "@litopis/dom/styles/base.css";</code></pre>
+            </div>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>@import "@litopis/dom/styles/foundation.css";
+
+.litopis {
+  --litopis-accent: var(--brand);
+  --litopis-accent-foreground: var(--on-brand);
+  --litopis-background: var(--surface);
+  --litopis-border: var(--outline);
+  --litopis-border-width: 1px;
+  --litopis-calendar-radius: 20px;
+  --litopis-danger: var(--danger);
+  --litopis-disabled: var(--text-disabled);
+  --litopis-focus-ring: color-mix(in oklab, var(--brand) 24%, transparent);
+  --litopis-foreground: var(--text);
+  --litopis-muted: var(--surface-muted);
+  --litopis-muted-foreground: var(--text-muted);
+  --litopis-popover-shadow: 0 18px 48px rgb(0 0 0 / 12%);
+  --litopis-radius: 8px;
+}</code></pre>
+            </div>
+          </section>
+
+          <section id="tokens">
+            <h2>Token contract</h2>
+            <p>
+              Core tokens cover theme colors, borders, radii and elevation. Advanced tokens let a
+              host system change geometry, type, interaction and individual surfaces without
+              replacing the structural CSS.
+            </p>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>.litopis {
+  /* Geometry */
+  --litopis-width: 360px;
+  --litopis-control-size: 40px;
+  --litopis-comfortable-target-size: 44px;
+  --litopis-day-size: 40px;
+  --litopis-calendar-padding: 12px;
+  --litopis-field-gap: 12px;
+
+  /* Typography and motion */
+  --litopis-font-family: inherit;
+  --litopis-label-font-size: 14px;
+  --litopis-transition-duration: 150ms;
+  --litopis-active-scale: .96;
+
+  /* Optional semantic refinements */
+  --litopis-input-background: var(--litopis-background);
+  --litopis-calendar-background: var(--litopis-background);
+  --litopis-hover-background: var(--litopis-muted);
+  --litopis-selected-background: var(--litopis-accent);
+}</code></pre>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Group</th>
+                  <th>Representative tokens</th>
+                  <th>Controls</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Theme</td>
+                  <td>
+                    <code>--litopis-accent</code>, <code>--litopis-background</code>,
+                    <code>--litopis-foreground</code>, <code>--litopis-border</code>
+                  </td>
+                  <td>Primary colors, surfaces, text and outlines</td>
+                </tr>
+                <tr>
+                  <td>Semantic states</td>
+                  <td>
+                    <code>--litopis-hover-background</code>,
+                    <code>--litopis-selected-background</code>, <code>--litopis-danger</code>,
+                    <code>--litopis-disabled</code>
+                  </td>
+                  <td>Hover, selection, errors and unavailable dates</td>
+                </tr>
+                <tr>
+                  <td>Geometry</td>
+                  <td>
+                    <code>--litopis-width</code>, <code>--litopis-control-size</code>,
+                    <code>--litopis-day-size</code>, <code>--litopis-calendar-padding</code>
+                  </td>
+                  <td>Calendar width, hit areas, grid and spacing</td>
+                </tr>
+                <tr>
+                  <td>Typography</td>
+                  <td>
+                    <code>--litopis-font-family</code>, <code>--litopis-label-font-size</code>,
+                    <code>--litopis-caption-font-weight</code>
+                  </td>
+                  <td>Inherited type system and component hierarchy</td>
+                </tr>
+                <tr>
+                  <td>Focus and motion</td>
+                  <td>
+                    <code>--litopis-focus-ring</code>, <code>--litopis-focus-width</code>,
+                    <code>--litopis-transition-duration</code>, <code>--litopis-active-scale</code>
+                  </td>
+                  <td>Visible focus and interaction feedback</td>
+                </tr>
+                <tr>
+                  <td>Popover</td>
+                  <td>
+                    <code>--litopis-popover-shadow</code>, <code>--litopis-popover-z-index</code>,
+                    <code>--litopis-popover-anchor-gap</code>
+                  </td>
+                  <td>Elevation and viewport positioning</td>
+                </tr>
+              </tbody>
+            </table>
           </section>
 
           <section id="anatomy">
@@ -74,9 +218,8 @@
               <span class="lang">css</span>
               <pre><code>.litopis[data-calendar-mode="popover"] .litopis-calendar {
   position: fixed;
-  inset: 12px auto auto 12px;
-  max-width: calc(100vw - 24px);
-  z-index: var(--litopis-popover-z-index, 2147483647);
+  max-width: calc(100vw - var(--litopis-calendar-viewport-gap));
+  z-index: var(--litopis-popover-z-index);
 }
 
 .litopis-calendar[popover]:not(:popover-open) {
@@ -87,60 +230,73 @@
   .litopis[data-calendar-mode="popover"] .litopis-calendar {
     top: anchor(bottom);
     left: anchor(left);
+    margin-top: var(--litopis-popover-anchor-gap);
     position-try-fallbacks: flip-block, flip-inline;
   }
 }</code></pre>
             </div>
           </section>
 
-          <section id="tailwind-daisyui">
-            <h2>Tailwind and daisyUI</h2>
+          <section id="theme-adapters">
+            <h2>Theme adapters</h2>
             <p>
-              Consumer apps can include Litopis package files in their Tailwind source scan and
-              style generated anatomy directly. No Litopis daisyUI package is needed.
+              Each adapter is a small CSS mapping. It adds no runtime dependency, does not require
+              another calendar, and automatically follows the host system's light, dark and custom
+              themes because it reads semantic variables rather than fixed colors.
             </p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
               <pre><code>@import "tailwindcss";
-@plugin "daisyui";
-@source "../node_modules/@litopis";</code></pre>
+@import "@litopis/dom/styles/daisyui.css";
+@plugin "daisyui";</code></pre>
             </div>
-          </section>
-
-          <section id="bootstrap">
-            <h2>Bootstrap</h2>
-            <p>Bootstrap can style Litopis through stable selectors and ordinary CSS.</p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
-              <pre><code>.litopis-input {
-  border: var(--bs-border-width) solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  padding: .375rem .75rem;
-}
-
-.litopis-day-button {
-  border-radius: var(--bs-border-radius-sm);
-}</code></pre>
+              <pre><code>@import "tailwindcss";
+@import "shadcn/tailwind.css";
+@import "@litopis/dom/styles/shadcn.css";</code></pre>
             </div>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>@import "bootstrap/dist/css/bootstrap.css";
+@import "@litopis/dom/styles/bootstrap.css";</code></pre>
+            </div>
+            <p>
+              Import one adapter only. daisyUI maps <code>--color-*</code> and
+              <code>--radius-*</code>; shadcn maps semantic surface/foreground pairs such as
+              <code>--primary</code>, <code>--popover</code> and <code>--ring</code>; Bootstrap maps
+              <code>--bs-*</code> variables and follows <code>data-bs-theme</code> color modes.
+            </p>
           </section>
 
-          <section id="decision">
-            <h2>Decision</h2>
+          <section id="override-safely">
+            <h2>Override safely</h2>
             <p>
-              Ship stable classes, data states and CSS variables. Do not require first-party theme
-              packages.
+              Prefer <code>--litopis-*</code> variables for theme and geometry changes. Use stable
+              <code>.litopis-*</code> selectors and <code>data-*</code> states when a design needs a
+              structural exception. Litopis never emits daisyUI, shadcn, Bootstrap or
+              third-party-calendar classes, so host styles remain explicit.
             </p>
+            <div class="note-callout">
+              <strong>Behavior does not depend on CSS</strong>
+              <p>
+                Removing every Litopis stylesheet leaves input parsing, keyboard navigation,
+                selection and controller methods intact.
+              </p>
+            </div>
           </section>
         </main>
 
-        <aside class="outline" aria-label="On this page">
+        <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
-          <nav>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#base-styles">Unstyled by default</a>
+            <a class="outline-link" href="#base-stylesheet">Styling layers</a>
+            <a class="outline-link" href="#tokens">Token contract</a>
             <a class="outline-link" href="#anatomy">Anatomy</a>
             <a class="outline-link" href="#popover-css">Popover CSS</a>
-            <a class="outline-link" href="#tailwind-daisyui">Tailwind and daisyUI</a>
-            <a class="outline-link" href="#bootstrap">Bootstrap</a>
-            <a class="outline-link" href="#decision">Decision</a>
+            <a class="outline-link" href="#theme-adapters">Theme adapters</a>
+            <a class="outline-link" href="#override-safely">Override safely</a>
           </nav>
         </aside>
       </div>

@@ -1,0 +1,452 @@
+.litopis,
+.litopis-field {
+  --litopis-active-scale: 0.96;
+  --litopis-calendar-gap: 12px;
+  --litopis-calendar-padding: 12px;
+  --litopis-calendar-viewport-gap: 24px;
+  --litopis-caption-gap: 2px;
+  --litopis-caption-padding-block: 4px;
+  --litopis-caption-padding-inline: 8px;
+  --litopis-comfortable-target-size: 44px;
+  --litopis-control-size: 40px;
+  --litopis-day-size: 40px;
+  --litopis-field-gap: 12px;
+  --litopis-focus-ring-width: 3px;
+  --litopis-focus-width: 2px;
+  --litopis-grid-gap: 6px;
+  --litopis-header-gap: 4px;
+  --litopis-input-padding-inline: 12px;
+  --litopis-label-popover-gap: 8px;
+  --litopis-month-year-gap: 12px;
+  --litopis-panel-title-size: 18px;
+  --litopis-panel-title-weight: 700;
+  --litopis-panel-title-line-height: 24px;
+  --litopis-popover-anchor-gap: 8px;
+  --litopis-popover-min-width: 320px;
+  --litopis-popover-z-index: 2147483647;
+  --litopis-today-padding-inline: 12px;
+  --litopis-transition-duration: 150ms;
+  --litopis-weekday-size: 28px;
+  --litopis-width: 360px;
+  color: var(--litopis-foreground);
+  display: grid;
+  font-family: var(--litopis-font-family, inherit);
+  font-size: var(--litopis-font-size, inherit);
+  font-variant-numeric: tabular-nums;
+  gap: var(--litopis-field-gap);
+  max-width: var(--litopis-width);
+  position: relative;
+  width: 100%;
+}
+
+.litopis *,
+.litopis-field * {
+  box-sizing: border-box;
+}
+
+.litopis[data-calendar-mode="popover"] {
+  display: block;
+}
+
+.litopis[data-target-size="comfortable"] {
+  --litopis-control-size: var(--litopis-comfortable-target-size);
+  --litopis-day-size: var(--litopis-comfortable-target-size);
+}
+
+.litopis[data-calendar-mode="popover"] .litopis-label {
+  display: block;
+  margin-bottom: var(--litopis-label-popover-gap);
+}
+
+.litopis-label {
+  color: var(--litopis-foreground);
+  font-size: var(--litopis-label-font-size, 14px);
+  font-weight: var(--litopis-label-font-weight, 600);
+  line-height: var(--litopis-label-line-height, 20px);
+}
+
+.litopis-input {
+  background: var(--litopis-input-background, var(--litopis-background));
+  border: var(--litopis-border-width) solid var(--litopis-input-border, var(--litopis-border));
+  border-radius: var(--litopis-radius);
+  color: var(--litopis-input-foreground, var(--litopis-foreground));
+  font: inherit;
+  height: var(--litopis-control-size);
+  outline: 0;
+  padding: 0 var(--litopis-input-padding-inline);
+  transition-duration: var(--litopis-transition-duration);
+  transition-property: border-color, box-shadow;
+  width: 100%;
+}
+
+.litopis-input:focus {
+  border-color: var(--litopis-focus-color, var(--litopis-accent));
+  box-shadow: 0 0 0 var(--litopis-focus-ring-width) var(--litopis-focus-ring);
+}
+
+.litopis-input[aria-invalid="true"] {
+  border-color: var(--litopis-danger);
+}
+
+.litopis-field-message {
+  color: var(--litopis-danger);
+  font-size: var(--litopis-message-font-size, 13px);
+  line-height: var(--litopis-message-line-height, 18px);
+  margin: 0;
+}
+
+.litopis-field-message:empty {
+  display: none;
+}
+
+.litopis-calendar {
+  background: var(--litopis-calendar-background, var(--litopis-background));
+  border: 0;
+  border-radius: var(--litopis-calendar-radius);
+  box-shadow: var(
+    --litopis-calendar-shadow,
+    inset 0 0 0 var(--litopis-border-width) var(--litopis-border)
+  );
+  color: var(--litopis-calendar-foreground, var(--litopis-foreground));
+  display: grid;
+  gap: var(--litopis-calendar-gap);
+  padding: var(--litopis-calendar-padding);
+}
+
+.litopis-calendar[hidden],
+.litopis-calendar[popover]:not(:popover-open) {
+  display: none;
+}
+
+.litopis[data-calendar-mode="popover"] .litopis-calendar {
+  box-shadow: var(--litopis-popover-shadow);
+  inset: calc(var(--litopis-calendar-viewport-gap) / 2) auto auto
+    calc(var(--litopis-calendar-viewport-gap) / 2);
+  margin: 0;
+  max-width: calc(100vw - var(--litopis-calendar-viewport-gap));
+  position: fixed;
+  width: min(var(--litopis-width), calc(100vw - var(--litopis-calendar-viewport-gap)));
+  z-index: var(--litopis-popover-z-index);
+}
+
+.litopis[data-calendar-mode="popover"] .litopis-calendar::backdrop {
+  background: transparent;
+}
+
+@supports (top: anchor(bottom)) {
+  .litopis[data-calendar-mode="popover"] .litopis-calendar {
+    inset: auto;
+    left: anchor(left);
+    margin-top: var(--litopis-popover-anchor-gap);
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+    top: anchor(bottom);
+    width: min(
+      max(anchor-size(width), var(--litopis-popover-min-width)),
+      calc(100vw - var(--litopis-calendar-viewport-gap))
+    );
+  }
+}
+
+.litopis-live {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.litopis-calendar-header,
+.litopis-month-year-header {
+  align-items: center;
+  display: grid;
+  gap: var(--litopis-header-gap);
+  grid-template-columns:
+    var(--litopis-control-size) minmax(0, 1fr)
+    var(--litopis-control-size);
+}
+
+.litopis-nav-button,
+.litopis-panel-nav-button,
+.litopis-caption,
+.litopis-panel-title,
+.litopis-month-button,
+.litopis-year-button,
+.litopis-day-button,
+.litopis-today-button {
+  color: var(--litopis-control-foreground, inherit);
+  cursor: pointer;
+  font: inherit;
+  transition-duration: var(--litopis-transition-duration);
+  transition-property: background-color, box-shadow, color, scale;
+}
+
+.litopis-nav-button,
+.litopis-panel-nav-button {
+  background: var(
+    --litopis-control-background,
+    var(--litopis-calendar-background, var(--litopis-background))
+  );
+  border: 0;
+  border-radius: var(--litopis-radius);
+  box-shadow: inset 0 0 0 var(--litopis-border-width) var(--litopis-border);
+  font-weight: 700;
+  height: var(--litopis-control-size);
+  width: var(--litopis-control-size);
+}
+
+.litopis-caption,
+.litopis-panel-title {
+  background: transparent;
+  border: 0;
+  border-radius: var(--litopis-radius);
+}
+
+.litopis-caption {
+  align-items: center;
+  align-self: stretch;
+  display: grid;
+  gap: var(--litopis-caption-gap);
+  justify-items: center;
+  min-width: 0;
+  padding: var(--litopis-caption-padding-block) var(--litopis-caption-padding-inline);
+}
+
+.litopis-caption-label {
+  font-size: var(--litopis-caption-font-size, 15px);
+  font-weight: var(--litopis-caption-font-weight, 700);
+  line-height: var(--litopis-caption-line-height, 20px);
+}
+
+.litopis-season {
+  color: var(--litopis-muted-foreground);
+  font-size: var(--litopis-season-font-size, 12px);
+  font-weight: var(--litopis-season-font-weight, 600);
+  line-height: var(--litopis-season-line-height, 16px);
+  margin: 0;
+  text-align: center;
+}
+
+.litopis-month-year-panel {
+  display: grid;
+  gap: var(--litopis-month-year-gap);
+}
+
+.litopis-month-year-panel[hidden] {
+  display: none;
+}
+
+.litopis-panel-title {
+  font-size: var(--litopis-panel-title-size);
+  font-weight: var(--litopis-panel-title-weight);
+  line-height: var(--litopis-panel-title-line-height);
+  min-height: var(--litopis-control-size);
+  text-align: center;
+}
+
+.litopis-panel-grid {
+  display: grid;
+  gap: var(--litopis-grid-gap);
+}
+
+.litopis-month-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.litopis-year-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.litopis-month-button,
+.litopis-year-button {
+  background: transparent;
+  border: 0;
+  border-radius: var(--litopis-radius);
+  font-size: var(--litopis-option-font-size, 14px);
+  font-weight: var(--litopis-option-font-weight, 600);
+  height: var(--litopis-control-size);
+}
+
+.litopis-month-button[data-selected],
+.litopis-year-button[data-selected],
+.litopis-day[data-selected] .litopis-day-button {
+  background: var(--litopis-selected-background, var(--litopis-accent));
+  color: var(--litopis-selected-foreground, var(--litopis-accent-foreground));
+}
+
+.litopis-grid {
+  max-width: 100%;
+  overflow: auto;
+  width: 100%;
+}
+
+.litopis-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  min-width: calc(
+    var(--litopis-day-size) + var(--litopis-day-size) + var(--litopis-day-size) +
+      var(--litopis-day-size) + var(--litopis-day-size) + var(--litopis-day-size) +
+      var(--litopis-day-size)
+  );
+}
+
+.litopis-weekdays {
+  box-shadow: inset 0 calc(-1 * var(--litopis-border-width)) 0 var(--litopis-border);
+  margin-bottom: var(--litopis-weekdays-gap, 4px);
+  padding-bottom: var(--litopis-weekdays-gap, 4px);
+}
+
+.litopis-weekday {
+  color: var(--litopis-muted-foreground);
+  font-size: var(--litopis-weekday-font-size, 12px);
+  font-weight: var(--litopis-weekday-font-weight, 700);
+  height: var(--litopis-weekday-size);
+  line-height: var(--litopis-weekday-size);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.litopis-day {
+  display: grid;
+  min-height: var(--litopis-day-size);
+  place-items: center;
+  width: 100%;
+}
+
+.litopis-day-empty {
+  pointer-events: none;
+}
+
+.litopis-day-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--litopis-radius);
+  display: inline-flex;
+  font-size: var(--litopis-day-font-size, 14px);
+  height: var(--litopis-day-size);
+  justify-content: center;
+  max-width: 100%;
+  padding: 0;
+  width: var(--litopis-day-size);
+}
+
+.litopis-day[data-outside-month] .litopis-day-button {
+  color: var(--litopis-muted-foreground);
+}
+
+.litopis-day[data-today] .litopis-day-button {
+  box-shadow: inset 0 0 0 var(--litopis-border-width)
+    var(--litopis-today-border, var(--litopis-accent));
+}
+
+.litopis-calendar-footer {
+  box-shadow: inset 0 var(--litopis-border-width) 0 var(--litopis-border);
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--litopis-footer-padding-top, 10px);
+}
+
+.litopis-calendar-footer[hidden] {
+  display: none;
+}
+
+.litopis-today-button {
+  background: var(--litopis-today-background, var(--litopis-muted));
+  border: 0;
+  border-radius: var(--litopis-radius);
+  font-size: var(--litopis-today-font-size, 13px);
+  font-weight: var(--litopis-today-font-weight, 700);
+  min-height: var(--litopis-control-size);
+  padding: 0 var(--litopis-today-padding-inline);
+}
+
+.litopis-nav-button:hover,
+.litopis-panel-nav-button:hover,
+.litopis-caption:hover,
+.litopis-panel-title:hover,
+.litopis-month-button:hover,
+.litopis-year-button:hover,
+.litopis-day-button:hover,
+.litopis-today-button:hover {
+  background: var(--litopis-hover-background, var(--litopis-muted));
+  color: var(--litopis-hover-foreground, var(--litopis-control-foreground, inherit));
+}
+
+.litopis-nav-button:active,
+.litopis-panel-nav-button:active,
+.litopis-caption:active,
+.litopis-panel-title:active,
+.litopis-month-button:active,
+.litopis-year-button:active,
+.litopis-day-button:active,
+.litopis-today-button:active {
+  scale: var(--litopis-active-scale);
+}
+
+.litopis-nav-button:focus-visible,
+.litopis-panel-nav-button:focus-visible,
+.litopis-caption:focus-visible,
+.litopis-panel-title:focus-visible,
+.litopis-month-button:focus-visible,
+.litopis-year-button:focus-visible,
+.litopis-day-button:focus-visible,
+.litopis-today-button:focus-visible {
+  box-shadow: inset 0 0 0 var(--litopis-focus-width)
+    var(--litopis-focus-color, var(--litopis-accent));
+  outline: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.litopis-day[data-today] .litopis-day-button:focus-visible {
+  box-shadow: inset 0 0 0 var(--litopis-focus-width)
+    var(--litopis-focus-color, var(--litopis-accent));
+}
+
+.litopis-month-button[data-selected]:focus-visible,
+.litopis-year-button[data-selected]:focus-visible,
+.litopis-day[data-selected] .litopis-day-button:focus-visible {
+  box-shadow: inset 0 0 0 var(--litopis-focus-width)
+    var(
+      --litopis-selected-focus-color,
+      var(--litopis-selected-foreground, var(--litopis-accent-foreground))
+    );
+}
+
+.litopis-nav-button:disabled,
+.litopis-panel-nav-button:disabled,
+.litopis-month-button:disabled,
+.litopis-year-button:disabled,
+.litopis-day-button:disabled,
+.litopis-today-button:disabled {
+  color: var(--litopis-disabled);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.litopis-nav-button:disabled:hover,
+.litopis-panel-nav-button:disabled:hover,
+.litopis-month-button:disabled:hover,
+.litopis-year-button:disabled:hover,
+.litopis-day-button:disabled:hover,
+.litopis-today-button:disabled:hover {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .litopis button,
+  .litopis input {
+    transition-duration: 0.01ms;
+  }
+
+  .litopis button:active {
+    scale: 1;
+  }
+}

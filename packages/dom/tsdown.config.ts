@@ -8,7 +8,7 @@ export default defineConfig([
     deps: {
       neverBundle: ["@litopis/core"],
     },
-    format: ["esm", "cjs"],
+    format: ["esm"],
     sourcemap: true,
   },
   {
@@ -20,6 +20,7 @@ export default defineConfig([
     entry: { index: "src/index.ts" },
     format: ["iife"],
     globalName: "LitopisDOM",
+    minify: true,
     outputOptions: {
       entryFileNames: "[name].global.js",
     },

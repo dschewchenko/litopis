@@ -11,6 +11,69 @@ describe("createDatePicker", () => {
 
     expect(root.querySelector("[role='grid']")).toBeTruthy();
     expect(root.querySelectorAll(".litopis-day-button[tabindex='0']")).toHaveLength(1);
+    expect(root.querySelector("[aria-current='date']")?.textContent).toBe("25");
+    expect(
+      root.querySelector<HTMLInputElement>(".litopis-input")?.getAttribute("aria-controls"),
+    ).toBe(root.querySelector(".litopis-grid")?.id);
+  });
+
+  it("renders only Litopis-owned styling hooks", () => {
+    const root = document.createElement("div");
+
+    createDatePicker(root, {
+      selected: { day: 25, month: 6, year: 2026 },
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    const classNames = [...root.querySelectorAll("[class]")].flatMap((element) => [
+      ...element.classList,
+    ]);
+
+    expect(
+      classNames.every((className) => className === "litopis" || className.startsWith("litopis-")),
+    ).toBe(true);
+    expect(root.querySelector(".litopis-day[data-selected][data-today]")).toBeTruthy();
+  });
+
+  it("moves focus from the input into the grid and preserves it after selection", () => {
+    const root = document.createElement("div");
+    document.body.append(root);
+    const picker = createDatePicker(root, {
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const input = root.querySelector<HTMLInputElement>(".litopis-input")!;
+
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" }));
+
+    expect(document.activeElement?.classList.contains("litopis-day-button")).toBe(true);
+    document.activeElement?.dispatchEvent(
+      new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }),
+    );
+
+    expect(picker.getValue()).toBe("2026-06-25");
+    expect(document.activeElement?.classList.contains("litopis-day-button")).toBe(true);
+    root.remove();
+  });
+
+  it("returns focus to the input when Escape closes a popover", () => {
+    const root = document.createElement("div");
+    document.body.append(root);
+    createDatePicker(root, {
+      calendarMode: "popover",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const input = root.querySelector<HTMLInputElement>(".litopis-input")!;
+
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" }));
+    document.activeElement?.dispatchEvent(
+      new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }),
+    );
+
+    expect(root.dataset.calendarOpen).toBe("false");
+    expect(document.activeElement).toBe(input);
+    root.remove();
   });
 
   it("renders an integrated month and year caption", () => {
@@ -137,6 +200,10 @@ describe("createDatePicker", () => {
     expect(root.querySelector(".litopis-caption-label")?.textContent).toBe("July 2027");
     expect(root.querySelector(".litopis-season")?.textContent).toBe("Summer");
     expect(weekdays[0]).toBe("Mon");
+
+    picker.setOptions({ today: { day: 25, month: 6, year: 2026 } });
+    expect(root.querySelector<HTMLElement>(".litopis-season")?.hidden).toBe(true);
+    expect(root.querySelector<HTMLInputElement>(".litopis-input")?.placeholder).toBe("YYYY-MM-DD");
   });
 
   it("can return the visible calendar state to today", () => {

@@ -12,6 +12,6 @@
       "@litopis/vue": ["packages/vue/src/index.ts"]
     }
   },
-  "include": ["apps/**/*.ts", "packages/**/*.ts", "*.ts"],
+  "include": ["apps/**/*.ts", "packages/**/*.ts", "tests/**/*.ts", "*.ts"],
   "exclude": ["dist", "node_modules"]
 }

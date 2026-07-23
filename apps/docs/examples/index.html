@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Copy-ready Litopis date picker examples using the real DOM and core APIs."
+    />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | Examples</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/" aria-label="Litopis documentation home">
+          <span class="brand-mark" aria-hidden="true">L</span>
+          <span>Litopis</span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link active" href="/litopis/examples/" aria-current="page">Examples</a>
+          <a class="nav-link" href="/litopis/guides/">Guides</a>
+          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
+          <a class="nav-link" href="/litopis/api/">API</a>
+          <a class="nav-link" href="/litopis/styling/">Styling</a>
+          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
+          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+        </nav>
+      </header>
+
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link active" href="/litopis/examples/" aria-current="page"
+              >Examples</a
+            >
+            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+          </nav>
+        </aside>
+
+        <main class="vp-doc examples-doc" tabindex="-1">
+          <section class="page-intro examples-intro">
+            <h1>Examples</h1>
+            <p>
+              Each example mounts the real Litopis package. Use the preview, test it with the
+              keyboard, then copy the complete setup.
+            </p>
+          </section>
+
+          <nav class="example-index" aria-label="Example index">
+            <a href="#basic"><strong>Basic inline</strong><span>Smallest complete setup</span></a>
+            <a href="#popover"><strong>Popover input</strong><span>Top-layer calendar</span></a>
+            <a href="#bounds"><strong>Date bounds</strong><span>Minimum and maximum</span></a>
+            <a href="#formats"><strong>Input formats</strong><span>ISO, European and US</span></a>
+            <a href="#locales"><strong>Locales</strong><span>Labels and week starts</span></a>
+            <a href="#comfortable"
+              ><strong>Touch targets</strong><span>44px comfortable mode</span></a
+            >
+            <a href="#controller"
+              ><strong>Controller API</strong><span>Update without remounting</span></a
+            >
+            <a href="#headless"
+              ><strong>Headless core</strong><span>No generated DOM required</span></a
+            >
+          </nav>
+
+          <div class="example-list">
+            <article id="basic" class="example-card">
+              <header class="example-card-header">
+                <div>
+                  <h2>Basic inline picker</h2>
+                  <p>Mount one calendar with an initial value and read a stable ISO form value.</p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Basic inline example"
+                data-example-tabs
+              >
+                <button
+                  id="basic-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="basic-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="basic-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="basic-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="basic-preview"
+                class="example-panel example-preview"
+                role="tabpanel"
+                aria-labelledby="basic-preview-tab"
+              >
+                <div data-litopis-picker="example-basic"></div>
+                <output class="example-output" data-example-value="basic" aria-live="polite"
+                  >Value: select a date</output
+                >
+              </div>
+              <div
+                id="basic-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="basic-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>import { getToday } from "@litopis/core";
+import { createDatePicker } from "@litopis/dom";
+import "@litopis/dom/styles/base.css";
+
+const picker = createDatePicker(root, {
+  label: "Appointment date",
+  selected: getToday(),
+});
+
+picker.getValue(); // YYYY-MM-DD</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="popover" class="example-card">
+              <header class="example-card-header">
+                <div>
+                  <h2>Popover date input</h2>
+                  <p>
+                    Keep the calendar out of document flow while preserving input typing, focus
+                    restoration and arrow-key entry into the grid.
+                  </p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Popover example"
+                data-example-tabs
+              >
+                <button
+                  id="popover-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="popover-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="popover-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="popover-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="popover-preview"
+                class="example-panel example-preview example-preview-popover"
+                role="tabpanel"
+                aria-labelledby="popover-preview-tab"
+              >
+                <div data-litopis-picker="example-popover"></div>
+                <output class="example-output" data-example-value="popover" aria-live="polite"
+                  >Value: none</output
+                >
+              </div>
+              <div
+                id="popover-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="popover-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>createDatePicker(root, {
+  calendarMode: "popover",
+  inputFormat: "dd.mm.yyyy",
+  label: "Departure date",
+  showOutsideDays: false,
+  targetSize: "comfortable",
+});</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="bounds" class="example-card">
+              <header class="example-card-header">
+                <div>
+                  <h2>Bounded booking window</h2>
+                  <p>
+                    Dates outside the allowed range are disabled by the shared state layer and
+                    exposed consistently to every renderer.
+                  </p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Date bounds example"
+                data-example-tabs
+              >
+                <button
+                  id="bounds-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="bounds-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="bounds-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="bounds-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="bounds-preview"
+                class="example-panel example-preview"
+                role="tabpanel"
+                aria-labelledby="bounds-preview-tab"
+              >
+                <div data-litopis-picker="example-bounds"></div>
+                <output class="example-output" data-example-value="bounds" aria-live="polite"
+                  >Value: none</output
+                >
+              </div>
+              <div
+                id="bounds-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="bounds-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>import { addDays, getToday } from "@litopis/core";
+
+const today = getToday();
+
+createDatePicker(root, {
+  label: "Booking date",
+  min: addDays(today, -15),
+  max: addDays(today, 15),
+  showOutsideDays: false,
+});</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="formats" class="example-card example-card-wide">
+              <header class="example-card-header">
+                <div>
+                  <h2>Three input formats, one value contract</h2>
+                  <p>
+                    Visible masks match the application, while every controller still returns
+                    <code>YYYY-MM-DD</code> from <code>getValue()</code>.
+                  </p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Input formats example"
+                data-example-tabs
+              >
+                <button
+                  id="formats-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="formats-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="formats-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="formats-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="formats-preview"
+                class="example-panel example-preview"
+                role="tabpanel"
+                aria-labelledby="formats-preview-tab"
+              >
+                <div class="example-preview-grid example-preview-grid-three">
+                  <div data-litopis-picker="example-format-iso"></div>
+                  <div data-litopis-picker="example-format-eu"></div>
+                  <div data-litopis-picker="example-format-us"></div>
+                </div>
+              </div>
+              <div
+                id="formats-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="formats-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>createDatePicker(isoRoot, { inputFormat: "yyyy-mm-dd" });
+createDatePicker(europeanRoot, { inputFormat: "dd.mm.yyyy" });
+createDatePicker(usRoot, { inputFormat: "mm/dd/yyyy" });</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="locales" class="example-card example-card-wide">
+              <header class="example-card-header">
+                <div>
+                  <h2>Locale labels and explicit week starts</h2>
+                  <p>
+                    Native <code>Intl</code> supplies month, weekday and ARIA labels. Week start can
+                    follow locale data or be overridden independently.
+                  </p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Locales example"
+                data-example-tabs
+              >
+                <button
+                  id="locales-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="locales-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="locales-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="locales-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="locales-preview"
+                class="example-panel example-preview"
+                role="tabpanel"
+                aria-labelledby="locales-preview-tab"
+              >
+                <div class="example-preview-grid">
+                  <div>
+                    <p class="preview-label">Ukrainian locale</p>
+                    <div data-litopis-picker="example-locale-uk"></div>
+                  </div>
+                  <div>
+                    <p class="preview-label">US locale, Monday override</p>
+                    <div data-litopis-picker="example-locale-us"></div>
+                  </div>
+                </div>
+              </div>
+              <div
+                id="locales-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="locales-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>createDatePicker(ukRoot, {
+  inputFormat: "dd.mm.yyyy",
+  label: "Дата події",
+  locale: "uk-UA",
+});
+
+createDatePicker(usRoot, {
+  firstDayOfWeek: 1,
+  inputFormat: "mm/dd/yyyy",
+  label: "Event date",
+  locale: "en-US",
+});</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="comfortable" class="example-card">
+              <header class="example-card-header">
+                <div>
+                  <h2>Comfortable touch targets</h2>
+                  <p>
+                    Increase interactive controls to 44 CSS pixels without changing calendar
+                    behavior or maintaining a separate mobile component.
+                  </p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Touch targets example"
+                data-example-tabs
+              >
+                <button
+                  id="comfortable-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="comfortable-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="comfortable-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="comfortable-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="comfortable-preview"
+                class="example-panel example-preview"
+                role="tabpanel"
+                aria-labelledby="comfortable-preview-tab"
+              >
+                <div data-litopis-picker="example-comfortable"></div>
+                <output class="example-output" data-example-value="comfortable" aria-live="polite"
+                  >Value: none</output
+                >
+              </div>
+              <div
+                id="comfortable-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="comfortable-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>createDatePicker(root, {
+  inputFormat: "dd.mm.yyyy",
+  showOutsideDays: false,
+  showSeason: true,
+  showTodayButton: true,
+  targetSize: "comfortable",
+});</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="controller" class="example-card example-card-wide">
+              <header class="example-card-header">
+                <div>
+                  <h2>Programmatic controller</h2>
+                  <p>
+                    Update value, visible month and options without recreating the DOM tree or
+                    losing the current selection.
+                  </p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Controller example"
+                data-example-tabs
+              >
+                <button
+                  id="controller-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="controller-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="controller-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="controller-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="controller-preview"
+                class="example-panel example-preview"
+                role="tabpanel"
+                aria-labelledby="controller-preview-tab"
+              >
+                <div class="demo-actions" aria-label="Programmatic date picker actions">
+                  <button
+                    class="demo-action"
+                    type="button"
+                    data-litopis-action="set-date"
+                    data-litopis-target="example-programmatic"
+                  >
+                    Set date
+                  </button>
+                  <button
+                    class="demo-action"
+                    type="button"
+                    data-litopis-action="jump"
+                    data-litopis-target="example-programmatic"
+                  >
+                    Jump month
+                  </button>
+                  <button
+                    class="demo-action"
+                    type="button"
+                    data-litopis-action="today"
+                    data-litopis-target="example-programmatic"
+                  >
+                    Today
+                  </button>
+                  <button
+                    class="demo-action"
+                    type="button"
+                    data-litopis-action="season"
+                    data-litopis-target="example-programmatic"
+                  >
+                    Toggle season
+                  </button>
+                  <button
+                    class="demo-action"
+                    type="button"
+                    data-litopis-action="clear"
+                    data-litopis-target="example-programmatic"
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div data-litopis-picker="example-programmatic"></div>
+                <output class="example-output" data-example-value="programmatic" aria-live="polite"
+                  >Value: none</output
+                >
+              </div>
+              <div
+                id="controller-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="controller-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>const picker = createDatePicker(root, { today });
+
+picker.setDate(addDays(today, 9));
+picker.setVisibleMonth(startOfMonth(addMonths(today, 6)));
+picker.goToToday();
+picker.setOptions({ showSeason: true, showOutsideDays: false });
+picker.setDate(null);</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="headless" class="example-card example-card-wide">
+              <header class="example-card-header">
+                <div>
+                  <h2>Headless calendar state</h2>
+                  <p>
+                    Use the DOM-free package for custom renderers, server validation or tests. This
+                    state inspector calls <code>@litopis/core</code> directly and generates no
+                    calendar markup.
+                  </p>
+                </div>
+              </header>
+              <div
+                class="example-tabs"
+                role="tablist"
+                aria-label="Headless core example"
+                data-example-tabs
+              >
+                <button
+                  id="headless-preview-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="headless-preview"
+                  aria-selected="true"
+                >
+                  Preview
+                </button>
+                <button
+                  id="headless-code-tab"
+                  class="example-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="headless-code"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Code
+                </button>
+              </div>
+              <div
+                id="headless-preview"
+                class="example-panel example-preview"
+                role="tabpanel"
+                aria-labelledby="headless-preview-tab"
+              >
+                <div class="core-example" data-core-example>
+                  <div class="demo-actions" aria-label="Headless calendar state actions">
+                    <button class="demo-action" type="button" data-core-action="day">
+                      Next day
+                    </button>
+                    <button class="demo-action" type="button" data-core-action="week">
+                      Next week
+                    </button>
+                    <button class="demo-action" type="button" data-core-action="month">
+                      Next month
+                    </button>
+                    <button class="demo-action" type="button" data-core-action="select">
+                      Select focused
+                    </button>
+                  </div>
+                  <output class="core-state" data-core-state aria-live="polite"></output>
+                </div>
+              </div>
+              <div
+                id="headless-code"
+                class="example-panel"
+                role="tabpanel"
+                aria-labelledby="headless-code-tab"
+                hidden
+              >
+                <div class="language-ts vp-code-group">
+                  <span class="lang">ts</span>
+                  <pre><code>import {
+  createCalendarState,
+  moveFocus,
+  selectFocusedDate,
+} from "@litopis/core";
+
+let state = createCalendarState({ selected: today, today });
+
+state = moveFocus(state, "next-week");
+state = selectFocusedDate(state);
+
+state.focusedDate; // { day, month, year }
+state.selected;    // { day, month, year } | null</code></pre>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <section class="status-callout example-next-step">
+            <div>
+              <p class="section-label">Need another surface?</p>
+              <h2>The behavior contract stays the same.</h2>
+              <p>
+                React, Vue, Solid, Svelte and Web Components wrap one controller per instance. See
+                their exact package imports and value boundaries before integrating.
+              </p>
+            </div>
+            <a class="secondary-action" href="/litopis/integrations/">Browse integrations</a>
+          </section>
+        </main>
+
+        <aside class="page-outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#basic">Basic inline</a>
+            <a class="outline-link" href="#popover">Popover input</a>
+            <a class="outline-link" href="#bounds">Date bounds</a>
+            <a class="outline-link" href="#formats">Input formats</a>
+            <a class="outline-link" href="#locales">Locales</a>
+            <a class="outline-link" href="#comfortable">Touch targets</a>
+            <a class="outline-link" href="#controller">Controller API</a>
+            <a class="outline-link" href="#headless">Headless core</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

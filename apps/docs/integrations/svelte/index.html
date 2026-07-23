@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Install and use the typed Litopis date picker action in Svelte."
+    />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | Svelte integration</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/" aria-label="Litopis documentation home"
+          ><span class="brand-mark" aria-hidden="true">L</span><span>Litopis</span></a
+        >
+        <nav class="top-nav" aria-label="Main navigation">
+          <a class="nav-link" href="/litopis/examples/">Examples</a
+          ><a class="nav-link" href="/litopis/guides/">Guides</a
+          ><a class="nav-link active" href="/litopis/integrations/" aria-current="page"
+            >Integrations</a
+          ><a class="nav-link" href="/litopis/api/">API</a
+          ><a class="nav-link" href="/litopis/styling/">Styling</a
+          ><a class="nav-link" href="/litopis/accessibility/">Accessibility</a
+          ><a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+        </nav>
+      </header>
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a
+            ><a class="sidebar-link" href="/litopis/examples/">Examples</a
+            ><a class="sidebar-link" href="/litopis/guides/">Date picker guides</a
+            ><a class="sidebar-link active" href="/litopis/integrations/" aria-current="page"
+              >Integrations</a
+            ><a class="sidebar-link" href="/litopis/api/">API reference</a
+            ><a class="sidebar-link" href="/litopis/styling/">Styling</a
+            ><a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+          </nav>
+        </aside>
+        <main class="vp-doc integration-doc" tabindex="-1">
+          <section class="page-intro">
+            <p class="eyebrow"><a href="/litopis/integrations/">Integrations</a> / Svelte</p>
+            <h1>Svelte</h1>
+            <p><code>@litopis/svelte</code> provides the <code>litopisDatePicker</code> action.</p>
+          </section>
+          <section id="install">
+            <h2>Installation</h2>
+            <div class="language-sh vp-code-group">
+              <span class="lang">sh</span>
+              <pre><code>npm install @litopis/svelte svelte</code></pre>
+            </div>
+            <div class="language-svelte vp-code-group">
+              <span class="lang">svelte</span>
+              <pre><code>&lt;script lang="ts"&gt;
+  import { litopisDatePicker } from "@litopis/svelte";
+  import "@litopis/dom/styles/base.css";
+&lt;/script&gt;</code></pre>
+            </div>
+          </section>
+          <section id="live-example">
+            <h2>Example</h2>
+            <div class="demo-block integration-demo">
+              <div data-integration-demo="svelte"></div>
+              <p class="demo-value" data-integration-value aria-live="polite">
+                Value: current date
+              </p>
+            </div>
+          </section>
+          <section id="action-options">
+            <h2>Options</h2>
+            <p>
+              Pass <code>DatePickerOptions</code> as the action value. Use
+              <code>onValueChange</code> to receive the selected date.
+            </p>
+            <div class="language-svelte vp-code-group">
+              <span class="lang">svelte</span>
+              <pre><code>&lt;script lang="ts"&gt;
+  import { litopisDatePicker } from "@litopis/svelte";
+  import type { DatePickerOptions, DateValue } from "@litopis/dom";
+
+  let date: DateValue | null = null;
+
+  const options: DatePickerOptions = {
+    calendarMode: "popover",
+    label: "Start date",
+    onValueChange(value) {
+      date = value;
+    },
+  };
+&lt;/script&gt;
+
+&lt;div use:litopisDatePicker={options}&gt;&lt;/div&gt;</code></pre>
+            </div>
+          </section>
+          <section id="updates">
+            <h2>Updating options</h2>
+            <p>
+              Updating the action value calls <code>setOptions()</code> on the existing date picker.
+            </p>
+            <div class="language-svelte vp-code-group">
+              <span class="lang">svelte</span>
+              <pre><code>&lt;script lang="ts"&gt;
+  let compact = false;
+  $: options = {
+    calendarMode: "popover" as const,
+    targetSize: compact ? "compact" as const : "comfortable" as const,
+  };
+&lt;/script&gt;
+
+&lt;div use:litopisDatePicker={options}&gt;&lt;/div&gt;</code></pre>
+            </div>
+          </section>
+          <section id="styling">
+            <h2>Styling</h2>
+            <p>
+              Add classes to the action element. Import one Litopis stylesheet in your application
+              entry.
+            </p>
+            <a class="text-action" href="/litopis/styling/">Styling guide →</a>
+          </section>
+        </main>
+        <aside class="page-outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#install">Installation</a
+            ><a class="outline-link" href="#live-example">Example</a
+            ><a class="outline-link" href="#action-options">Options</a
+            ><a class="outline-link" href="#updates">Updating options</a
+            ><a class="outline-link" href="#styling">Styling</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/integrations/svelte.ts"></script>
+  </body>
+</html>

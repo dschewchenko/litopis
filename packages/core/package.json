@@ -1,24 +1,43 @@
 {
   "name": "@litopis/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Headless date and calendar engine for Litopis.",
+  "keywords": [
+    "accessibility",
+    "calendar",
+    "date-picker",
+    "headless",
+    "typescript"
+  ],
+  "homepage": "https://dschewchenko.github.io/litopis/",
+  "bugs": {
+    "url": "https://github.com/dschewchenko/litopis/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Dmytro Shevchenko",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dschewchenko/litopis.git",
+    "directory": "packages/core"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "type": "module",
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.mjs"
     }
   },
   "scripts": {
     "build": "tsdown",
     "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
