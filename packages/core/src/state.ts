@@ -10,6 +10,7 @@ import {
 } from "./date";
 import { createCalendarGrid } from "./grid";
 import { getLocaleFirstDayOfWeek, resolveLocale } from "./locale";
+import { createEmptyDateRange, normalizeDateRange } from "./range";
 import type {
   CalendarMove,
   CalendarState,
@@ -27,7 +28,7 @@ export function createCalendarState(options: CalendarStateOptions = {}): Calenda
     throw new RangeError("Calendar minimum date must not be after its maximum date.");
   }
 
-  const initialDate = options.selected ?? today;
+  const initialDate = options.selected ?? options.range?.start ?? today;
   const focusedDate = clampDate(initialDate, options.min ?? null, options.max ?? null);
   const visibleMonth = startOfMonth(focusedDate);
 
@@ -41,12 +42,15 @@ export function createCalendarState(options: CalendarStateOptions = {}): Calenda
       firstDayOfWeek,
       options.min ?? null,
       options.max ?? null,
+      normalizeDateRange(options.range ?? createEmptyDateRange()),
     ),
     firstDayOfWeek,
     locale,
     max: options.max ?? null,
     min: options.min ?? null,
     selected: options.selected ?? null,
+    range: normalizeDateRange(options.range ?? createEmptyDateRange()),
+    selectionMode: options.selectionMode ?? "single",
     today,
     visibleMonth,
   };
@@ -68,6 +72,7 @@ export function moveFocus(state: CalendarState, move: CalendarMove): CalendarSta
       state.firstDayOfWeek,
       state.min,
       state.max,
+      state.range,
     ),
     visibleMonth,
   };
@@ -86,6 +91,7 @@ export function selectFocusedDate(state: CalendarState): CalendarState {
       state.firstDayOfWeek,
       state.min,
       state.max,
+      state.range,
     ),
     selected,
   };
@@ -106,8 +112,33 @@ export function selectDate(state: CalendarState, value: DateValue | null): Calen
       state.firstDayOfWeek,
       state.min,
       state.max,
+      state.range,
     ),
     selected: value,
+    visibleMonth,
+  };
+}
+
+export function selectRange(state: CalendarState, range: CalendarState["range"]): CalendarState {
+  const nextRange = normalizeDateRange(range);
+  const focusedDate = nextRange.end ?? nextRange.start ?? state.focusedDate;
+  const visibleMonth = startOfMonth(focusedDate);
+
+  return {
+    ...state,
+    focusedDate,
+    grid: createCalendarGrid(
+      visibleMonth,
+      null,
+      state.today,
+      state.locale,
+      state.firstDayOfWeek,
+      state.min,
+      state.max,
+      nextRange,
+    ),
+    range: nextRange,
+    selected: null,
     visibleMonth,
   };
 }
@@ -127,6 +158,7 @@ export function focusDate(state: CalendarState, value: DateValue): CalendarState
       state.firstDayOfWeek,
       state.min,
       state.max,
+      state.range,
     ),
     visibleMonth,
   };

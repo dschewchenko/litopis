@@ -11,11 +11,23 @@ export {
 } from "./date-field-format";
 export type { DateValue } from "@litopis/core";
 export type {
+  CalendarGranularity,
   DateFieldController,
   DateFieldFormat,
   DateFieldOptions,
-  DatePickerCalendarMode,
+  DatePickerMode,
   DatePickerController,
+  DatePickerLayout,
   DatePickerOptions,
-  DatePickerTargetSize,
+  DatePickerRange,
+  DatePickerRangeLabels,
+  DatePickerRangeNames,
+  DatePickerRangeOptions,
+  DatePickerSelection,
+  DatePickerSelectionValue,
+  DatePickerSize,
+  DatePickerPanels,
+  DatePickerValue,
+  DatePickerValueAs,
+  DateRange,
 } from "./types";

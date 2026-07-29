@@ -13,42 +13,70 @@
         <a class="brand" href="/litopis/" aria-label="Litopis documentation home"
           ><span class="brand-mark" aria-hidden="true">L</span><span>Litopis</span></a
         >
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link" href="/litopis/examples/">Examples</a
-          ><a class="nav-link" href="/litopis/guides/">Guides</a
-          ><a class="nav-link active" href="/litopis/integrations/" aria-current="page"
-            >Integrations</a
-          ><a class="nav-link" href="/litopis/api/">API</a
-          ><a class="nav-link" href="/litopis/styling/">Styling</a
-          ><a class="nav-link" href="/litopis/accessibility/">Accessibility</a
-          ><a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
       <div class="docs-layout">
         <aside class="sidebar" aria-label="Documentation sections">
           <nav class="sidebar-nav" aria-label="Documentation navigation">
             <p class="sidebar-group">Litopis</p>
-            <a class="sidebar-link" href="/litopis/">Getting started</a
-            ><a class="sidebar-link" href="/litopis/examples/">Examples</a
-            ><a class="sidebar-link" href="/litopis/guides/">Date picker guides</a
-            ><a class="sidebar-link active" href="/litopis/integrations/" aria-current="page"
-              >Integrations</a
-            ><a class="sidebar-link" href="/litopis/api/">API reference</a
-            ><a class="sidebar-link" href="/litopis/styling/">Styling</a
-            ><a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
+            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a
+                class="sidebar-link sidebar-sublink active"
+                href="/litopis/integrations/vue/"
+                aria-current="page"
+                >Vue</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
         <main class="vp-doc integration-doc" tabindex="-1">
           <section class="page-intro">
             <p class="eyebrow"><a href="/litopis/integrations/">Integrations</a> / Vue</p>
             <h1>Vue</h1>
-            <p><code>@litopis/vue</code> provides the <code>LitopisDatePicker</code> component.</p>
+            <p>
+              <code>@litopis/vue</code> provides a component with standard Vue props and
+              <code>v-model</code>.
+            </p>
           </section>
           <section id="install">
             <h2>Installation</h2>
-            <div class="language-sh vp-code-group">
-              <span class="lang">sh</span>
-              <pre><code>npm install @litopis/vue vue</code></pre>
+            <div class="package-install" data-package-install="@litopis/vue vue">
+              <div class="package-install-tabs" role="tablist" aria-label="Package manager">
+                <button type="button" role="tab" aria-selected="true" data-package-manager="npm">
+                  npm
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="pnpm">
+                  pnpm
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="yarn">
+                  yarn
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="bun">
+                  Bun
+                </button>
+              </div>
+              <div class="language-sh vp-code-group" data-package-install-panel>
+                <span class="lang">sh</span>
+                <pre><code>npm install @litopis/vue vue</code></pre>
+              </div>
             </div>
             <div class="language-vue vp-code-group">
               <span class="lang">vue</span>
@@ -70,8 +98,8 @@ import "@litopis/dom/styles/base.css";
           <section id="controlled-value">
             <h2>Value</h2>
             <p>
-              Pass the selected date through <code>value</code>. Listen for
-              <code>value-change</code> to update it.
+              Bind a single date with <code>v-model</code>. Picker options are regular component
+              props, so they work naturally with template bindings.
             </p>
             <div class="language-vue vp-code-group">
               <span class="lang">vue</span>
@@ -84,9 +112,9 @@ const date = ref&lt;LitopisDateValue | null&gt;(null);
 
 &lt;template&gt;
   &lt;LitopisDatePicker
-    :options="{ calendarMode: 'popover', label: 'Start date' }"
-    :value="date"
-    @value-change="date = $event"
+    v-model="date"
+    mode="popover"
+    label="Start date"
   /&gt;
 &lt;/template&gt;</code></pre>
             </div>
@@ -94,7 +122,7 @@ const date = ref&lt;LitopisDateValue | null&gt;(null);
           <section id="component-ref">
             <h2>Component ref</h2>
             <p>
-              The component instance exposes <code>controller</code> and <code>getValue()</code>.
+              The component instance exposes <code>controller</code> and <code>getISOValue()</code>.
             </p>
             <div class="language-vue vp-code-group">
               <span class="lang">vue</span>
@@ -105,11 +133,54 @@ import { LitopisDatePicker } from "@litopis/vue";
 const picker = ref&lt;InstanceType&lt;typeof LitopisDatePicker&gt; | null&gt;(null);
 
 function readDate() {
-  return picker.value?.getValue() ?? "";
+  return picker.value?.getISOValue() ?? "";
 }
 &lt;/script&gt;
 
 &lt;template&gt;&lt;LitopisDatePicker ref="picker" /&gt;&lt;/template&gt;</code></pre>
+            </div>
+          </section>
+          <section id="range">
+            <h2>Range</h2>
+            <p>
+              Use one range object, or bind its endpoints separately when the form already stores
+              <code>from</code> and <code>to</code> fields. These are alternative bindings.
+            </p>
+            <div class="language-vue vp-code-group">
+              <span class="lang">vue</span>
+              <pre><code>&lt;script setup lang="ts"&gt;
+import { ref } from "vue";
+import { LitopisDatePicker, type LitopisDateRange } from "@litopis/vue";
+
+const stay = ref&lt;LitopisDateRange&gt;({ start: null, end: null });
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;LitopisDatePicker
+    v-model="stay"
+    selection="range"
+    layout="split"
+  /&gt;
+&lt;/template&gt;</code></pre>
+            </div>
+            <div class="language-vue vp-code-group">
+              <span class="lang">vue</span>
+              <pre><code>&lt;script setup lang="ts"&gt;
+import { ref } from "vue";
+import { LitopisDatePicker, type LitopisDateValue } from "@litopis/vue";
+
+const from = ref&lt;LitopisDateValue | null&gt;(null);
+const to = ref&lt;LitopisDateValue | null&gt;(null);
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;LitopisDatePicker
+    v-model:from="from"
+    v-model:to="to"
+    selection="range"
+    layout="split"
+  /&gt;
+&lt;/template&gt;</code></pre>
             </div>
           </section>
           <section id="styling">
@@ -128,6 +199,7 @@ function readDate() {
             ><a class="outline-link" href="#live-example">Example</a
             ><a class="outline-link" href="#controlled-value">Value</a
             ><a class="outline-link" href="#component-ref">Component ref</a
+            ><a class="outline-link" href="#range">Range</a
             ><a class="outline-link" href="#styling">Styling</a>
           </nav>
         </aside>

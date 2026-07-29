@@ -17,15 +17,7 @@
           <span class="brand-mark" aria-hidden="true">L</span>
           <span>Litopis</span>
         </a>
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link" href="/litopis/examples/">Examples</a>
-          <a class="nav-link" href="/litopis/guides/">Guides</a>
-          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
-          <a class="nav-link active" href="/litopis/api/" aria-current="page">API</a>
-          <a class="nav-link" href="/litopis/styling/">Styling</a>
-          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
-          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
 
       <div class="docs-layout">
@@ -36,6 +28,20 @@
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
             <a class="sidebar-link active" href="/litopis/api/" aria-current="page"
               >API reference</a
             >
@@ -48,10 +54,7 @@
           <section class="page-intro">
             <p class="eyebrow">@litopis/dom and @litopis/core</p>
             <h1>API reference</h1>
-            <p>
-              Public values, options and controller methods for the headless core and imperative DOM
-              binding. Framework adapters expose the same option and value contract.
-            </p>
+            <p>Public APIs for <code>@litopis/core</code> and <code>@litopis/dom</code>.</p>
           </section>
 
           <section id="date-value">
@@ -68,13 +71,145 @@
   readonly year: number;
 }</code></pre>
             </div>
-            <div class="note-callout">
-              <strong>Form boundary</strong>
-              <p>
-                <code>getValue()</code> returns an ISO <code>YYYY-MM-DD</code> string. Use
-                <code>getDate()</code> when the application should keep a typed value.
-              </p>
+            <p>
+              <code>DateValue</code> is the default public value. Use
+              <code>valueAs: "date"</code> when the application works with native
+              <code>Date</code> instances.
+            </p>
+            <p>
+              A valid value has <code>year: 1…9999</code>, <code>month: 1…12</code> and a day valid
+              for that month; for example <code>{ year: 2026, month: 7, day: 29 }</code>.
+            </p>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>interface DateRange {
+  readonly start: DateValue | null;
+  readonly end: DateValue | null;
+}</code></pre>
             </div>
+          </section>
+
+          <section id="value-output">
+            <h2>Value output</h2>
+            <p>
+              The calendar keeps date-only values internally. The controller can expose the same
+              selection in the form that fits the consuming code.
+            </p>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>const picker = createDatePicker(root, {
+  format: "dd.mm.yyyy",
+  valueAs: "date",
+});
+
+picker.getValue();          // Date | null
+picker.getInputValue();     // "29.02.2024"
+picker.getISOValue();       // "2024-02-29"</code></pre>
+            </div>
+            <p>
+              <code>getInputValue()</code> is the exact value shown in the field, including the
+              range separator. <code>getISOValue()</code> is always an ISO value for forms and
+              storage. With <code>valueAs: "date"</code>, <code>selected</code>, <code>range</code>,
+              <code>setDate()</code> and <code>setRange()</code> also accept local
+              <code>Date</code> instances. Litopis reads their local year, month and day and returns
+              local-noon <code>Date</code> instances so a calendar day is not shifted at a
+              daylight-saving transition.
+            </p>
+            <p>
+              <code>selection</code> and <code>valueAs</code> determine the return type together.
+              Pass literals directly, or preserve them with <code>satisfies</code> when options are
+              stored first.
+            </p>
+            <div class="language-ts vp-code-group">
+              <span class="lang">ts</span>
+              <pre><code>import {
+  createDatePicker,
+  type DatePickerOptions,
+  type DatePickerRange,
+  type DateValue,
+} from "@litopis/dom";
+
+const dateValuePicker = createDatePicker(root);
+const dateValue: DateValue | null = dateValuePicker.getValue();
+
+const nativeDatePicker = createDatePicker(root, { valueAs: "date" });
+const nativeDate: Date | null = nativeDatePicker.getValue();
+
+const rangeOptions = {
+  selection: "range",
+  valueAs: "date",
+} satisfies DatePickerOptions&lt;"date", "range"&gt;;
+
+const rangePicker = createDatePicker(root, rangeOptions);
+const range: DatePickerRange&lt;"date"&gt; = rangePicker.getValue();</code></pre>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Options</th>
+                  <th><code>getValue()</code></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Default</td>
+                  <td><code>DateValue | null</code></td>
+                </tr>
+                <tr>
+                  <td><code>valueAs: "date"</code></td>
+                  <td><code>Date | null</code></td>
+                </tr>
+                <tr>
+                  <td><code>selection: "range"</code></td>
+                  <td><code>{ start: DateValue | null; end: DateValue | null }</code></td>
+                </tr>
+                <tr>
+                  <td><code>selection: "range", valueAs: "date"</code></td>
+                  <td><code>{ start: Date | null; end: Date | null }</code></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Period boundaries</h3>
+            <p>
+              Month and year selections represent complete periods in values sent to an application
+              or a form. Field text remains at the selected precision.
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Granularity</th>
+                  <th>Single value / range start</th>
+                  <th>Range end</th>
+                  <th>Field text</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>"day"</code></td>
+                  <td>The selected day</td>
+                  <td>The selected day</td>
+                  <td>Configured date format</td>
+                </tr>
+                <tr>
+                  <td><code>"month"</code></td>
+                  <td>First day of the month</td>
+                  <td>Last day of the month; February 2024 ends on <code>2024-02-29</code></td>
+                  <td><code>YYYY-MM</code> or <code>MM.YYYY</code></td>
+                </tr>
+                <tr>
+                  <td><code>"year"</code></td>
+                  <td>January 1</td>
+                  <td>December 31</td>
+                  <td><code>YYYY</code></td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              For example, selecting February through March 2024 yields
+              <code>2024-02-01/2024-03-31</code> from <code>getISOValue()</code>, while a field with
+              <code>format: "dd.mm.yyyy"</code> displays <code>02.2024 – 03.2024</code>.
+            </p>
           </section>
 
           <section id="create-date-picker">
@@ -89,6 +224,10 @@
             </div>
 
             <h3 id="date-picker-options">DatePickerOptions</h3>
+            <p>
+              Literal unions below are the complete set of accepted variants. Text options accept
+              user-facing text; locale accepts a supported BCP 47 tag such as <code>"uk-UA"</code>.
+            </p>
             <table>
               <thead>
                 <tr>
@@ -100,94 +239,241 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>calendarMode</code></td>
+                  <td><code>mode</code></td>
                   <td><code>"inline" | "popover"</code></td>
                   <td><code>"inline"</code></td>
-                  <td>Renders the calendar in flow or in the browser top layer.</td>
+                  <td>
+                    <code>"inline"</code> stays in document flow; <code>"popover"</code> opens from
+                    the field.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>selection</code></td>
+                  <td><code>"single" | "range"</code></td>
+                  <td><code>"single"</code></td>
+                  <td>
+                    <code>"single"</code> chooses one period; <code>"range"</code> chooses start
+                    then end.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>granularity</code></td>
+                  <td><code>"day" | "month" | "year"</code></td>
+                  <td><code>"day"</code></td>
+                  <td>
+                    Chooses days, months or years. Period output uses real calendar boundaries;
+                    field text remains at the selected precision.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>range</code></td>
+                  <td>
+                    <code>{ start: DateValue | Date | null; end: DateValue | Date | null }</code>
+                  </td>
+                  <td><code>{ start: null, end: null }</code></td>
+                  <td>
+                    Initial range for <code>selection: "range"</code>; a partial range may have only
+                    <code>start</code>. Endpoints are ordered chronologically.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>layout</code></td>
+                  <td><code>"single" | "split"</code></td>
+                  <td><code>"split"</code> for range</td>
+                  <td>
+                    <code>"single"</code> uses one <code>start – end</code> field;
+                    <code>"split"</code> uses From and To fields. It applies only to ranges.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>panels</code></td>
+                  <td><code>1 | 2 | "auto"</code></td>
+                  <td><code>"auto"</code> for range</td>
+                  <td>
+                    <code>1</code> shows one month; <code>2</code> shows adjacent months;
+                    <code>"auto"</code> uses two when the container is at least 640px wide.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>closeOnSelect</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>true</code></td>
+                  <td>
+                    <code>true</code> closes a popover after selection; <code>false</code> leaves it
+                    open. Inline calendars stay open.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>clearButton</code></td>
+                  <td><code>boolean</code></td>
+                  <td><code>false</code></td>
+                  <td>
+                    <code>true</code> adds a Clear footer action; <code>false</code> omits it.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>clearLabel</code></td>
+                  <td><code>string</code></td>
+                  <td><code>"Clear"</code></td>
+                  <td>Any visible text for Clear; for example <code>"Reset dates"</code>.</td>
                 </tr>
                 <tr>
                   <td><code>firstDayOfWeek</code></td>
-                  <td><code>0 | 1 | … | 6</code></td>
+                  <td><code>0 | 1 | 2 | 3 | 4 | 5 | 6</code></td>
                   <td>Locale-derived</td>
-                  <td>Overrides the first weekday; Sunday is <code>0</code>.</td>
+                  <td>
+                    Overrides locale: <code>0</code> Sunday through <code>6</code> Saturday; for
+                    example <code>1</code> starts weeks on Monday.
+                  </td>
                 </tr>
                 <tr>
-                  <td><code>inputFormat</code></td>
-                  <td><code>DateFieldFormat</code></td>
+                  <td><code>format</code></td>
+                  <td><code>"yyyy-mm-dd" | "dd.mm.yyyy" | "mm/dd/yyyy"</code></td>
                   <td><code>"yyyy-mm-dd"</code></td>
-                  <td>Visible input mask and parsing format.</td>
+                  <td>
+                    Visible mask and parsing: <code>"yyyy-mm-dd"</code> → 2026-07-29;
+                    <code>"dd.mm.yyyy"</code> → 29.07.2026; <code>"mm/dd/yyyy"</code> → 07/29/2026.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>label</code></td>
-                  <td><code>string</code></td>
-                  <td><code>"Date"</code></td>
-                  <td>Visible label and accessible name.</td>
+                  <td>
+                    <code>string | { start: string; end: string }</code>; for example
+                    <code>"Travel date"</code>
+                  </td>
+                  <td><code>"Date"</code>; <code>"Start"</code> / <code>"End"</code> for split</td>
+                  <td>
+                    Visible label and accessible name. A range object labels split fields; for
+                    example <code>{ start: "Departure", end: "Return" }</code>.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>locale</code></td>
-                  <td><code>string</code></td>
-                  <td><code>"en-US"</code></td>
-                  <td>BCP 47 locale for labels, names and week data.</td>
+                  <td>Supported BCP 47 tag; for example <code>"uk-UA"</code></td>
+                  <td>Browser locale</td>
+                  <td>
+                    Omit it for the browser language. <code>"uk-UA"</code> localizes labels; invalid
+                    tags fall back to <code>"en-US"</code>.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>min</code></td>
                   <td><code>DateValue</code></td>
                   <td>—</td>
-                  <td>Earliest selectable date.</td>
+                  <td>
+                    Inclusive earliest selectable date; for example
+                    <code>{ year: 2026, month: 7, day: 1 }</code>.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>max</code></td>
                   <td><code>DateValue</code></td>
                   <td>—</td>
-                  <td>Latest selectable date.</td>
+                  <td>
+                    Inclusive latest selectable date; for example
+                    <code>{ year: 2026, month: 7, day: 31 }</code>.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>onValueChange</code></td>
-                  <td><code>(value) =&gt; void</code></td>
+                  <td><code>(value: DateValue | Date | null) =&gt; void</code></td>
                   <td>—</td>
-                  <td>Runs after the selected typed value changes.</td>
+                  <td>
+                    Called after a single value changes. Its value follows <code>valueAs</code>; use
+                    it to synchronize application state.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>valueAs</code></td>
+                  <td><code>"date-value" | "date"</code></td>
+                  <td><code>"date-value"</code></td>
+                  <td>
+                    Chooses the representation returned by selection APIs and change callbacks: a
+                    <code>DateValue</code> object or a local native <code>Date</code>.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>selected</code></td>
-                  <td><code>DateValue | null</code></td>
+                  <td><code>DateValue | Date | null</code></td>
                   <td><code>null</code></td>
-                  <td>Initial selected value.</td>
+                  <td>
+                    Initial single value. Use <code>null</code> for none; use <code>range</code> for
+                    range mode.
+                  </td>
                 </tr>
                 <tr>
-                  <td><code>showOutsideDays</code></td>
+                  <td><code>onRangeChange</code></td>
+                  <td><code>(range) =&gt; void</code></td>
+                  <td>—</td>
+                  <td>
+                    Called after either endpoint changes. The endpoint type follows
+                    <code>valueAs</code>; the completed end is expanded to the final day of a
+                    selected month or year.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td>
+                    <code>string | { start: string; end: string }</code>; for example
+                    <code>"period"</code>
+                  </td>
+                  <td>—</td>
+                  <td>
+                    Native <code>FormData</code> name. A split range derived from
+                    <code>"stay"</code> submits <code>stay[start]</code> and <code>stay[end]</code>;
+                    pass an object only when the endpoints need different names. A one-field range
+                    serializes full ISO boundaries, for example <code>2024-02-01/2024-03-31</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>outsideDays</code></td>
                   <td><code>boolean</code></td>
                   <td><code>true</code></td>
-                  <td>Shows dates that fill the first and last calendar week.</td>
+                  <td>
+                    <code>true</code> shows subdued adjacent-month dates; <code>false</code> leaves
+                    their cells empty.
+                  </td>
                 </tr>
                 <tr>
-                  <td><code>showSeason</code></td>
+                  <td><code>season</code></td>
                   <td><code>boolean</code></td>
                   <td><code>false</code></td>
-                  <td>Adds the season label below the month caption.</td>
+                  <td>
+                    <code>true</code> adds a localized season beside the caption;
+                    <code>false</code> omits it.
+                  </td>
                 </tr>
                 <tr>
-                  <td><code>showTodayButton</code></td>
+                  <td><code>todayButton</code></td>
                   <td><code>boolean</code></td>
                   <td><code>false</code></td>
-                  <td>Adds a footer action that selects today.</td>
+                  <td>
+                    <code>true</code> adds a Today footer action; <code>false</code> omits it.
+                  </td>
                 </tr>
                 <tr>
-                  <td><code>targetSize</code></td>
+                  <td><code>size</code></td>
                   <td><code>"compact" | "comfortable"</code></td>
                   <td><code>"compact"</code></td>
-                  <td>Comfortable controls are at least 44 by 44 CSS pixels.</td>
+                  <td>
+                    <code>"compact"</code> uses 40px controls; <code>"comfortable"</code> uses at
+                    least 44px controls.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>today</code></td>
                   <td><code>DateValue</code></td>
                   <td>Local current date</td>
-                  <td>Overrides today for deterministic UI or testing.</td>
+                  <td>
+                    Overrides the local current date; for example
+                    <code>{ year: 2026, month: 7, day: 29 }</code> for deterministic tests.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>todayLabel</code></td>
                   <td><code>string</code></td>
                   <td><code>"Today"</code></td>
-                  <td>Visible text for the today action.</td>
+                  <td>Any visible text for Today; for example <code>"Jump to today"</code>.</td>
                 </tr>
               </tbody>
             </table>
@@ -218,19 +504,40 @@
                   <td>Toggles popover visibility.</td>
                 </tr>
                 <tr>
-                  <td><code>getDate()</code></td>
-                  <td><code>DateValue | null</code></td>
-                  <td>Returns the selected typed value.</td>
+                  <td><code>getValue()</code></td>
+                  <td>
+                    <code>DateValue | Date | null</code>, or <code>{ start, end }</code> for range
+                  </td>
+                  <td>
+                    Returns the selected value. Its shape follows <code>selection</code>; its
+                    endpoint type follows <code>valueAs</code>.
+                  </td>
                 </tr>
                 <tr>
-                  <td><code>getValue()</code></td>
+                  <td><code>getInputValue()</code></td>
                   <td><code>string</code></td>
-                  <td>Returns ISO <code>YYYY-MM-DD</code> or an empty string.</td>
+                  <td>Returns the formatted field text; a range uses <code>start – end</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>getISOValue()</code></td>
+                  <td><code>string</code></td>
+                  <td>
+                    Returns ISO <code>YYYY-MM-DD</code>, a complete range as
+                    <code>start/end</code> with complete period boundaries, or an empty string.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>setDate(value)</code></td>
                   <td><code>void</code></td>
                   <td>Sets or clears selection and updates the input.</td>
+                </tr>
+                <tr>
+                  <td><code>setRange(range)</code></td>
+                  <td><code>void</code></td>
+                  <td>
+                    Sets or clears range endpoints and synchronizes the fields and native form
+                    values.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>setVisibleMonth(value)</code></td>
@@ -273,11 +580,56 @@
 });
 
 field.getDate();
-field.getValue();
+field.getISOValue();
 field.isValid();
 field.setDate({ day: 16, month: 7, year: 2026 });
 field.destroy();</code></pre>
             </div>
+            <h3>DateFieldOptions</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Accepted value</th>
+                  <th>Default</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>format</code></td>
+                  <td><code>"yyyy-mm-dd" | "dd.mm.yyyy" | "mm/dd/yyyy"</code></td>
+                  <td><code>"yyyy-mm-dd"</code></td>
+                  <td>
+                    Input mask and parser; for example <code>"dd.mm.yyyy"</code> accepts 29.07.2026.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>label</code></td>
+                  <td>Visible text; for example <code>"Invoice date"</code></td>
+                  <td><code>"Date"</code></td>
+                  <td>Visible label and accessible name.</td>
+                </tr>
+                <tr>
+                  <td><code>min</code></td>
+                  <td><code>DateValue</code></td>
+                  <td>—</td>
+                  <td>Inclusive lower bound; dates before it are invalid.</td>
+                </tr>
+                <tr>
+                  <td><code>max</code></td>
+                  <td><code>DateValue</code></td>
+                  <td>—</td>
+                  <td>Inclusive upper bound; dates after it are invalid.</td>
+                </tr>
+                <tr>
+                  <td><code>value</code></td>
+                  <td><code>DateValue | null</code></td>
+                  <td><code>null</code></td>
+                  <td>Initial value; <code>null</code> starts with an empty field.</td>
+                </tr>
+              </tbody>
+            </table>
           </section>
 
           <section id="core-exports">
@@ -324,6 +676,7 @@ field.destroy();</code></pre>
           <p>On this page</p>
           <nav aria-label="Page outline">
             <a class="outline-link" href="#date-value">DateValue</a>
+            <a class="outline-link" href="#value-output">Value output</a>
             <a class="outline-link" href="#create-date-picker">createDatePicker</a>
             <a class="outline-link outline-nested" href="#date-picker-options">Options</a>
             <a class="outline-link outline-nested" href="#date-picker-controller">Controller</a>

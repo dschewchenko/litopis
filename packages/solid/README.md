@@ -17,3 +17,6 @@ const [date, setDate] = createSignal<LitopisDateValue | null>(null);
 ```
 
 See the [Solid integration guide](https://dschewchenko.github.io/litopis/integrations/solid/) for controlled signals and controller access.
+
+Pass `selection: "range"` and `name` to `LitopisDatePicker` for a synchronized
+native form range.

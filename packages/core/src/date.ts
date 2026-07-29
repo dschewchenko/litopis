@@ -42,7 +42,7 @@ export function addDays(value: DateValue, days: number): DateValue {
   const date = toLocalDate(value);
   date.setDate(date.getDate() + days);
 
-  return clampToSupportedRange(fromLocalDate(date));
+  return clampToSupportedRange(getLocalDateValue(date));
 }
 
 export function addMonths(value: DateValue, months: number): DateValue {
@@ -170,6 +170,18 @@ export function toLocalDate(value: DateValue): Date {
   return date;
 }
 
+/** Converts a local calendar day from a native Date into Litopis' date-only value. */
+export function fromLocalDate(date: Date): DateValue {
+  if (Number.isNaN(date.getTime())) {
+    throw new TypeError("Date must be valid.");
+  }
+
+  const value = getLocalDateValue(date);
+  assertDateValue(value);
+
+  return value;
+}
+
 export function isValidDateValue(value: DateValue): boolean {
   return (
     Number.isInteger(value.day) &&
@@ -184,7 +196,7 @@ export function isValidDateValue(value: DateValue): boolean {
   );
 }
 
-function fromLocalDate(date: Date): DateValue {
+function getLocalDateValue(date: Date): DateValue {
   return {
     day: date.getDate(),
     month: date.getMonth() + 1,

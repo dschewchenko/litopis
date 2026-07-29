@@ -11,12 +11,20 @@ import { createDatePicker } from "@litopis/dom";
 import "@litopis/dom/styles/base.css";
 
 const picker = createDatePicker(document.querySelector("#picker")!, {
-  calendarMode: "popover",
+  clearButton: true,
+  closeOnSelect: false,
+  mode: "popover",
   label: "Appointment date",
 });
 ```
 
-The controller returns an ISO `YYYY-MM-DD` value through `picker.getValue()`.
+The controller returns an ISO `YYYY-MM-DD` value through `picker.getISOValue()`.
+
+## Date ranges and forms
+
+Range selection stays on `createDatePicker`. Use `selection: "range"` with `name` for two native
+endpoint values, or `layout: "single"` with `name` for one
+serialized range value.
 
 The JavaScript package is unstyled and does not import CSS. Choose one styling layer:
 

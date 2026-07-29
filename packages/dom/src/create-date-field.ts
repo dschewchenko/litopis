@@ -127,7 +127,7 @@ export function createDateField(
     getDate() {
       return date;
     },
-    getValue() {
+    getISOValue() {
       return date && valid ? toIsoDate(date) : "";
     },
     isValid() {

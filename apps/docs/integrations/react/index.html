@@ -16,17 +16,7 @@
         <a class="brand" href="/litopis/" aria-label="Litopis documentation home">
           <span class="brand-mark" aria-hidden="true">L</span><span>Litopis</span>
         </a>
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link" href="/litopis/examples/">Examples</a>
-          <a class="nav-link" href="/litopis/guides/">Guides</a>
-          <a class="nav-link active" href="/litopis/integrations/" aria-current="page"
-            >Integrations</a
-          >
-          <a class="nav-link" href="/litopis/api/">API</a>
-          <a class="nav-link" href="/litopis/styling/">Styling</a>
-          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
-          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
       <div class="docs-layout">
         <aside class="sidebar" aria-label="Documentation sections">
@@ -35,9 +25,26 @@
             <a class="sidebar-link" href="/litopis/">Getting started</a>
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
-            <a class="sidebar-link active" href="/litopis/integrations/" aria-current="page"
-              >Integrations</a
-            >
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a
+                class="sidebar-link sidebar-sublink active"
+                href="/litopis/integrations/react/"
+                aria-current="page"
+                >React</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
@@ -53,9 +60,25 @@
           </section>
           <section id="install">
             <h2>Installation</h2>
-            <div class="language-sh vp-code-group">
-              <span class="lang">sh</span>
-              <pre><code>npm install @litopis/react react react-dom</code></pre>
+            <div class="package-install" data-package-install="@litopis/react react react-dom">
+              <div class="package-install-tabs" role="tablist" aria-label="Package manager">
+                <button type="button" role="tab" aria-selected="true" data-package-manager="npm">
+                  npm
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="pnpm">
+                  pnpm
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="yarn">
+                  yarn
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="bun">
+                  Bun
+                </button>
+              </div>
+              <div class="language-sh vp-code-group" data-package-install-panel>
+                <span class="lang">sh</span>
+                <pre><code>npm install @litopis/react react react-dom</code></pre>
+              </div>
             </div>
             <div class="language-tsx vp-code-group">
               <span class="lang">tsx</span>
@@ -86,7 +109,7 @@ import { LitopisDatePicker, type LitopisDateValue } from "@litopis/react";
 const [date, setDate] = useState&lt;LitopisDateValue | null&gt;(null);
 
 &lt;LitopisDatePicker
-  calendarMode="popover"
+  mode="popover"
   label="Start date"
   value={date}
   onValueChange={setDate}
@@ -97,7 +120,7 @@ const [date, setDate] = useState&lt;LitopisDateValue | null&gt;(null);
             <h2>Controller ref</h2>
             <p>
               The forwarded ref implements <code>DatePickerController</code>. Use it to call methods
-              such as <code>open()</code>, <code>close()</code> and <code>getValue()</code>.
+              such as <code>open()</code>, <code>close()</code> and <code>getISOValue()</code>.
             </p>
             <div class="language-tsx vp-code-group">
               <span class="lang">tsx</span>
@@ -108,6 +131,25 @@ const pickerRef = useRef&lt;DatePickerController | null&gt;(null);
 
 &lt;LitopisDatePicker ref={pickerRef} /&gt;
 &lt;button onClick={() =&gt; pickerRef.current?.open()}&gt;Open calendar&lt;/button&gt;</code></pre>
+            </div>
+          </section>
+          <section id="range">
+            <h2>Range</h2>
+            <p>
+              Keep the same component. A range is controlled with <code>range</code> and emits
+              <code>onRangeChange</code>.
+            </p>
+            <div class="language-tsx vp-code-group">
+              <span class="lang">tsx</span>
+              <pre><code>const [stay, setStay] = useState({ start: null, end: null });
+
+&lt;LitopisDatePicker
+  selection="range"
+  layout="split"
+  name={{ start: "from", end: "to" }}
+  range={stay}
+  onRangeChange={setStay}
+/&gt;</code></pre>
             </div>
           </section>
           <section id="styling">
@@ -126,6 +168,7 @@ const pickerRef = useRef&lt;DatePickerController | null&gt;(null);
             <a class="outline-link" href="#live-example">Example</a>
             <a class="outline-link" href="#controlled-value">Controlled value</a>
             <a class="outline-link" href="#controller-ref">Controller ref</a>
+            <a class="outline-link" href="#range">Range</a>
             <a class="outline-link" href="#styling">Styling</a>
           </nav>
         </aside>

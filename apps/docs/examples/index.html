@@ -17,15 +17,7 @@
           <span class="brand-mark" aria-hidden="true">L</span>
           <span>Litopis</span>
         </a>
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link active" href="/litopis/examples/" aria-current="page">Examples</a>
-          <a class="nav-link" href="/litopis/guides/">Guides</a>
-          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
-          <a class="nav-link" href="/litopis/api/">API</a>
-          <a class="nav-link" href="/litopis/styling/">Styling</a>
-          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
-          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
 
       <div class="docs-layout">
@@ -38,6 +30,20 @@
             >
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
@@ -47,10 +53,7 @@
         <main class="vp-doc examples-doc" tabindex="-1">
           <section class="page-intro examples-intro">
             <h1>Examples</h1>
-            <p>
-              Each example mounts the real Litopis package. Use the preview, test it with the
-              keyboard, then copy the complete setup.
-            </p>
+            <p>Copy a setup, then adjust its options for your form.</p>
           </section>
 
           <nav class="example-index" aria-label="Example index">
@@ -75,7 +78,7 @@
               <header class="example-card-header">
                 <div>
                   <h2>Basic inline picker</h2>
-                  <p>Mount one calendar with an initial value and read a stable ISO form value.</p>
+                  <p>Inline calendar with an initial value and an ISO form value.</p>
                 </div>
               </header>
               <div
@@ -135,7 +138,7 @@ const picker = createDatePicker(root, {
   selected: getToday(),
 });
 
-picker.getValue(); // YYYY-MM-DD</code></pre>
+picker.getISOValue(); // YYYY-MM-DD</code></pre>
                 </div>
               </div>
             </article>
@@ -199,11 +202,11 @@ picker.getValue(); // YYYY-MM-DD</code></pre>
                 <div class="language-ts vp-code-group">
                   <span class="lang">ts</span>
                   <pre><code>createDatePicker(root, {
-  calendarMode: "popover",
-  inputFormat: "dd.mm.yyyy",
+  mode: "popover",
+  format: "dd.mm.yyyy",
   label: "Departure date",
-  showOutsideDays: false,
-  targetSize: "comfortable",
+  outsideDays: false,
+  size: "comfortable",
 });</code></pre>
                 </div>
               </div>
@@ -275,7 +278,7 @@ createDatePicker(root, {
   label: "Booking date",
   min: addDays(today, -15),
   max: addDays(today, 15),
-  showOutsideDays: false,
+  outsideDays: false,
 });</code></pre>
                 </div>
               </div>
@@ -284,10 +287,10 @@ createDatePicker(root, {
             <article id="formats" class="example-card example-card-wide">
               <header class="example-card-header">
                 <div>
-                  <h2>Three input formats, one value contract</h2>
+                  <h2>Three input formats, one stored value</h2>
                   <p>
-                    Visible masks match the application, while every controller still returns
-                    <code>YYYY-MM-DD</code> from <code>getValue()</code>.
+                    Choose the visible format. <code>getISOValue()</code> returns
+                    <code>YYYY-MM-DD</code> in every case.
                   </p>
                 </div>
               </header>
@@ -340,9 +343,9 @@ createDatePicker(root, {
               >
                 <div class="language-ts vp-code-group">
                   <span class="lang">ts</span>
-                  <pre><code>createDatePicker(isoRoot, { inputFormat: "yyyy-mm-dd" });
-createDatePicker(europeanRoot, { inputFormat: "dd.mm.yyyy" });
-createDatePicker(usRoot, { inputFormat: "mm/dd/yyyy" });</code></pre>
+                  <pre><code>createDatePicker(isoRoot, { format: "yyyy-mm-dd" });
+createDatePicker(europeanRoot, { format: "dd.mm.yyyy" });
+createDatePicker(usRoot, { format: "mm/dd/yyyy" });</code></pre>
                 </div>
               </div>
             </article>
@@ -412,14 +415,14 @@ createDatePicker(usRoot, { inputFormat: "mm/dd/yyyy" });</code></pre>
                 <div class="language-ts vp-code-group">
                   <span class="lang">ts</span>
                   <pre><code>createDatePicker(ukRoot, {
-  inputFormat: "dd.mm.yyyy",
+  format: "dd.mm.yyyy",
   label: "Дата події",
   locale: "uk-UA",
 });
 
 createDatePicker(usRoot, {
   firstDayOfWeek: 1,
-  inputFormat: "mm/dd/yyyy",
+  format: "mm/dd/yyyy",
   label: "Event date",
   locale: "en-US",
 });</code></pre>
@@ -431,10 +434,7 @@ createDatePicker(usRoot, {
               <header class="example-card-header">
                 <div>
                   <h2>Comfortable touch targets</h2>
-                  <p>
-                    Increase interactive controls to 44 CSS pixels without changing calendar
-                    behavior or maintaining a separate mobile component.
-                  </p>
+                  <p>Sets day and control targets to 44px.</p>
                 </div>
               </header>
               <div
@@ -486,11 +486,11 @@ createDatePicker(usRoot, {
                 <div class="language-ts vp-code-group">
                   <span class="lang">ts</span>
                   <pre><code>createDatePicker(root, {
-  inputFormat: "dd.mm.yyyy",
-  showOutsideDays: false,
-  showSeason: true,
-  showTodayButton: true,
-  targetSize: "comfortable",
+  format: "dd.mm.yyyy",
+  outsideDays: false,
+  season: true,
+  todayButton: true,
+  size: "comfortable",
 });</code></pre>
                 </div>
               </div>
@@ -500,10 +500,7 @@ createDatePicker(usRoot, {
               <header class="example-card-header">
                 <div>
                   <h2>Programmatic controller</h2>
-                  <p>
-                    Update value, visible month and options without recreating the DOM tree or
-                    losing the current selection.
-                  </p>
+                  <p>Set the value, visible month or options from application code.</p>
                 </div>
               </header>
               <div
@@ -601,7 +598,7 @@ createDatePicker(usRoot, {
 picker.setDate(addDays(today, 9));
 picker.setVisibleMonth(startOfMonth(addMonths(today, 6)));
 picker.goToToday();
-picker.setOptions({ showSeason: true, showOutsideDays: false });
+picker.setOptions({ season: true, outsideDays: false });
 picker.setDate(null);</code></pre>
                 </div>
               </div>
@@ -696,18 +693,6 @@ state.selected;    // { day, month, year } | null</code></pre>
               </div>
             </article>
           </div>
-
-          <section class="status-callout example-next-step">
-            <div>
-              <p class="section-label">Need another surface?</p>
-              <h2>The behavior contract stays the same.</h2>
-              <p>
-                React, Vue, Solid, Svelte and Web Components wrap one controller per instance. See
-                their exact package imports and value boundaries before integrating.
-              </p>
-            </div>
-            <a class="secondary-action" href="/litopis/integrations/">Browse integrations</a>
-          </section>
         </main>
 
         <aside class="page-outline" aria-label="On this page">

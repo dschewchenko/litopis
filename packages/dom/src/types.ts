@@ -1,37 +1,100 @@
-import type { CalendarStateOptions, DateValue } from "@litopis/core";
+import type { CalendarGranularity, CalendarStateOptions, DateValue } from "@litopis/core";
 
 export type { DateValue } from "@litopis/core";
+export type { CalendarGranularity, DateRange } from "@litopis/core";
 
-export interface DatePickerOptions extends CalendarStateOptions {
-  readonly calendarMode?: DatePickerCalendarMode;
-  readonly inputFormat?: DateFieldFormat;
-  readonly label?: string;
-  readonly onValueChange?: (value: DateValue | null) => void;
-  readonly showOutsideDays?: boolean;
-  readonly showSeason?: boolean;
-  readonly showTodayButton?: boolean;
-  readonly targetSize?: DatePickerTargetSize;
-  readonly todayLabel?: string;
+/** Selects the JavaScript representation used by picker selection APIs. */
+export type DatePickerValueAs = "date-value" | "date";
+
+export type DatePickerValue<ValueAs extends DatePickerValueAs> = ValueAs extends "date"
+  ? Date
+  : DateValue;
+
+export interface DatePickerRange<ValueAs extends DatePickerValueAs> {
+  readonly end: DatePickerValue<ValueAs> | null;
+  readonly start: DatePickerValue<ValueAs> | null;
 }
 
-export interface DatePickerController {
+/** Native form names for a split range field. */
+export interface DatePickerRangeNames {
+  readonly end: string;
+  readonly start: string;
+}
+
+/** Visible labels for the two fields of a split range. */
+export interface DatePickerRangeLabels {
+  readonly end: string;
+  readonly start: string;
+}
+
+export type DatePickerSelectionValue<
+  ValueAs extends DatePickerValueAs,
+  Selection extends DatePickerSelection,
+> = Selection extends "range" ? DatePickerRange<ValueAs> : DatePickerValue<ValueAs> | null;
+
+export interface DatePickerOptions<
+  ValueAs extends DatePickerValueAs = "date-value",
+  Selection extends DatePickerSelection = DatePickerSelection,
+> extends Omit<CalendarStateOptions, "range" | "selected" | "selectionMode"> {
+  readonly clearButton?: boolean;
+  readonly clearLabel?: string;
+  readonly closeOnSelect?: boolean;
+  readonly mode?: DatePickerMode;
+  readonly format?: DateFieldFormat;
+  readonly label?: string | DatePickerRangeLabels;
+  readonly onValueChange?: (value: DatePickerValue<ValueAs> | null) => void;
+  readonly onRangeChange?: (value: DatePickerRange<ValueAs>) => void;
+  readonly range?: DatePickerRange<ValueAs>;
+  readonly selected?: DatePickerValue<ValueAs> | null;
+  readonly selection?: Selection;
+  readonly layout?: DatePickerLayout;
+  readonly name?: string | DatePickerRangeNames;
+  readonly granularity?: CalendarGranularity;
+  readonly panels?: DatePickerPanels;
+  readonly outsideDays?: boolean;
+  readonly season?: boolean;
+  readonly todayButton?: boolean;
+  readonly size?: DatePickerSize;
+  readonly todayLabel?: string;
+  /** Chooses DateValue objects or native local Date instances for selection APIs. */
+  readonly valueAs?: ValueAs;
+}
+
+export interface DatePickerRangeOptions<
+  ValueAs extends DatePickerValueAs = "date-value",
+> extends DatePickerOptions<ValueAs, "range"> {
+  readonly selection: "range";
+}
+
+export interface DatePickerController<
+  ValueAs extends DatePickerValueAs = "date-value",
+  Selection extends DatePickerSelection = DatePickerSelection,
+> {
   close(): void;
   destroy(): void;
-  getDate(): DateValue | null;
-  getValue(): string;
+  getInputValue(): string;
+  getISOValue(): string;
+  getValue(): DatePickerSelectionValue<ValueAs, Selection>;
   goToToday(): void;
   open(): void;
-  setDate(value: DateValue | null): void;
-  setOptions(options: DatePickerOptions): void;
+  setDate(value: DatePickerValue<ValueAs> | null): void;
+  setRange(value: DatePickerRange<ValueAs>): void;
+  setOptions(options: DatePickerOptions<ValueAs>): void;
   setVisibleMonth(value: DateValue): void;
   toggle(): void;
 }
 
 export type DateFieldFormat = "yyyy-mm-dd" | "dd.mm.yyyy" | "mm/dd/yyyy";
 
-export type DatePickerCalendarMode = "inline" | "popover";
+export type DatePickerLayout = "single" | "split";
 
-export type DatePickerTargetSize = "comfortable" | "compact";
+export type DatePickerSelection = "single" | "range";
+
+export type DatePickerPanels = 1 | 2 | "auto";
+
+export type DatePickerMode = "inline" | "popover";
+
+export type DatePickerSize = "comfortable" | "compact";
 
 export interface DateFieldOptions {
   readonly format?: DateFieldFormat;
@@ -44,7 +107,7 @@ export interface DateFieldOptions {
 export interface DateFieldController {
   destroy(): void;
   getDate(): DateValue | null;
-  getValue(): string;
+  getISOValue(): string;
   isValid(): boolean;
   setDate(value: DateValue | null): void;
 }

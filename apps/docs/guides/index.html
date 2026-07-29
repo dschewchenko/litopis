@@ -14,15 +14,7 @@
           <span class="brand-mark" aria-hidden="true">L</span>
           <span>Litopis</span>
         </a>
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link" href="/litopis/examples/">Examples</a>
-          <a class="nav-link active" href="/litopis/guides/" aria-current="page">Guides</a>
-          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
-          <a class="nav-link" href="/litopis/api/">API</a>
-          <a class="nav-link" href="/litopis/styling/">Styling</a>
-          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
-          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
 
       <div class="docs-layout">
@@ -35,6 +27,20 @@
               >Date picker guides</a
             >
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
@@ -45,18 +51,12 @@
           <section class="page-intro">
             <p class="eyebrow">Working examples</p>
             <h1>Date picker guides</h1>
-            <p>
-              Copy complete patterns for single dates, bounded booking windows, localized input,
-              popovers and programmatic control. Every example below runs the current DOM API.
-            </p>
+            <p>Single dates, bounds, locales, popovers and controller methods.</p>
           </section>
 
           <section id="single-date">
             <h2>Single date</h2>
-            <p>
-              Mount a picker on any element. The controller returns the current form value in
-              <code>YYYY-MM-DD</code> format.
-            </p>
+            <p>Mount a picker and submit an ISO <code>YYYY-MM-DD</code> value.</p>
             <div class="demo-block">
               <div data-litopis-picker="single"></div>
             </div>
@@ -70,7 +70,7 @@ const picker = createDatePicker(root, {
   today: getToday(),
 });
 
-picker.getValue();</code></pre>
+picker.getISOValue();</code></pre>
             </div>
           </section>
 
@@ -110,7 +110,7 @@ createDatePicker(root, {
               <span class="lang">ts</span>
               <pre><code>createDatePicker(root, {
   firstDayOfWeek: 6,
-  inputFormat: "mm/dd/yyyy",
+  format: "mm/dd/yyyy",
   label: "Weekend trip",
 });</code></pre>
             </div>
@@ -120,15 +120,16 @@ createDatePicker(root, {
             <h2>Localization</h2>
             <p>
               <code>locale</code> is a BCP 47 tag used for month names, weekday labels and ARIA text
-              through native <code>Intl</code>. Unsupported or invalid locales fall back to
-              <code>en-US</code>. Week start uses native locale data when available, with compact
-              region data only for browsers that do not expose it. Calendar math is proleptic
-              Gregorian, so historical Julian/Gregorian cutovers are not modeled.
+              through native <code>Intl</code>. Leave it out to use the browser language; outside a
+              browser the default is <code>en-US</code>. Unsupported or invalid locales also fall
+              back to <code>en-US</code>. Week start uses native locale data when available, with
+              compact region data only for browsers that do not expose it. Calendar math is
+              proleptic Gregorian, so historical Julian/Gregorian cutovers are not modeled.
             </p>
             <div class="language-ts vp-code-group">
               <span class="lang">ts</span>
               <pre><code>createDatePicker(root, {
-  inputFormat: "dd.mm.yyyy",
+  format: "dd.mm.yyyy",
   label: "Date",
   locale: "uk-UA",
 });
@@ -152,22 +153,18 @@ createDatePicker(root, {
             <div class="language-ts vp-code-group">
               <span class="lang">ts</span>
               <pre><code>createDatePicker(root, {
-  calendarMode: "popover",
-  inputFormat: "dd.mm.yyyy",
-  showOutsideDays: false,
-  showSeason: true,
-  targetSize: "comfortable",
+  mode: "popover",
+  format: "dd.mm.yyyy",
+  outsideDays: false,
+  season: true,
+  size: "comfortable",
 });</code></pre>
             </div>
           </section>
 
           <section id="programmatic-state">
             <h2>Programmatic state</h2>
-            <p>
-              Controllers can update value, visible month and options without remounting the
-              calendar. <code>setOptions</code> replaces the option object while preserving the
-              current selected value unless a new <code>selected</code> value is supplied.
-            </p>
+            <p>Use the controller to update the value, visible month or options.</p>
             <div class="demo-block">
               <div class="demo-actions" aria-label="Programmatic date picker actions">
                 <button
@@ -223,7 +220,7 @@ const picker = createDatePicker(root, { today });
 picker.setDate(addDays(today, 9));
 picker.setVisibleMonth(startOfMonth(addMonths(today, 6)));
 picker.goToToday();
-picker.setOptions({ showSeason: true, showOutsideDays: false });</code></pre>
+picker.setOptions({ season: true, outsideDays: false });</code></pre>
             </div>
           </section>
 
@@ -251,7 +248,10 @@ picker.setOptions({ showSeason: true, showOutsideDays: false });</code></pre>
                 </tr>
                 <tr>
                   <th>Adapter value</th>
-                  <td><code>DateValue</code>; adapters can convert at the app boundary</td>
+                  <td>
+                    <code>DateValue</code> by default; the DOM controller can expose native
+                    <code>Date</code> values with <code>valueAs: "date"</code>.
+                  </td>
                 </tr>
               </tbody>
             </table>

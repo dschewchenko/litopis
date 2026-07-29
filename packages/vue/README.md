@@ -16,8 +16,11 @@ const date = ref<LitopisDateValue | null>(null);
 </script>
 
 <template>
-  <LitopisDatePicker :value="date" @value-change="date = $event" />
+  <LitopisDatePicker v-model="date" mode="popover" label="Start date" />
 </template>
 ```
 
-See the [Vue integration guide](https://dschewchenko.github.io/litopis/integrations/vue/) for options, events and component refs.
+See the [Vue integration guide](https://dschewchenko.github.io/litopis/integrations/vue/) for component props, `v-model` and component refs.
+
+For a range, bind a `LitopisDateRange` with `v-model`, then set `selection="range"`,
+`name` for synchronized native form values.

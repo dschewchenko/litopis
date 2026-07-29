@@ -12,25 +12,7 @@ export interface LitopisDatePickerProps extends Omit<DatePickerOptions, "selecte
 
 export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePickerProps>(
   function LitopisDatePicker(props, forwardedRef) {
-    const {
-      calendarMode,
-      className,
-      controllerRef,
-      firstDayOfWeek,
-      inputFormat,
-      label,
-      locale,
-      max,
-      min,
-      onValueChange,
-      showOutsideDays,
-      showSeason,
-      showTodayButton,
-      targetSize,
-      today,
-      todayLabel,
-      value,
-    } = props;
+    const { className, controllerRef, value, ...pickerOptions } = props;
     const rootRef = useRef<HTMLDivElement | null>(null);
     const controllerRefState = useRef<DatePickerController | null>(null);
     const handleRef = useRef<DatePickerController>({
@@ -41,11 +23,14 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
       close() {
         controllerRefState.current?.close();
       },
-      getDate() {
-        return controllerRefState.current?.getDate() ?? null;
-      },
       getValue() {
-        return controllerRefState.current?.getValue() ?? "";
+        return controllerRefState.current?.getValue() ?? null;
+      },
+      getInputValue() {
+        return controllerRefState.current?.getInputValue() ?? "";
+      },
+      getISOValue() {
+        return controllerRefState.current?.getISOValue() ?? "";
       },
       goToToday() {
         controllerRefState.current?.goToToday();
@@ -55,6 +40,9 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
       },
       setDate(nextValue) {
         controllerRefState.current?.setDate(nextValue);
+      },
+      setRange(nextValue) {
+        controllerRefState.current?.setRange(nextValue);
       },
       setOptions(nextOptions) {
         controllerRefState.current?.setOptions(nextOptions);
@@ -96,22 +84,7 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
 
     useEffect(() => {
       controllerRefState.current?.setOptions(getPickerOptions(valueRef.current));
-    }, [
-      calendarMode,
-      firstDayOfWeek,
-      inputFormat,
-      label,
-      locale,
-      max,
-      min,
-      onValueChange,
-      showOutsideDays,
-      showSeason,
-      showTodayButton,
-      targetSize,
-      today,
-      todayLabel,
-    ]);
+    }, [pickerOptions]);
 
     useEffect(() => {
       valueRef.current = value ?? null;
@@ -122,21 +95,8 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
 
     function getPickerOptions(selected: DateValue | null): DatePickerOptions {
       return {
-        ...(calendarMode === undefined ? {} : { calendarMode }),
-        ...(firstDayOfWeek === undefined ? {} : { firstDayOfWeek }),
-        ...(inputFormat === undefined ? {} : { inputFormat }),
-        ...(label === undefined ? {} : { label }),
-        ...(locale === undefined ? {} : { locale }),
-        ...(max === undefined ? {} : { max }),
-        ...(min === undefined ? {} : { min }),
-        ...(onValueChange === undefined ? {} : { onValueChange }),
+        ...pickerOptions,
         selected,
-        ...(showOutsideDays === undefined ? {} : { showOutsideDays }),
-        ...(showSeason === undefined ? {} : { showSeason }),
-        ...(showTodayButton === undefined ? {} : { showTodayButton }),
-        ...(targetSize === undefined ? {} : { targetSize }),
-        ...(today === undefined ? {} : { today }),
-        ...(todayLabel === undefined ? {} : { todayLabel }),
       };
     }
   },

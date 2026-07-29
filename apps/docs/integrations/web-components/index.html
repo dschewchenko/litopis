@@ -16,29 +16,36 @@
         <a class="brand" href="/litopis/" aria-label="Litopis documentation home"
           ><span class="brand-mark" aria-hidden="true">L</span><span>Litopis</span></a
         >
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link" href="/litopis/examples/">Examples</a
-          ><a class="nav-link" href="/litopis/guides/">Guides</a
-          ><a class="nav-link active" href="/litopis/integrations/" aria-current="page"
-            >Integrations</a
-          ><a class="nav-link" href="/litopis/api/">API</a
-          ><a class="nav-link" href="/litopis/styling/">Styling</a
-          ><a class="nav-link" href="/litopis/accessibility/">Accessibility</a
-          ><a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
       <div class="docs-layout">
         <aside class="sidebar" aria-label="Documentation sections">
           <nav class="sidebar-nav" aria-label="Documentation navigation">
             <p class="sidebar-group">Litopis</p>
-            <a class="sidebar-link" href="/litopis/">Getting started</a
-            ><a class="sidebar-link" href="/litopis/examples/">Examples</a
-            ><a class="sidebar-link" href="/litopis/guides/">Date picker guides</a
-            ><a class="sidebar-link active" href="/litopis/integrations/" aria-current="page"
-              >Integrations</a
-            ><a class="sidebar-link" href="/litopis/api/">API reference</a
-            ><a class="sidebar-link" href="/litopis/styling/">Styling</a
-            ><a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
+            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a
+                class="sidebar-link sidebar-sublink active"
+                href="/litopis/integrations/web-components/"
+                aria-current="page"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
         <main class="vp-doc integration-doc" tabindex="-1">
@@ -54,9 +61,25 @@
           </section>
           <section id="install">
             <h2>Installation</h2>
-            <div class="language-sh vp-code-group">
-              <span class="lang">sh</span>
-              <pre><code>npm install @litopis/elements @litopis/dom</code></pre>
+            <div class="package-install" data-package-install="@litopis/elements @litopis/dom">
+              <div class="package-install-tabs" role="tablist" aria-label="Package manager">
+                <button type="button" role="tab" aria-selected="true" data-package-manager="npm">
+                  npm
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="pnpm">
+                  pnpm
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="yarn">
+                  yarn
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-package-manager="bun">
+                  Bun
+                </button>
+              </div>
+              <div class="language-sh vp-code-group" data-package-install-panel>
+                <span class="lang">sh</span>
+                <pre><code>npm install @litopis/elements @litopis/dom</code></pre>
+              </div>
             </div>
             <div class="language-ts vp-code-group">
               <span class="lang">ts</span>
@@ -69,12 +92,12 @@ import "@litopis/dom/styles/base.css";</code></pre>
             <div class="demo-block integration-demo">
               <litopis-date-picker
                 data-integration-demo="web-components"
-                calendar-mode="popover"
+                mode="popover"
                 first-day-of-week="1"
-                input-format="dd.mm.yyyy"
+                format="dd.mm.yyyy"
                 label="Web Component date"
-                show-outside-days="false"
-                target-size="comfortable"
+                outside-days="false"
+                size="comfortable"
               ></litopis-date-picker>
             </div>
           </section>
@@ -84,11 +107,30 @@ import "@litopis/dom/styles/base.css";</code></pre>
             <div class="language-html vp-code-group">
               <span class="lang">html</span>
               <pre><code>&lt;litopis-date-picker
-  calendar-mode="popover"
+  mode="popover"
   first-day-of-week="1"
-  input-format="dd.mm.yyyy"
+  close-on-select="false"
+  clear-button
+  format="dd.mm.yyyy"
   label="Start date"
-  show-today-button
+  today-button
+&gt;&lt;/litopis-date-picker&gt;</code></pre>
+            </div>
+          </section>
+          <section id="range">
+            <h2>Range</h2>
+            <p>
+              Use one <code>name</code>. Split fields submit it as <code>name[start]</code> and
+              <code>name[end]</code>.
+            </p>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;litopis-date-picker
+  selection="range"
+  layout="split"
+  name="stay"
+  start="2026-06-12"
+  end="2026-06-18"
 &gt;&lt;/litopis-date-picker&gt;</code></pre>
             </div>
           </section>
@@ -138,6 +180,7 @@ if (picker) {
             <a class="outline-link" href="#install">Installation</a
             ><a class="outline-link" href="#live-example">Example</a
             ><a class="outline-link" href="#attributes">HTML attributes</a
+            ><a class="outline-link" href="#range">Range</a
             ><a class="outline-link" href="#value-property">Value property</a
             ><a class="outline-link" href="#cdn">CDN</a
             ><a class="outline-link" href="#styling">Styling</a>

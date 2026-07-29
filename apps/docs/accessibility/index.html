@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Litopis accessibility contract." />
+    <meta name="description" content="Keyboard and accessibility support in Litopis." />
     <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
     <title>Litopis | Accessibility</title>
   </head>
@@ -14,17 +14,7 @@
           <span class="brand-mark" aria-hidden="true">L</span>
           <span>Litopis</span>
         </a>
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link" href="/litopis/examples/">Examples</a>
-          <a class="nav-link" href="/litopis/guides/">Guides</a>
-          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
-          <a class="nav-link" href="/litopis/api/">API</a>
-          <a class="nav-link" href="/litopis/styling/">Styling</a>
-          <a class="nav-link active" href="/litopis/accessibility/" aria-current="page"
-            >Accessibility</a
-          >
-          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
 
       <div class="docs-layout">
@@ -35,6 +25,20 @@
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
             <a class="sidebar-link active" href="/litopis/accessibility/" aria-current="page"
@@ -45,16 +49,12 @@
 
         <main class="vp-doc" tabindex="-1">
           <section class="page-intro">
-            <p class="eyebrow">Behavior contract</p>
             <h1>Accessibility</h1>
-            <p>
-              Keyboard, focus and announcement behavior is implemented once in the DOM binding and
-              preserved by every framework adapter.
-            </p>
+            <p>Keyboard, focus and screen-reader support for every Litopis date picker.</p>
           </section>
 
           <section id="contract">
-            <h2>What Litopis provides</h2>
+            <h2>Included accessibility support</h2>
             <ul>
               <li>One active tab stop inside the calendar grid.</li>
               <li>A labelled input with expanded, controls and invalid-state semantics.</li>
@@ -64,7 +64,7 @@
                 Selected, current, outside-month and disabled states in ARIA and
                 <code>data-*</code>.
               </li>
-              <li>Predictable focus restoration after selection or Escape.</li>
+              <li>Focus returns to the input after selection or <kbd>Escape</kbd>.</li>
             </ul>
           </section>
 
@@ -124,68 +124,39 @@
           </section>
 
           <section id="automation">
-            <h2>Release testing</h2>
-            <p>
-              Accessibility checks are part of <code>bun run check:release</code>, not a separate
-              optional audit.
-            </p>
+            <h2>How accessibility is checked</h2>
+            <p>Automated checks cover the public packages and documentation examples.</p>
             <table>
               <thead>
                 <tr>
-                  <th>Layer</th>
-                  <th>Coverage</th>
-                  <th>Status</th>
+                  <th>Check</th>
+                  <th>What it covers</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Core and DOM</td>
-                  <td>Date math, bounds, input masking, focus and selection</td>
-                  <td><strong>Automated</strong></td>
+                  <td>Unit tests</td>
+                  <td>Date limits, input masks, selection and focus behavior</td>
                 </tr>
                 <tr>
-                  <td>Real browsers</td>
-                  <td>Chromium, Firefox and WebKit keyboard flows</td>
-                  <td><strong>Automated</strong></td>
+                  <td>Browser tests</td>
+                  <td>Keyboard flows in Chromium, Firefox and WebKit</td>
                 </tr>
                 <tr>
-                  <td>Static analysis</td>
-                  <td>axe on every docs page and open picker states</td>
-                  <td><strong>Automated</strong></td>
-                </tr>
-                <tr>
-                  <td>Assistive technology</td>
-                  <td>VoiceOver, NVDA and JAWS speech and interaction</td>
-                  <td><strong>Pending</strong></td>
+                  <td>Accessibility scan</td>
+                  <td>axe checks every documentation page and open picker state</td>
                 </tr>
               </tbody>
             </table>
-          </section>
-
-          <section id="manual-status">
-            <h2>Manual status</h2>
-            <p>
-              VoiceOver, NVDA and JAWS verification is still pending. Until those combinations are
-              recorded, releases must describe accessibility support as tested automation rather
-              than universal compatibility.
-            </p>
-            <div class="note-callout">
-              <strong>No universal claim yet</strong>
-              <p>
-                The public matrix records exact browser, operating system and screen-reader
-                versions, including known issues and reproduction steps.
-              </p>
-            </div>
           </section>
         </main>
 
         <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
           <nav aria-label="Page outline">
-            <a class="outline-link" href="#contract">What Litopis provides</a>
+            <a class="outline-link" href="#contract">Included support</a>
             <a class="outline-link" href="#keyboard">Keyboard support</a>
-            <a class="outline-link" href="#automation">Release testing</a>
-            <a class="outline-link" href="#manual-status">Manual status</a>
+            <a class="outline-link" href="#automation">How it is checked</a>
           </nav>
         </aside>
       </div>
