@@ -2,6 +2,10 @@ name: Pages
 
 on:
   workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - "apps/docs/**"
 
 permissions:
   contents: read
@@ -27,6 +31,9 @@ jobs:
 
       - name: Install
         run: bun install --frozen-lockfile
+
+      - name: Build packages
+        run: bun run build:packages
 
       - name: Build docs
         run: bun run --filter @litopis/docs build
