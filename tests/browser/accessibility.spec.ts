@@ -225,7 +225,7 @@ test("keyboard users can enter, navigate, and select in the calendar grid", asyn
   await expect(focusedDay).toHaveCount(1);
 });
 
-test("homepage playground mounts one responsive range calendar and submits native endpoint values", async ({
+test("homepage playground mounts one responsive range calendar and updates native endpoint values", async ({
   page,
 }) => {
   await page.goto("./");
@@ -248,7 +248,6 @@ test("homepage playground mounts one responsive range calendar and submits nativ
   await expect(playground.locator("input[type='hidden'][name='from']")).toHaveValue("2026-06-12");
   await expect(playground.locator("input[type='hidden'][name='to']")).toHaveValue("2026-06-18");
   await expect(playground.locator(".litopis-day[data-in-range]")).toHaveCount(7);
-  await playground.getByRole("button", { name: "Inspect FormData" }).click();
   await expect(playground.locator("[data-playground-value]")).toContainText("from=2026-06-12");
   await expect(playground.locator("[data-playground-value]")).toContainText("to=2026-06-18");
 });
@@ -352,7 +351,7 @@ test("homepage playground masks a single range field and keeps its keyboard cont
   const playground = page.locator("[data-playground]");
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-layout]").selectOption("single");
-  const input = playground.getByRole("combobox", { name: "From" });
+  const input = playground.getByRole("combobox", { name: "Travel date" });
 
   await input.fill("1206202618062026");
   await expect(input).toHaveValue("12.06.2026 – 18.06.2026");
@@ -399,7 +398,7 @@ test("range highlights start and end at the center of their cells", async ({ pag
   const playground = page.locator("[data-playground]");
 
   await playground.locator("[data-playground-selection]").selectOption("range");
-  await playground.getByRole("combobox", { name: "From" }).fill("08.07.2026 – 18.07.2026");
+  await playground.getByRole("combobox", { name: "Travel date" }).fill("08.07.2026 – 18.07.2026");
 
   const endpointGeometry = await playground
     .locator(".litopis-day[data-range-start], .litopis-day[data-range-end]")
