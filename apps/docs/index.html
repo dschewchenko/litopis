@@ -65,38 +65,36 @@
 
           <section class="home-strengths" aria-label="Why Litopis">
             <div>
-              <h2>One keyboard contract</h2>
+              <h2>Keyboard interaction</h2>
               <p>Day, month and year views share focus movement, selection and range behavior.</p>
             </div>
             <div>
-              <h2>Native forms first</h2>
+              <h2>Native form support</h2>
               <p>Use one formatted field or two endpoints without inventing a form abstraction.</p>
             </div>
             <div>
-              <h2>Core before UI</h2>
-              <p>
-                Calendar state and date math stay independent of the renderer and styling layer.
-              </p>
+              <h2>Headless core</h2>
+              <p>Calendar state and date math stay independent of the DOM and CSS.</p>
             </div>
             <div>
-              <h2>Styles stay optional</h2>
-              <p>Start with the base CSS or add a focused adapter for a design system.</p>
+              <h2>Optional CSS</h2>
+              <p>Use the base stylesheet or a theme adapter for your design system.</p>
             </div>
           </section>
 
           <section class="bundle-footprint" aria-labelledby="bundle-footprint-heading">
             <div class="section-heading">
               <h2 id="bundle-footprint-heading">Bundle size</h2>
-              <p>Minified and gzip-compressed. JavaScript and CSS are measured separately.</p>
+              <p>Gzipped size from a production build. JavaScript and CSS are separate.</p>
             </div>
             <h3>JavaScript</h3>
             <div class="bundle-table-wrap">
               <table class="bundle-table">
                 <thead>
                   <tr>
-                    <th scope="col">Layer</th>
-                    <th scope="col">Gzip</th>
-                    <th scope="col">Purpose</th>
+                    <th scope="col">Package layer</th>
+                    <th scope="col">Gzipped size</th>
+                    <th scope="col">Includes</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -106,17 +104,17 @@
                     <td>Headless state, date math and keyboard navigation.</td>
                   </tr>
                   <tr>
-                    <th scope="row">DOM renderer</th>
+                    <th scope="row">DOM bindings</th>
                     <td>+11.2 kB</td>
                     <td>Accessible fields, form values and calendar DOM.</td>
                   </tr>
                   <tr>
                     <th scope="row">Web Component</th>
                     <td>+2.0 kB</td>
-                    <td>Custom-element API over the DOM renderer.</td>
+                    <td>Custom-element API over the DOM bindings.</td>
                   </tr>
                   <tr>
-                    <th scope="row">Framework adapter</th>
+                    <th scope="row">Framework bindings</th>
                     <td>+0.2–1.2 kB</td>
                     <td>React, Vue, Solid or Svelte bindings.</td>
                   </tr>
@@ -124,8 +122,8 @@
               </table>
             </div>
             <p class="bundle-note">
-              The <code>+</code> rows are incremental: DOM requires Core; components and adapters
-              require Core and DOM. Framework runtimes are not included.
+              <code>+</code> is added size. DOM bindings require Core; Web Components and framework
+              bindings require Core and DOM. Frameworks are peer dependencies.
             </p>
 
             <h3>CSS</h3>
@@ -133,19 +131,19 @@
               <table class="bundle-table">
                 <thead>
                   <tr>
-                    <th scope="col">CSS import</th>
-                    <th scope="col">Gzip</th>
-                    <th scope="col">Extra over foundation</th>
+                    <th scope="col">CSS entry point</th>
+                    <th scope="col">Gzipped size</th>
+                    <th scope="col">Added to Foundation</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <th scope="row">Foundation</th>
+                    <th scope="row">Foundation CSS</th>
                     <td>2.7 kB</td>
                     <td>—</td>
                   </tr>
                   <tr>
-                    <th scope="row">Base</th>
+                    <th scope="row">Base styles</th>
                     <td>3.0 kB</td>
                     <td>+0.3 kB</td>
                   </tr>
@@ -158,7 +156,7 @@
               </table>
             </div>
             <p class="bundle-note">
-              Import one CSS entry. Base and theme entries already include foundation.
+              Import one CSS entry point. Base styles and theme adapters include Foundation CSS.
             </p>
           </section>
 
