@@ -1,6 +1,7 @@
 # Litopis
 
-Accessible date fields, date pickers and calendar primitives for plain DOM, Web Components, React, Vue, Solid and Svelte.
+_Litopis_ is Ukrainian for “chronicle”: accessible date fields, date pickers and calendar primitives
+for plain DOM, Web Components, React, Vue, Solid and Svelte.
 
 Litopis keeps calendar math, focus movement and selection in a typed headless core, then exposes
 thin adapters for each rendering environment. JavaScript imports never load CSS.
