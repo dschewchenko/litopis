@@ -27,7 +27,8 @@
     "test": "vitest run",
     "test:browser": "playwright test",
     "test:headless": "node scripts/check-headless-core.mjs",
-    "check:release": "bun run check && bun run build:docs && bun run test:headless && bun run test:browser && bun run pack:check && bun run audit",
+    "check:release": "bun run check:release:base && bun run test:browser",
+    "check:release:base": "bun run check && bun run build:docs && bun run test:headless && bun run pack:check && bun run audit",
     "typecheck": "tsc -p tsconfig.typecheck.json --noEmit --pretty false",
     "version": "changeset version && bun install --lockfile-only"
   },
