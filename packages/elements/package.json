@@ -1,6 +1,6 @@
 {
   "name": "@litopis/elements",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Web Components for Litopis date and calendar primitives.",
   "keywords": [
     "accessibility",
@@ -39,8 +39,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@litopis/core": "^0.1.0",
-    "@litopis/dom": "^0.1.0"
+    "@litopis/core": "^0.2.0",
+    "@litopis/dom": "^0.2.0"
   },
   "engines": {
     "node": ">=22.0.0"
