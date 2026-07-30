@@ -86,39 +86,79 @@
 
           <section class="bundle-footprint" aria-labelledby="bundle-footprint-heading">
             <div class="section-heading">
-              <h2 id="bundle-footprint-heading">Small by layer</h2>
-              <p>Core: 3.9 kB gzip. Foundation: 2.8 kB; base or a theme adds 0.2–0.3 kB.</p>
+              <h2 id="bundle-footprint-heading">Bundle size</h2>
+              <p>Minified and gzip-compressed. JavaScript and CSS are measured separately.</p>
             </div>
+            <h3>JavaScript</h3>
             <div class="bundle-table-wrap">
               <table class="bundle-table">
                 <thead>
                   <tr>
-                    <th scope="col">Module</th>
-                    <th scope="col">Added to Core</th>
+                    <th scope="col">Layer</th>
+                    <th scope="col">Gzip</th>
                     <th scope="col">Purpose</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
+                    <th scope="row">Core</th>
+                    <td>3.9 kB</td>
+                    <td>Headless state, date math and keyboard navigation.</td>
+                  </tr>
+                  <tr>
                     <th scope="row">DOM renderer</th>
-                    <td>+11.0 kB</td>
+                    <td>+11.2 kB</td>
                     <td>Accessible fields, form values and calendar DOM.</td>
                   </tr>
                   <tr>
                     <th scope="row">Web Component</th>
-                    <td>+1.9 kB</td>
+                    <td>+2.0 kB</td>
                     <td>Custom-element API over the DOM renderer.</td>
                   </tr>
                   <tr>
                     <th scope="row">Framework adapter</th>
-                    <td>+0.2–0.9 kB</td>
+                    <td>+0.2–1.2 kB</td>
                     <td>React, Vue, Solid or Svelte bindings.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <p class="bundle-note">
-              Framework runtimes are not included. Tree-shaking can reduce application output.
+              The <code>+</code> rows are incremental: DOM requires Core; components and adapters
+              require Core and DOM. Framework runtimes are not included.
+            </p>
+
+            <h3>CSS</h3>
+            <div class="bundle-table-wrap">
+              <table class="bundle-table">
+                <thead>
+                  <tr>
+                    <th scope="col">CSS import</th>
+                    <th scope="col">Gzip</th>
+                    <th scope="col">Extra over foundation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Foundation</th>
+                    <td>2.7 kB</td>
+                    <td>—</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Base</th>
+                    <td>3.0 kB</td>
+                    <td>+0.3 kB</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">daisyUI, shadcn or Bootstrap</th>
+                    <td>2.9–3.0 kB</td>
+                    <td>+0.2–0.3 kB</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="bundle-note">
+              Import one CSS entry. Base and theme entries already include foundation.
             </p>
           </section>
 
