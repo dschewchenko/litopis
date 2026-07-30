@@ -53,6 +53,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1.9.0
         with:
+          commit: "chore: version packages"
           version: bun run version
           publish: bun run publish
         env:
