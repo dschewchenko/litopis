@@ -48,7 +48,7 @@ describe("createDateField", () => {
 
     expect(input?.value).toBe("06/25/2026");
     expect(field.getDate()).toEqual({ day: 25, month: 6, year: 2026 });
-    expect(field.getValue()).toBe("2026-06-25");
+    expect(field.getISOValue()).toBe("2026-06-25");
     expect(field.isValid()).toBe(true);
   });
 
@@ -68,7 +68,7 @@ describe("createDateField", () => {
 
     expect(input?.value).toBe("10.06.2026");
     expect(field.getDate()).toEqual({ day: 10, month: 6, year: 2026 });
-    expect(field.getValue()).toBe("2026-06-10");
+    expect(field.getISOValue()).toBe("2026-06-10");
     expect(field.isValid()).toBe(true);
   });
 });

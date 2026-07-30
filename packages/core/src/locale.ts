@@ -26,16 +26,18 @@ const SUNDAY_FIRST_REGIONS =
 const SATURDAY_FIRST_REGIONS = "|AF|BH|DJ|DZ|EG|IQ|IR|JO|KW|LY|OM|QA|SD|SY|";
 const FRIDAY_FIRST_REGIONS = "|MV|";
 
-export function resolveLocale(locale: string | undefined): string {
-  if (!locale) {
-    return DEFAULT_LOCALE;
-  }
+export function resolveLocale(locale?: string): string {
+  const requestedLocale = locale ?? getBrowserLocale() ?? DEFAULT_LOCALE;
 
   try {
-    return Intl.DateTimeFormat.supportedLocalesOf([locale])[0] ?? DEFAULT_LOCALE;
+    return Intl.DateTimeFormat.supportedLocalesOf([requestedLocale])[0] ?? DEFAULT_LOCALE;
   } catch {
     return DEFAULT_LOCALE;
   }
+}
+
+function getBrowserLocale(): string | undefined {
+  return typeof navigator === "undefined" ? undefined : navigator.language || undefined;
 }
 
 export function getLocaleFirstDayOfWeek(locale: string): FirstDayOfWeek {
@@ -55,10 +57,18 @@ function getNativeFirstDayOfWeek(locale: string): FirstDayOfWeek | null {
   const firstDay = weekInfo?.firstDay;
 
   if (typeof firstDay === "number" && firstDay >= 1 && firstDay <= 7) {
-    return (firstDay % 7) as FirstDayOfWeek;
+    return firstDay === 7 ? 0 : getWeekday(firstDay);
   }
 
   return null;
+}
+
+function getWeekday(value: number): FirstDayOfWeek {
+  if (value === 1 || value === 2 || value === 3 || value === 4 || value === 5 || value === 6) {
+    return value;
+  }
+
+  return 0;
 }
 
 function getLocaleRegion(locale: string): string | null {

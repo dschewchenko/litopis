@@ -14,3 +14,6 @@ import "@litopis/dom/styles/base.css";
 ```
 
 See the [React integration guide](https://dschewchenko.github.io/litopis/integrations/react/) for controlled values and controller access.
+
+Pass `selection: "range"` and `name` to `LitopisDatePicker` options for a
+synchronized native form range.

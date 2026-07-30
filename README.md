@@ -56,13 +56,13 @@ const root = document.querySelector<HTMLElement>("#date-picker");
 
 if (root) {
   const picker = createDatePicker(root, {
-    calendarMode: "popover",
-    inputFormat: "dd.mm.yyyy",
+    mode: "popover",
+    format: "dd.mm.yyyy",
     label: "Appointment date",
     locale: "uk-UA",
   });
 
-  picker.getValue(); // YYYY-MM-DD
+  picker.getISOValue(); // YYYY-MM-DD
 }
 ```
 
@@ -75,14 +75,23 @@ The Web Component IIFE includes the Litopis engine and defines `<litopis-date-pi
 <script src="https://cdn.jsdelivr.net/npm/@litopis/elements/dist/index.global.js"></script>
 
 <litopis-date-picker
-  calendar-mode="popover"
-  input-format="dd.mm.yyyy"
+  mode="popover"
+  format="dd.mm.yyyy"
   label="Start date"
   locale="uk-UA"
 ></litopis-date-picker>
 ```
 
 Pin an exact package version in production CDN URLs.
+
+## Vue ranges
+
+Bind the complete range when it is one value in application state. When a form keeps endpoints
+separately, named models map directly to those fields:
+
+```vue
+<LitopisDatePicker v-model:from="from" v-model:to="to" selection="range" layout="split" />
+```
 
 ## Packages
 

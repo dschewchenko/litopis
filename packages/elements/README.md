@@ -12,7 +12,7 @@ import "@litopis/dom/styles/base.css";
 ```
 
 ```html
-<litopis-date-picker calendar-mode="popover" label="Start date"></litopis-date-picker>
+<litopis-date-picker mode="popover" label="Start date"></litopis-date-picker>
 ```
 
 For static sites, use `dist/index.global.js` from the package together with `@litopis/dom/styles/base.css`.

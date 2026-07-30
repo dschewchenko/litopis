@@ -4,11 +4,11 @@ import type { DatePickerOptions, DateValue } from "@litopis/dom";
 export const integrationToday = getToday();
 
 export const integrationOptions: DatePickerOptions = {
-  calendarMode: "popover",
+  mode: "popover",
   firstDayOfWeek: 1,
-  inputFormat: "dd.mm.yyyy",
-  showOutsideDays: false,
-  targetSize: "comfortable",
+  format: "dd.mm.yyyy",
+  outsideDays: false,
+  size: "comfortable",
   today: integrationToday,
 };
 

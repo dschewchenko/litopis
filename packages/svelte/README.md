@@ -12,7 +12,10 @@ npm install @litopis/svelte svelte
   import "@litopis/dom/styles/base.css";
 </script>
 
-<div use:litopisDatePicker={{ calendarMode: "popover" }}></div>
+<div use:litopisDatePicker={{ mode: "popover" }}></div>
 ```
 
 See the [Svelte integration guide](https://dschewchenko.github.io/litopis/integrations/svelte/) for action options and update behavior.
+
+Pass `selection: "range"` and `name` to `litopisDatePicker` for a synchronized
+native form range.

@@ -9,13 +9,16 @@
   --litopis-border-width: var(--bs-border-width);
   --litopis-calendar-radius: var(--bs-border-radius-lg);
   --litopis-calendar-shadow: inset 0 0 0 var(--bs-border-width) var(--bs-border-color);
+  --litopis-control-size: calc(1.5em + 0.75rem + (var(--bs-border-width) * 2));
   --litopis-danger: var(--bs-danger);
   --litopis-disabled: var(--bs-tertiary-color);
   --litopis-focus-color: var(--bs-primary);
   --litopis-focus-ring: var(--bs-focus-ring-color);
+  --litopis-focus-ring-width: 0.25rem;
   --litopis-font-family: var(--bs-body-font-family);
   --litopis-font-size: var(--bs-body-font-size);
   --litopis-foreground: var(--bs-body-color);
+  --litopis-input-padding-inline: 0.75rem;
   --litopis-muted: var(--bs-tertiary-bg);
   --litopis-muted-foreground: var(--bs-secondary-color);
   --litopis-popover-shadow: var(--bs-box-shadow);

@@ -4,6 +4,7 @@ import {
   addMonths,
   addYears,
   formatDate,
+  fromLocalDate,
   getDaysInMonth,
   toIsoDate,
   toLocalDate,
@@ -18,6 +19,13 @@ describe("date utilities", () => {
       month: 1,
       year: 2,
     });
+  });
+
+  it("converts native Date values through their local calendar day", () => {
+    const value = fromLocalDate(new Date(2024, 1, 29, 23, 45));
+
+    expect(value).toEqual({ day: 29, month: 2, year: 2024 });
+    expect(() => fromLocalDate(new Date("invalid"))).toThrow("Date must be valid.");
   });
 
   it("calculates month lengths across the supported range", () => {

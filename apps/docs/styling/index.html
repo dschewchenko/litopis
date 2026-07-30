@@ -14,15 +14,7 @@
           <span class="brand-mark" aria-hidden="true">L</span>
           <span>Litopis</span>
         </a>
-        <nav class="top-nav" aria-label="Main navigation">
-          <a class="nav-link" href="/litopis/examples/">Examples</a>
-          <a class="nav-link" href="/litopis/guides/">Guides</a>
-          <a class="nav-link" href="/litopis/integrations/">Integrations</a>
-          <a class="nav-link" href="/litopis/api/">API</a>
-          <a class="nav-link active" href="/litopis/styling/" aria-current="page">Styling</a>
-          <a class="nav-link" href="/litopis/accessibility/">Accessibility</a>
-          <a class="nav-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
-        </nav>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
       </header>
 
       <div class="docs-layout">
@@ -33,6 +25,20 @@
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
             <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link active" href="/litopis/styling/" aria-current="page">Styling</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
@@ -41,28 +47,110 @@
 
         <main class="vp-doc" tabindex="-1">
           <section class="page-intro">
-            <p class="eyebrow">CSS architecture</p>
+            <p class="eyebrow">Make it yours</p>
             <h1>Styling</h1>
-            <p>
-              Start fully unstyled, use a small neutral base, or map Litopis to an existing design
-              system without changing behavior or generated markup.
-            </p>
+            <p>Choose Base, Foundation or an adapter for your UI library.</p>
+          </section>
+
+          <section id="theme-playground" class="theme-playground-section">
+            <h2>Theme playground</h2>
+            <p>Select a stylesheet to see its field and calendar styles.</p>
+            <div class="theme-playground" data-theme-playground data-style-theme="foundation">
+              <div class="theme-playground-preview">
+                <div data-theme-picker></div>
+              </div>
+              <div class="theme-playground-tabs" role="tablist" aria-label="Styling layer">
+                <button
+                  id="theme-foundation-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="theme-instructions"
+                  aria-selected="true"
+                  data-style-theme-tab="foundation"
+                >
+                  Foundation
+                </button>
+                <button
+                  id="theme-base-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="theme-instructions"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-style-theme-tab="base"
+                >
+                  Base
+                </button>
+                <button
+                  id="theme-daisyui-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="theme-instructions"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-style-theme-tab="daisyui"
+                >
+                  daisyUI
+                </button>
+                <button
+                  id="theme-shadcn-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="theme-instructions"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-style-theme-tab="shadcn"
+                >
+                  shadcn
+                </button>
+                <button
+                  id="theme-bootstrap-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="theme-instructions"
+                  aria-selected="false"
+                  tabindex="-1"
+                  data-style-theme-tab="bootstrap"
+                >
+                  Bootstrap
+                </button>
+              </div>
+              <div
+                id="theme-instructions"
+                class="theme-playground-instructions"
+                role="tabpanel"
+                aria-labelledby="theme-foundation-tab"
+              >
+                <p data-theme-description>
+                  Foundation supplies the calendar layout. Set the <code>--litopis-*</code>
+                  variables to match your colours, spacing and type scale.
+                </p>
+                <div class="language-css vp-code-group">
+                  <span class="lang">css</span>
+                  <pre><code data-theme-code>@import "@litopis/dom/styles/foundation.css";
+
+.litopis {
+  --litopis-accent: var(--brand);
+  --litopis-background: var(--surface);
+}</code></pre>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section id="base-styles">
             <h2>Unstyled by default</h2>
             <p>
-              Importing Litopis JavaScript adds behavior and accessible semantics only. It never
-              loads CSS, so the same DOM anatomy can be the foundation of your own design system.
+              Importing Litopis JavaScript adds interaction and accessible semantics, not CSS. Add
+              your own styles when the picker needs to follow an existing design system.
             </p>
           </section>
 
           <section id="base-stylesheet">
             <h2>Four styling layers</h2>
             <p>
-              Choose exactly one stylesheet. The base is ready to use; the foundation is for a
-              design system that wants complete control; adapters consume variables already provided
-              by the host UI library.
+              Choose one stylesheet. Base gives you a neutral default; Foundation lets you define
+              the tokens yourself; adapters match the theme variables from a supported UI library.
             </p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
@@ -92,11 +180,10 @@
           </section>
 
           <section id="tokens">
-            <h2>Token contract</h2>
+            <h2>CSS variables</h2>
             <p>
-              Core tokens cover theme colors, borders, radii and elevation. Advanced tokens let a
-              host system change geometry, type, interaction and individual surfaces without
-              replacing the structural CSS.
+              Use these variables for colours, borders, radius, spacing and motion. They let you
+              tune the picker without replacing its stylesheet.
             </p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
@@ -120,6 +207,23 @@
   --litopis-calendar-background: var(--litopis-background);
   --litopis-hover-background: var(--litopis-muted);
   --litopis-selected-background: var(--litopis-accent);
+}</code></pre>
+            </div>
+            <p>
+              The default width follows <code>panels</code>: one calendar is 360px and two are
+              capped at 720px. Override the same token when the host layout needs another responsive
+              breakpoint.
+            </p>
+            <div class="language-css vp-code-group">
+              <span class="lang">css</span>
+              <pre><code>.travel-picker[data-panels="2"] {
+  --litopis-width: 720px;
+}
+
+@media (max-width: 42rem) {
+  .travel-picker[data-panels="auto"] {
+    --litopis-width: 360px;
+  }
 }</code></pre>
             </div>
             <table>
@@ -187,8 +291,7 @@
           <section id="anatomy">
             <h2>Anatomy</h2>
             <p>
-              The default DOM output exposes predictable class names and data attributes. These
-              selectors are the styling contract, not implementation details.
+              Use these classes and <code>data-*</code> states when a CSS variable is not enough.
             </p>
             <div class="demo-block compact-demo">
               <div data-litopis-picker="styling"></div>
@@ -196,8 +299,8 @@
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
               <pre><code>.litopis
-.litopis[data-calendar-mode="popover"]
-.litopis[data-target-size="comfortable"]
+.litopis[data-mode="popover"]
+.litopis[data-size="comfortable"]
 .litopis-input
 .litopis-grid
 .litopis-day[data-selected]
@@ -216,7 +319,7 @@
             </div>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
-              <pre><code>.litopis[data-calendar-mode="popover"] .litopis-calendar {
+              <pre><code>.litopis[data-mode="popover"] .litopis-calendar {
   position: fixed;
   max-width: calc(100vw - var(--litopis-calendar-viewport-gap));
   z-index: var(--litopis-popover-z-index);
@@ -227,7 +330,7 @@
 }
 
 @supports (top: anchor(bottom)) {
-  .litopis[data-calendar-mode="popover"] .litopis-calendar {
+  .litopis[data-mode="popover"] .litopis-calendar {
     top: anchor(bottom);
     left: anchor(left);
     margin-top: var(--litopis-popover-anchor-gap);
@@ -240,9 +343,9 @@
           <section id="theme-adapters">
             <h2>Theme adapters</h2>
             <p>
-              Each adapter is a small CSS mapping. It adds no runtime dependency, does not require
-              another calendar, and automatically follows the host system's light, dark and custom
-              themes because it reads semantic variables rather than fixed colors.
+              Each adapter matches Litopis controls to the variables already used by the selected UI
+              library, including its field radius, borders, focus treatment and colour modes. It
+              adds no JavaScript.
             </p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
@@ -270,20 +373,12 @@
           </section>
 
           <section id="override-safely">
-            <h2>Override safely</h2>
+            <h2>Overrides</h2>
             <p>
-              Prefer <code>--litopis-*</code> variables for theme and geometry changes. Use stable
-              <code>.litopis-*</code> selectors and <code>data-*</code> states when a design needs a
-              structural exception. Litopis never emits daisyUI, shadcn, Bootstrap or
-              third-party-calendar classes, so host styles remain explicit.
+              Use <code>--litopis-*</code> variables for colour and size. Use
+              <code>.litopis-*</code> selectors and <code>data-*</code> states for structural
+              changes. Litopis does not emit daisyUI, shadcn or Bootstrap classes.
             </p>
-            <div class="note-callout">
-              <strong>Behavior does not depend on CSS</strong>
-              <p>
-                Removing every Litopis stylesheet leaves input parsing, keyboard navigation,
-                selection and controller methods intact.
-              </p>
-            </div>
           </section>
         </main>
 
@@ -291,12 +386,13 @@
           <p>On this page</p>
           <nav aria-label="Page outline">
             <a class="outline-link" href="#base-styles">Unstyled by default</a>
+            <a class="outline-link" href="#theme-playground">Theme playground</a>
             <a class="outline-link" href="#base-stylesheet">Styling layers</a>
-            <a class="outline-link" href="#tokens">Token contract</a>
+            <a class="outline-link" href="#tokens">CSS variables</a>
             <a class="outline-link" href="#anatomy">Anatomy</a>
             <a class="outline-link" href="#popover-css">Popover CSS</a>
             <a class="outline-link" href="#theme-adapters">Theme adapters</a>
-            <a class="outline-link" href="#override-safely">Override safely</a>
+            <a class="outline-link" href="#override-safely">Overrides</a>
           </nav>
         </aside>
       </div>
