@@ -85,79 +85,53 @@
           <section class="bundle-footprint" aria-labelledby="bundle-footprint-heading">
             <div class="section-heading">
               <h2 id="bundle-footprint-heading">Bundle size</h2>
-              <p>Gzipped size from a production build. JavaScript and CSS are separate.</p>
+              <p>Gzipped size from a production build.</p>
             </div>
-            <h3>JavaScript</h3>
-            <div class="bundle-table-wrap">
-              <table class="bundle-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Package layer</th>
-                    <th scope="col">Gzipped size</th>
-                    <th scope="col">Includes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">Core</th>
-                    <td>3.9 kB</td>
-                    <td>Headless state, date math and keyboard navigation.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">DOM bindings</th>
-                    <td>+11.2 kB</td>
-                    <td>Accessible fields, form values and calendar DOM.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Web Component</th>
-                    <td>+2.0 kB</td>
-                    <td>Custom-element API over the DOM bindings.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Framework bindings</th>
-                    <td>+0.2–1.2 kB</td>
-                    <td>React, Vue, Solid or Svelte bindings.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="bundle-note">
-              <code>+</code> is added size. DOM bindings require Core; Web Components and framework
-              bindings require Core and DOM. Frameworks are peer dependencies.
-            </p>
+            <div class="bundle-columns">
+              <section class="bundle-group" aria-labelledby="bundle-javascript-heading">
+                <h3 id="bundle-javascript-heading">JavaScript</h3>
+                <ul class="bundle-list">
+                  <li>
+                    <strong>Core</strong><span>3.9 kB</span>
+                    <p>Headless state, date math and keyboard navigation.</p>
+                  </li>
+                  <li>
+                    <strong>DOM bindings</strong><span>+11.2 kB</span>
+                    <p>Accessible fields, form values and calendar DOM.</p>
+                  </li>
+                  <li>
+                    <strong>Web Components</strong><span>+2.0 kB</span>
+                    <p>Custom-element API over the DOM bindings.</p>
+                  </li>
+                  <li>
+                    <strong>Framework bindings</strong><span>+0.2–1.2 kB</span>
+                    <p>React, Vue, Solid and Svelte bindings.</p>
+                  </li>
+                </ul>
+                <p class="bundle-note">
+                  <code>+</code> is added size. Frameworks are peer dependencies.
+                </p>
+              </section>
 
-            <h3>CSS</h3>
-            <div class="bundle-table-wrap">
-              <table class="bundle-table">
-                <thead>
-                  <tr>
-                    <th scope="col">CSS entry point</th>
-                    <th scope="col">Gzipped size</th>
-                    <th scope="col">Added to Foundation</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">Foundation CSS</th>
-                    <td>2.7 kB</td>
-                    <td>—</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Base styles</th>
-                    <td>3.0 kB</td>
-                    <td>+0.3 kB</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">daisyUI, shadcn or Bootstrap</th>
-                    <td>2.9–3.0 kB</td>
-                    <td>+0.2–0.3 kB</td>
-                  </tr>
-                </tbody>
-              </table>
+              <section class="bundle-group" aria-labelledby="bundle-css-heading">
+                <h3 id="bundle-css-heading">CSS</h3>
+                <ul class="bundle-list">
+                  <li>
+                    <strong>Foundation</strong><span>2.7 kB</span>
+                    <p>CSS variables and calendar anatomy.</p>
+                  </li>
+                  <li>
+                    <strong>Base styles</strong><span>+0.3 kB</span>
+                    <p>Neutral default styles.</p>
+                  </li>
+                  <li>
+                    <strong>Theme adapters</strong><span>+0.2–0.3 kB</span>
+                    <p>daisyUI, shadcn and Bootstrap.</p>
+                  </li>
+                </ul>
+                <p class="bundle-note">Import one CSS entry point.</p>
+              </section>
             </div>
-            <p class="bundle-note">
-              Import one CSS entry point. Base styles and theme adapters include Foundation CSS.
-            </p>
           </section>
 
           <section id="quick-start" class="workbench">
