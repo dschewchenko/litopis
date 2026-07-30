@@ -6,6 +6,12 @@ on:
     paths:
       - ".changeset/**"
       - "packages/**"
+      - "package.json"
+      - "bun.lock"
+      - "scripts/check-package-manifests.mjs"
+      - "tsconfig.base.json"
+      - "tsconfig.build.json"
+  workflow_dispatch:
 
 concurrency:
   group: release
