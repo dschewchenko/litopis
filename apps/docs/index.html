@@ -65,61 +65,73 @@
 
           <section class="home-strengths" aria-label="Why Litopis">
             <div>
-              <h2>One keyboard contract</h2>
+              <h2>Keyboard interaction</h2>
               <p>Day, month and year views share focus movement, selection and range behavior.</p>
             </div>
             <div>
-              <h2>Native forms first</h2>
+              <h2>Native form support</h2>
               <p>Use one formatted field or two endpoints without inventing a form abstraction.</p>
             </div>
             <div>
-              <h2>Core before UI</h2>
-              <p>
-                Calendar state and date math stay independent of the renderer and styling layer.
-              </p>
+              <h2>Headless core</h2>
+              <p>Calendar state and date math stay independent of the DOM and CSS.</p>
             </div>
             <div>
-              <h2>Styles stay optional</h2>
-              <p>Start with the base CSS or add a focused adapter for a design system.</p>
+              <h2>Optional CSS</h2>
+              <p>Use the base stylesheet or a theme adapter for your design system.</p>
             </div>
           </section>
 
           <section class="bundle-footprint" aria-labelledby="bundle-footprint-heading">
             <div class="section-heading">
-              <h2 id="bundle-footprint-heading">Small by layer</h2>
-              <p>Core: 3.9 kB gzip. Foundation: 2.8 kB; base or a theme adds 0.2–0.3 kB.</p>
+              <h2 id="bundle-footprint-heading">Bundle size</h2>
+              <p>Gzipped size from a production build.</p>
             </div>
-            <div class="bundle-table-wrap">
-              <table class="bundle-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Module</th>
-                    <th scope="col">Added to Core</th>
-                    <th scope="col">Purpose</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">DOM renderer</th>
-                    <td>+11.0 kB</td>
-                    <td>Accessible fields, form values and calendar DOM.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Web Component</th>
-                    <td>+1.9 kB</td>
-                    <td>Custom-element API over the DOM renderer.</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Framework adapter</th>
-                    <td>+0.2–0.9 kB</td>
-                    <td>React, Vue, Solid or Svelte bindings.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="bundle-columns">
+              <section class="bundle-group" aria-labelledby="bundle-javascript-heading">
+                <h3 id="bundle-javascript-heading">JavaScript</h3>
+                <ul class="bundle-list">
+                  <li>
+                    <strong>Core</strong><span>3.9 kB</span>
+                    <p>Headless state, date math and keyboard navigation.</p>
+                  </li>
+                  <li>
+                    <strong>DOM bindings</strong><span>+11.2 kB</span>
+                    <p>Accessible fields, form values and calendar DOM.</p>
+                  </li>
+                  <li>
+                    <strong>Web Components</strong><span>+2.0 kB</span>
+                    <p>Custom-element API over the DOM bindings.</p>
+                  </li>
+                  <li>
+                    <strong>Framework bindings</strong><span>+0.2–1.2 kB</span>
+                    <p>React, Vue, Solid and Svelte bindings.</p>
+                  </li>
+                </ul>
+                <p class="bundle-note">
+                  <code>+</code> is added size. Frameworks are peer dependencies.
+                </p>
+              </section>
+
+              <section class="bundle-group" aria-labelledby="bundle-css-heading">
+                <h3 id="bundle-css-heading">CSS</h3>
+                <ul class="bundle-list">
+                  <li>
+                    <strong>Foundation</strong><span>2.7 kB</span>
+                    <p>CSS variables and calendar anatomy.</p>
+                  </li>
+                  <li>
+                    <strong>Base styles</strong><span>+0.3 kB</span>
+                    <p>Neutral default styles.</p>
+                  </li>
+                  <li>
+                    <strong>Theme adapters</strong><span>+0.2–0.3 kB</span>
+                    <p>daisyUI, shadcn and Bootstrap.</p>
+                  </li>
+                </ul>
+                <p class="bundle-note">Import one CSS entry point.</p>
+              </section>
             </div>
-            <p class="bundle-note">
-              Framework runtimes are not included. Tree-shaking can reduce application output.
-            </p>
           </section>
 
           <section id="quick-start" class="workbench">

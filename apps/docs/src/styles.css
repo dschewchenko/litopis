@@ -628,45 +628,58 @@ input {
   margin-bottom: 16px;
 }
 
-.bundle-table-wrap {
-  overflow-x: auto;
+.bundle-columns {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.bundle-table {
-  border-collapse: collapse;
+.bundle-group h3 {
   font-size: 14px;
   line-height: 21px;
-  min-width: 500px;
-  width: 100%;
+  margin: 0 0 6px;
 }
 
-.bundle-table th,
-.bundle-table td {
-  border-bottom: 1px solid var(--vp-c-divider);
-  padding: 11px 12px;
-  text-align: left;
-  vertical-align: top;
-}
-
-.bundle-table thead th {
+.bundle-list {
   border-top: 1px solid var(--vp-c-divider);
-  color: var(--vp-c-text-2);
-  font-size: 12px;
-  font-weight: 650;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.bundle-table tbody th {
+.bundle-list li {
+  border-bottom: 1px solid var(--vp-c-divider);
+  display: grid;
+  gap: 1px 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 8px 0;
+}
+
+.bundle-list strong {
   color: var(--vp-c-text-1);
+  font-size: 14px;
   font-weight: 650;
+  line-height: 21px;
 }
 
-.bundle-table td:nth-child(2) {
+.bundle-list span {
+  color: var(--vp-c-text-1);
+  font-size: 14px;
+  line-height: 21px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
+.bundle-list p {
+  font-size: 13px !important;
+  grid-column: 1 / -1;
+  line-height: 20px !important;
+}
+
 .bundle-note {
-  margin-top: 12px !important;
+  font-size: 13px !important;
+  line-height: 20px !important;
+  margin-top: 8px !important;
 }
 
 .hero-actions {
@@ -1422,6 +1435,11 @@ litopis-date-picker {
 
   .home-strengths {
     gap: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  .bundle-columns {
+    gap: 24px;
     grid-template-columns: 1fr;
   }
 
