@@ -1,5 +1,16 @@
 # @litopis/solid
 
+## 0.2.0
+
+### Minor Changes
+
+- 918b70b: Add single and range selection for days, months and years across every renderer and framework adapter.
+
+### Patch Changes
+
+- Updated dependencies [918b70b]
+  - @litopis/dom@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

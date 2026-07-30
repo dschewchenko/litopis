@@ -1,6 +1,6 @@
 {
   "name": "@litopis/svelte",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Svelte actions for Litopis date and calendar primitives.",
   "keywords": [
     "accessibility",
@@ -37,7 +37,7 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@litopis/dom": "^0.1.0"
+    "@litopis/dom": "^0.2.0"
   },
   "peerDependencies": {
     "svelte": ">=4.0.0"

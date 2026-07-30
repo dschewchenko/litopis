@@ -1,6 +1,6 @@
 {
   "name": "@litopis/dom",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DOM bindings for Litopis date and calendar primitives.",
   "keywords": [
     "accessibility",
@@ -47,7 +47,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@litopis/core": "^0.1.0"
+    "@litopis/core": "^0.2.0"
   },
   "engines": {
     "node": ">=22.0.0"
