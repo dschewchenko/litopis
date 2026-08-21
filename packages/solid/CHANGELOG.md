@@ -1,5 +1,16 @@
 # @litopis/solid
 
+## 0.3.0
+
+### Minor Changes
+
+- 92b9991: Allow date pickers to use consumer-owned input elements through framework-native slots and children.
+
+### Patch Changes
+
+- Updated dependencies [92b9991]
+  - @litopis/dom@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
