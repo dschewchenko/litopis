@@ -1174,6 +1174,14 @@ export function createDatePicker<
     openCalendar();
   }
 
+  function onInputClick(): void {
+    if (supportsNativePopover() && !isNativePopoverOpen()) {
+      calendarOpen = false;
+    }
+
+    openCalendar();
+  }
+
   function onInputBlur(
     event: FocusEvent,
     target: HTMLInputElement = input,
@@ -1429,12 +1437,12 @@ export function createDatePicker<
   nextMonthButton.addEventListener("click", onNextMonthClick);
   todayButton.addEventListener("click", onTodayClick);
   clearButton.addEventListener("click", onClearClick);
-  input.addEventListener("click", onInputFocus);
+  input.addEventListener("click", onInputClick);
   input.addEventListener("blur", onInputBlur);
   input.addEventListener("focus", onInputFocus);
   input.addEventListener("input", onStartInput);
   input.addEventListener("keydown", onInputKeydown);
-  endInput.addEventListener("click", onInputFocus);
+  endInput.addEventListener("click", onInputClick);
   endInput.addEventListener("blur", onEndInputBlur);
   endInput.addEventListener("focus", onInputFocus);
   endInput.addEventListener("input", onEndInput);
@@ -1461,12 +1469,12 @@ export function createDatePicker<
       nextMonthButton.removeEventListener("click", onNextMonthClick);
       todayButton.removeEventListener("click", onTodayClick);
       clearButton.removeEventListener("click", onClearClick);
-      input.removeEventListener("click", onInputFocus);
+      input.removeEventListener("click", onInputClick);
       input.removeEventListener("blur", onInputBlur);
       input.removeEventListener("focus", onInputFocus);
       input.removeEventListener("input", onStartInput);
       input.removeEventListener("keydown", onInputKeydown);
-      endInput.removeEventListener("click", onInputFocus);
+      endInput.removeEventListener("click", onInputClick);
       endInput.removeEventListener("blur", onEndInputBlur);
       endInput.removeEventListener("focus", onInputFocus);
       endInput.removeEventListener("input", onEndInput);

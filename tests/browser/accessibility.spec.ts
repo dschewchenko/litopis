@@ -263,21 +263,33 @@ test("split range fields complete from one open calendar", async ({ page }) => {
   const from = playground.getByRole("combobox", { name: "From" });
   const to = playground.getByRole("combobox", { name: "To" });
   await from.click();
-  await playground.locator(".litopis-day[data-iso-date='2026-07-12'] button").click();
+  const primaryGrid = playground.locator(".litopis-grid:not(.litopis-grid-secondary)");
+  const startCell = primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-12']")
+    .first();
+  const endCell = primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-18']")
+    .first();
+  const startIso = await startCell.getAttribute("data-iso-date");
+  const endIso = await endCell.getAttribute("data-iso-date");
 
-  await expect(from).toHaveValue("12.07.2026");
+  expect(startIso).not.toBeNull();
+  expect(endIso).not.toBeNull();
+  await startCell.getByRole("button").click();
+
+  await expect(from).toHaveValue(startIso!.split("-").reverse().join("."));
   await expect(to).toHaveValue("");
   await expect(playground.locator(".litopis")).toHaveAttribute("data-calendar-open", "true");
   await expect(playground.locator(".litopis")).toHaveAttribute("data-range-complete", "false");
-  const pendingRangeContent = await playground
-    .locator(".litopis-day[data-iso-date='2026-07-12']")
-    .evaluate((cell) => getComputedStyle(cell, "::before").content);
+  const pendingRangeContent = await startCell.evaluate(
+    (cell) => getComputedStyle(cell, "::before").content,
+  );
   expect(pendingRangeContent).toBe("none");
 
-  await playground.locator(".litopis-day[data-iso-date='2026-07-18'] button").click();
+  await endCell.getByRole("button").click();
 
-  await expect(from).toHaveValue("12.07.2026");
-  await expect(to).toHaveValue("18.07.2026");
+  await expect(from).toHaveValue(startIso!.split("-").reverse().join("."));
+  await expect(to).toHaveValue(endIso!.split("-").reverse().join("."));
   await expect(playground.locator(".litopis")).toHaveAttribute("data-calendar-open", "false");
   await expect(playground.locator(".litopis")).toHaveAttribute("data-range-complete", "true");
 });
@@ -291,8 +303,13 @@ test("playground can keep its popover open and clear the selected range", async 
   await playground.locator("[data-playground-calendar]").selectOption("popover");
   await playground.locator("[data-playground-close-on-select]").uncheck();
   await playground.getByRole("combobox", { name: "From" }).click();
-  await playground.locator(".litopis-day[data-iso-date='2026-07-12'] button").click();
-  await playground.locator(".litopis-day[data-iso-date='2026-07-18'] button").click();
+  const primaryGrid = playground.locator(".litopis-grid:not(.litopis-grid-secondary)");
+  await primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-12'] button")
+    .click();
+  await primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-18'] button")
+    .click();
 
   await expect(playground.locator(".litopis")).toHaveAttribute("data-calendar-open", "true");
   await playground.getByRole("button", { name: "Clear" }).click();
@@ -319,17 +336,32 @@ test("playground uses the browser locale in auto mode and exposes calendar setti
   const playground = page.locator("[data-playground]");
   const locale = playground.locator("[data-playground-locale]");
   const caption = playground.locator(".litopis-caption-label");
-  const browserCaption = await page.evaluate(() =>
-    new Intl.DateTimeFormat(navigator.language, { month: "long", year: "numeric" }).format(
-      new Date(2026, 6, 1),
-    ),
+  const todayIso = await playground
+    .locator(".litopis-day[data-today]")
+    .first()
+    .getAttribute("data-iso-date");
+
+  expect(todayIso).not.toBeNull();
+  const browserCaption = await page.evaluate(
+    (isoDate) =>
+      new Intl.DateTimeFormat(navigator.language, { month: "long", year: "numeric" }).format(
+        new Date(`${isoDate}T12:00:00`),
+      ),
+    todayIso!,
+  );
+  const englishCaption = await page.evaluate(
+    (isoDate) =>
+      new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(
+        new Date(`${isoDate}T12:00:00`),
+      ),
+    todayIso!,
   );
 
   await expect(locale).toHaveValue("auto");
   await expect(caption).toHaveText(browserCaption);
 
   await locale.fill("en-US");
-  await expect(caption).toHaveText("July 2026");
+  await expect(caption).toHaveText(englishCaption);
 
   await locale.fill("auto");
   await playground.locator("[data-playground-first-day]").selectOption("0");
@@ -499,8 +531,8 @@ test("Escape closes the popover and restores focus to its input", async ({ page 
 
 test("comfortable targets are at least 44 by 44 CSS pixels", async ({ page }) => {
   await page.goto("./guides/");
-  const input = page.getByRole("combobox", { name: "Departure date" });
-  const picker = input.locator("..");
+  const picker = page.locator("[data-litopis-picker='popover']");
+  const input = picker.getByRole("combobox", { name: "Departure date" });
 
   await input.click();
   const dayButton = picker.locator(".litopis-day-button").first();
@@ -517,8 +549,8 @@ test("open popover and month selection states have no detectable violations", as
   test.setTimeout(extendedAccessibilityTimeout);
 
   await page.goto("./guides/");
-  const input = page.getByRole("combobox", { name: "Departure date" });
-  const picker = input.locator("..");
+  const picker = page.locator("[data-litopis-picker='popover']");
+  const input = picker.getByRole("combobox", { name: "Departure date" });
 
   await input.click();
   await picker.getByRole("button", { name: "Choose month and year" }).click();
