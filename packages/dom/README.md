@@ -20,6 +20,19 @@ const picker = createDatePicker(document.querySelector("#picker")!, {
 
 The controller returns an ISO `YYYY-MM-DD` value through `picker.getISOValue()`.
 
+## Custom input
+
+Place an input directly inside the picker root with `slot="input"`. Litopis keeps the same element,
+adds its behavior and accessibility attributes, and preserves your classes and placeholder.
+
+```html
+<div id="picker">
+  <input slot="input" class="my-input" placeholder="Choose a date" />
+</div>
+```
+
+For a split range, add a second input with `slot="end-input"`.
+
 ## Date ranges and forms
 
 Range selection stays on `createDatePicker`. Use `selection: "range"` with `name` for two native

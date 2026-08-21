@@ -1,10 +1,11 @@
-import { createEffect, onCleanup, onMount, type JSX } from "solid-js";
+import { children, createEffect, onCleanup, onMount, type JSX } from "solid-js";
 import { createDatePicker, type DatePickerController } from "@litopis/dom";
 import type { DatePickerOptions, DateValue } from "@litopis/dom";
 
 export type { DateValue as LitopisDateValue } from "@litopis/dom";
 
 export interface LitopisDatePickerProps extends Omit<DatePickerOptions, "selected"> {
+  readonly children?: JSX.Element;
   readonly class?: string;
   readonly controllerRef?: (controller: DatePickerController | null) => void;
   readonly value?: DateValue | null;
@@ -12,8 +13,13 @@ export interface LitopisDatePickerProps extends Omit<DatePickerOptions, "selecte
 
 export function LitopisDatePicker(props: LitopisDatePickerProps): JSX.Element {
   const root = document.createElement("div");
+  const resolvedChildren = children(() => props.children);
   let controller: DatePickerController | null = null;
   let appliedClassNames: string[] = [];
+
+  for (const child of resolvedChildren.toArray()) {
+    if (child instanceof Node) root.append(child);
+  }
 
   onMount(() => {
     const { class: className, controllerRef, value, ...options } = props;

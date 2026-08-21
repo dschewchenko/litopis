@@ -5,6 +5,30 @@ import type { LitopisDatePickerModelValue, LitopisDatePickerRangeEndpoint } from
 import { LitopisDatePicker } from "./index";
 
 describe("LitopisDatePicker for Vue", () => {
+  it("uses the input slot", async () => {
+    const host = document.createElement("div");
+    const app = createApp({
+      render: () =>
+        h(
+          LitopisDatePicker,
+          { modelValue: { day: 25, month: 6, year: 2026 } },
+          {
+            input: () => h("input", { class: "custom-input", placeholder: "Choose a date" }),
+          },
+        ),
+    });
+
+    app.mount(host);
+    await nextTick();
+
+    const input = host.querySelector<HTMLInputElement>(".custom-input");
+    expect(input?.classList.contains("litopis-input")).toBe(true);
+    expect(input?.getAttribute("slot")).toBe("input");
+    expect(input?.placeholder).toBe("Choose a date");
+    expect(input?.value).toBe("2026-06-25");
+    app.unmount();
+  });
+
   it("mounts the shared interactive picker contract", async () => {
     const host = document.createElement("div");
     const range = ref<DateRange>({

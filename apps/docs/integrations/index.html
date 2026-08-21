@@ -104,6 +104,16 @@ const picker = createDatePicker(root, {
 picker.getISOValue();</code></pre>
             </div>
             <p>
+              To use your own field, place an input directly inside the root with
+              <code>slot="input"</code> before calling <code>createDatePicker()</code>.
+            </p>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;div id="picker"&gt;
+  &lt;input slot="input" class="my-input" placeholder="Choose a date" /&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <p>
               See the <a href="/litopis/api/">API reference</a> for options and controller methods.
             </p>
           </section>

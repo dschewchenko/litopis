@@ -44,6 +44,27 @@ describe("LitopisDatePickerElement", () => {
     element.remove();
   });
 
+  it("uses a slotted input across reconnects", () => {
+    defineLitopisElements();
+    const element = document.createElement("litopis-date-picker") as TestLitopisDatePickerElement;
+    const input = document.createElement("input");
+    input.className = "custom-input";
+    input.setAttribute("slot", "input");
+    element.append(input);
+
+    document.body.append(element);
+
+    expect(element.querySelector<HTMLInputElement>(".litopis-input")).toBe(input);
+    expect(input.classList.contains("custom-input")).toBe(true);
+
+    element.remove();
+    expect(element.querySelector("[slot='input']")).toBe(input);
+
+    document.body.append(element);
+    expect(element.querySelector<HTMLInputElement>(".litopis-input")).toBe(input);
+    element.remove();
+  });
+
   it("accepts the initial value attribute and later attribute updates", () => {
     defineLitopisElements();
     const element = document.createElement("litopis-date-picker") as TestLitopisDatePickerElement;

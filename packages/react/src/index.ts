@@ -1,10 +1,12 @@
 import { createElement, forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import type { ReactNode } from "react";
 import { createDatePicker, type DatePickerController } from "@litopis/dom";
 import type { DatePickerOptions, DateValue } from "@litopis/dom";
 
 export type { DateValue as LitopisDateValue } from "@litopis/dom";
 
 export interface LitopisDatePickerProps extends Omit<DatePickerOptions, "selected"> {
+  readonly children?: ReactNode;
   readonly className?: string;
   readonly controllerRef?: (controller: DatePickerController | null) => void;
   readonly value?: DateValue | null;
@@ -12,7 +14,7 @@ export interface LitopisDatePickerProps extends Omit<DatePickerOptions, "selecte
 
 export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePickerProps>(
   function LitopisDatePicker(props, forwardedRef) {
-    const { className, controllerRef, value, ...pickerOptions } = props;
+    const { children, className, controllerRef, value, ...pickerOptions } = props;
     const rootRef = useRef<HTMLDivElement | null>(null);
     const controllerRefState = useRef<DatePickerController | null>(null);
     const handleRef = useRef<DatePickerController>({
@@ -91,7 +93,7 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
       controllerRefState.current?.setDate(value ?? null);
     }, [value]);
 
-    return createElement("div", { className, ref: rootRef });
+    return createElement("div", { className, ref: rootRef }, children);
 
     function getPickerOptions(selected: DateValue | null): DatePickerOptions {
       return {

@@ -2,6 +2,79 @@ import { describe, expect, it } from "vitest";
 import { createDatePicker } from "./create-date-picker";
 
 describe("createDatePicker", () => {
+  it("uses and restores supplied input slots", () => {
+    const root = document.createElement("div");
+    const input = document.createElement("input");
+    input.className = "custom-input";
+    input.id = "appointment-date";
+    input.name = "visible-date";
+    input.placeholder = "Choose a date";
+    input.setAttribute("aria-describedby", "appointment-help");
+    input.setAttribute("slot", "input");
+    root.append(input);
+    const changes: unknown[] = [];
+
+    const picker = createDatePicker(root, {
+      mode: "popover",
+      onValueChange: (value) => changes.push(value),
+      selected: { day: 25, month: 6, year: 2026 },
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    expect(root.querySelector<HTMLInputElement>(".litopis-input")).toBe(input);
+    expect(input.classList.contains("custom-input")).toBe(true);
+    expect(input.id).toBe("appointment-date");
+    expect(input.name).toBe("");
+    expect(input.placeholder).toBe("Choose a date");
+    expect(input.value).toBe("2026-06-25");
+    expect(input.getAttribute("aria-describedby")).toContain("appointment-help");
+    input.click();
+    expect(root.dataset.calendarOpen).toBe("true");
+
+    input.value = "20260626";
+    input.setSelectionRange(8, 8);
+    input.dispatchEvent(new Event("input"));
+    expect(changes).toEqual([{ day: 26, month: 6, year: 2026 }]);
+    expect(input.value).toBe("2026-06-26");
+    expect(picker.getISOValue()).toBe("2026-06-26");
+
+    root
+      .querySelector<HTMLButtonElement>(".litopis-day[data-iso-date='2026-06-27'] button")
+      ?.click();
+    expect(input.value).toBe("2026-06-27");
+    expect(picker.getISOValue()).toBe("2026-06-27");
+
+    picker.destroy();
+
+    expect([...root.childNodes]).toEqual([input]);
+    expect(input.className).toBe("custom-input");
+    expect(input.name).toBe("visible-date");
+    expect(input.getAttribute("role")).toBeNull();
+    expect(input.getAttribute("aria-describedby")).toBe("appointment-help");
+  });
+
+  it("uses both supplied input slots for a split range", () => {
+    const root = document.createElement("div");
+    const startInput = document.createElement("input");
+    const endInput = document.createElement("input");
+    startInput.setAttribute("slot", "input");
+    endInput.setAttribute("slot", "end-input");
+    root.append(startInput, endInput);
+
+    createDatePicker(root, {
+      layout: "split",
+      range: {
+        end: { day: 18, month: 6, year: 2026 },
+        start: { day: 12, month: 6, year: 2026 },
+      },
+      selection: "range",
+    });
+
+    expect([...root.querySelectorAll("[role='combobox']")]).toEqual([startInput, endInput]);
+    expect(startInput.value).toBe("2026-06-12");
+    expect(endInput.value).toBe("2026-06-18");
+  });
+
   it("renders a keyboard reachable grid", () => {
     const root = document.createElement("div");
 

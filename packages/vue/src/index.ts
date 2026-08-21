@@ -1,4 +1,13 @@
-import { defineComponent, h, onBeforeUnmount, onMounted, ref, watch, type PropType } from "vue";
+import {
+  cloneVNode,
+  defineComponent,
+  h,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  type PropType,
+} from "vue";
 import { createDatePicker } from "@litopis/dom";
 import type { FirstDayOfWeek } from "@litopis/core";
 import type {
@@ -78,7 +87,7 @@ export const LitopisDatePicker = defineComponent({
     "update:modelValue": (_value: LitopisDatePickerModelValue) => true,
     "update:to": (_value: LitopisDatePickerRangeEndpoint) => true,
   },
-  setup(props, { emit, expose }) {
+  setup(props, { emit, expose, slots }) {
     const root = ref<HTMLElement | null>(null);
     let controller: LitopisDatePickerController | null = null;
 
@@ -189,7 +198,11 @@ export const LitopisDatePicker = defineComponent({
       },
     });
 
-    return () => h("div", { class: props.class, ref: root });
+    return () =>
+      h("div", { class: props.class, ref: root }, [
+        ...(slots.input?.().map((node) => cloneVNode(node, { slot: "input" })) ?? []),
+        ...(slots["end-input"]?.().map((node) => cloneVNode(node, { slot: "end-input" })) ?? []),
+      ]);
   },
 });
 

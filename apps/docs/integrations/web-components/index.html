@@ -134,6 +134,19 @@ import "@litopis/dom/styles/base.css";</code></pre>
 &gt;&lt;/litopis-date-picker&gt;</code></pre>
             </div>
           </section>
+          <section id="custom-input">
+            <h2>Custom input</h2>
+            <p>
+              Use the <code>input</code> slot to keep your own input element. Litopis supplies its
+              value, behavior and accessibility attributes.
+            </p>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;litopis-date-picker mode="popover" label="Start date"&gt;
+  &lt;input slot="input" class="my-input" placeholder="Choose a date" /&gt;
+&lt;/litopis-date-picker&gt;</code></pre>
+            </div>
+          </section>
           <section id="value-property">
             <h2>Value property</h2>
             <p>
@@ -181,6 +194,7 @@ if (picker) {
             ><a class="outline-link" href="#live-example">Example</a
             ><a class="outline-link" href="#attributes">HTML attributes</a
             ><a class="outline-link" href="#range">Range</a
+            ><a class="outline-link" href="#custom-input">Custom input</a
             ><a class="outline-link" href="#value-property">Value property</a
             ><a class="outline-link" href="#cdn">CDN</a
             ><a class="outline-link" href="#styling">Styling</a>

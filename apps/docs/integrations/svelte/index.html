@@ -156,6 +156,20 @@
 &lt;div use:litopisDatePicker={options}&gt;&lt;/div&gt;</code></pre>
             </div>
           </section>
+          <section id="custom-input">
+            <h2>Custom input</h2>
+            <p>
+              Place an input with <code>slot="input"</code> inside the action host. Litopis keeps
+              its classes and placeholder while supplying the picker behavior and accessibility
+              attributes.
+            </p>
+            <div class="language-svelte vp-code-group">
+              <span class="lang">svelte</span>
+              <pre><code>&lt;div use:litopisDatePicker={options}&gt;
+  &lt;input slot="input" class="my-input" placeholder="Choose a date" /&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+          </section>
           <section id="styling">
             <h2>Styling</h2>
             <p>
@@ -173,6 +187,7 @@
             ><a class="outline-link" href="#action-options">Options</a
             ><a class="outline-link" href="#updates">Updating options</a
             ><a class="outline-link" href="#range">Range</a
+            ><a class="outline-link" href="#custom-input">Custom input</a
             ><a class="outline-link" href="#styling">Styling</a>
           </nav>
         </aside>

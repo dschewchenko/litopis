@@ -152,6 +152,19 @@ const pickerRef = useRef&lt;DatePickerController | null&gt;(null);
 /&gt;</code></pre>
             </div>
           </section>
+          <section id="custom-input">
+            <h2>Custom input</h2>
+            <p>
+              Pass an input child with <code>slot="input"</code>. Litopis keeps its classes and
+              placeholder while supplying the picker behavior and accessibility attributes.
+            </p>
+            <div class="language-tsx vp-code-group">
+              <span class="lang">tsx</span>
+              <pre><code>&lt;LitopisDatePicker value={date} onValueChange={setDate}&gt;
+  &lt;input slot="input" className="my-input" placeholder="Choose a date" /&gt;
+&lt;/LitopisDatePicker&gt;</code></pre>
+            </div>
+          </section>
           <section id="styling">
             <h2>Styling</h2>
             <p>
@@ -169,6 +182,7 @@ const pickerRef = useRef&lt;DatePickerController | null&gt;(null);
             <a class="outline-link" href="#controlled-value">Controlled value</a>
             <a class="outline-link" href="#controller-ref">Controller ref</a>
             <a class="outline-link" href="#range">Range</a>
+            <a class="outline-link" href="#custom-input">Custom input</a>
             <a class="outline-link" href="#styling">Styling</a>
           </nav>
         </aside>

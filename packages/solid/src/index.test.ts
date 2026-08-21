@@ -3,6 +3,28 @@ import { describe, expect, it } from "vitest";
 import { LitopisDatePicker } from "./index";
 
 describe("LitopisDatePicker for Solid", () => {
+  it("uses a custom input child", () => {
+    const host = document.createElement("div");
+    const input = document.createElement("input");
+    input.className = "custom-input";
+    input.placeholder = "Choose a date";
+    input.setAttribute("slot", "input");
+    const dispose = render(
+      () =>
+        LitopisDatePicker({
+          children: input,
+          value: { day: 25, month: 6, year: 2026 },
+        }),
+      host,
+    );
+
+    expect(host.querySelector<HTMLInputElement>(".custom-input")).toBe(input);
+    expect(input.classList.contains("litopis-input")).toBe(true);
+    expect(input.placeholder).toBe("Choose a date");
+    expect(input.value).toBe("2026-06-25");
+    dispose();
+  });
+
   it("mounts the shared interactive picker contract", () => {
     const host = document.createElement("div");
     const dispose = render(

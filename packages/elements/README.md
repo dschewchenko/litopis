@@ -15,6 +15,17 @@ import "@litopis/dom/styles/base.css";
 <litopis-date-picker mode="popover" label="Start date"></litopis-date-picker>
 ```
 
+Use the `input` slot to keep your own input element while Litopis supplies its value, behavior and
+accessibility attributes:
+
+```html
+<litopis-date-picker mode="popover" label="Start date">
+  <input slot="input" class="my-input" placeholder="Choose a date" />
+</litopis-date-picker>
+```
+
+For a split range, use `slot="input"` and `slot="end-input"`.
+
 For static sites, use `dist/index.global.js` from the package together with `@litopis/dom/styles/base.css`.
 
 See the [Web Components integration guide](https://dschewchenko.github.io/litopis/integrations/web-components/) for attributes, the value property and CDN usage.

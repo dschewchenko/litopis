@@ -70,6 +70,12 @@ const keyMoves = new Map<string, CalendarMove>([
 type PanelMode = "month" | "year";
 type InputStatus = "invalid" | "valid";
 type RangeEndpoint = "end" | "start";
+type InputSlot = "end-input" | "input";
+
+interface AttributeSnapshot {
+  readonly name: string;
+  readonly value: string;
+}
 
 let datePickerId = 0;
 
@@ -114,31 +120,50 @@ export function createDatePicker<
   const anchorName = `--${id}-anchor`;
   datePickerId += 1;
 
+  const initialChildren = [...root.childNodes];
+  const suppliedInput = getInputSlot(root, "input");
+  const suppliedEndInput = getInputSlot(root, "end-input");
+  const inputAttributes = suppliedInput ? getAttributeSnapshot(suppliedInput) : null;
+  const endInputAttributes = suppliedEndInput ? getAttributeSnapshot(suppliedEndInput) : null;
+  const inputPlaceholder = suppliedInput?.getAttribute("placeholder") ?? null;
+  const endInputPlaceholder = suppliedEndInput?.getAttribute("placeholder") ?? null;
+
   root.classList.add("litopis");
-  root.innerHTML = "";
+  root.replaceChildren();
   resolvedPanelCount = resolvePanelCount();
 
   const label = document.createElement("label");
   label.className = "litopis-label";
-  label.htmlFor = `${id}-input`;
 
-  const input = document.createElement("input");
-  input.autocomplete = "off";
-  input.className = "litopis-input";
-  input.id = `${id}-input`;
-  input.inputMode = "numeric";
+  const input = suppliedInput ?? document.createElement("input");
+  input.autocomplete ||= "off";
+  input.classList.add("litopis-input");
+  input.id ||= `${id}-input`;
+  input.inputMode ||= "numeric";
+  input.removeAttribute("name");
   input.type = "text";
   input.setAttribute("role", "combobox");
   input.setAttribute("aria-autocomplete", "none");
   input.setAttribute("aria-controls", `${id}-grid`);
   input.setAttribute("aria-haspopup", "grid");
+  label.htmlFor = input.id;
 
   const endLabel = document.createElement("label");
   endLabel.className = "litopis-label";
-  endLabel.htmlFor = `${id}-end-input`;
 
-  const endInput = input.cloneNode() as HTMLInputElement;
-  endInput.id = `${id}-end-input`;
+  const endInput = suppliedEndInput ?? (input.cloneNode() as HTMLInputElement);
+  endInput.autocomplete ||= "off";
+  endInput.classList.add("litopis-input");
+  endInput.id = suppliedEndInput?.id || `${id}-end-input`;
+  endInput.inputMode ||= "numeric";
+  endInput.removeAttribute("name");
+  endInput.type = "text";
+  endInput.setAttribute("role", "combobox");
+  endInput.setAttribute("aria-autocomplete", "none");
+  endInput.setAttribute("aria-controls", `${id}-grid`);
+  endInput.setAttribute("aria-haspopup", "grid");
+  if (!suppliedEndInput) endInput.removeAttribute("slot");
+  endLabel.htmlFor = endInput.id;
 
   const fields = document.createElement("div");
   fields.className = "litopis-range-fields";
@@ -160,13 +185,19 @@ export function createDatePicker<
   fieldMessage.className = "litopis-field-message";
   fieldMessage.id = `${id}-message`;
   fieldMessage.setAttribute("aria-live", "polite");
-  input.setAttribute("aria-describedby", fieldMessage.id);
+  input.setAttribute(
+    "aria-describedby",
+    appendToken(input.getAttribute("aria-describedby"), fieldMessage.id),
+  );
 
   const endFieldMessage = document.createElement("p");
   endFieldMessage.className = "litopis-field-message";
   endFieldMessage.id = `${id}-end-message`;
   endFieldMessage.setAttribute("aria-live", "polite");
-  endInput.setAttribute("aria-describedby", endFieldMessage.id);
+  endInput.setAttribute(
+    "aria-describedby",
+    appendToken(endInput.getAttribute("aria-describedby"), endFieldMessage.id),
+  );
 
   const hiddenStartInput = document.createElement("input");
   hiddenStartInput.type = "hidden";
@@ -333,9 +364,11 @@ export function createDatePicker<
     setDataValue(root, "rangeComplete", String(Boolean(range.start && range.end)));
     syncPopoverMode(mode);
     label.textContent = getStartLabel(currentOptions);
-    input.placeholder = getFieldPlaceholder(format, getGranularity(currentOptions));
+    input.placeholder =
+      inputPlaceholder ?? getFieldPlaceholder(format, getGranularity(currentOptions));
     endLabel.textContent = getEndLabel(currentOptions);
-    endInput.placeholder = getFieldPlaceholder(format, getGranularity(currentOptions));
+    endInput.placeholder =
+      endInputPlaceholder ?? getFieldPlaceholder(format, getGranularity(currentOptions));
     if (!preserveInputValue) {
       renderFieldValues(selected, format);
     }
@@ -1261,7 +1294,7 @@ export function createDatePicker<
   }
 
   function openCalendar(): void {
-    if (getCalendarMode(currentOptions) !== "popover") {
+    if (getCalendarMode(currentOptions) !== "popover" || calendarOpen) {
       return;
     }
 
@@ -1446,7 +1479,9 @@ export function createDatePicker<
       form?.removeEventListener("reset", onFormReset);
       resizeObserver?.disconnect();
       hideNativePopover();
-      root.replaceChildren();
+      if (inputAttributes) restoreAttributes(input, inputAttributes);
+      if (endInputAttributes) restoreAttributes(endInput, endInputAttributes);
+      root.replaceChildren(...initialChildren);
       root.classList.remove("litopis");
       delete root.dataset.calendarOpen;
       delete root.dataset.mode;
@@ -1734,4 +1769,34 @@ function getVisiblePanels<ValueAs extends DatePickerValueAs>(
 
 function getYearPageStart(year: number): number {
   return Math.floor(year / 12) * 12;
+}
+
+function getInputSlot(root: HTMLElement, slot: InputSlot): HTMLInputElement | null {
+  for (const child of root.children) {
+    if (child instanceof HTMLInputElement && child.getAttribute("slot") === slot) {
+      return child;
+    }
+  }
+
+  return null;
+}
+
+function getAttributeSnapshot(element: HTMLElement): AttributeSnapshot[] {
+  return [...element.attributes].map(({ name, value }) => ({ name, value }));
+}
+
+function restoreAttributes(element: HTMLElement, snapshot: readonly AttributeSnapshot[]): void {
+  for (const attribute of getAttributeSnapshot(element)) {
+    element.removeAttribute(attribute.name);
+  }
+
+  for (const attribute of snapshot) {
+    element.setAttribute(attribute.name, attribute.value);
+  }
+}
+
+function appendToken(value: string | null, token: string): string {
+  const tokens = new Set(value?.split(/\s+/).filter(Boolean) ?? []);
+  tokens.add(token);
+  return [...tokens].join(" ");
 }

@@ -20,6 +20,18 @@ const date = ref<LitopisDateValue | null>(null);
 </template>
 ```
 
+Use the `input` slot to provide your own input component or element:
+
+```vue
+<LitopisDatePicker v-model="date" mode="popover" label="Start date">
+  <template #input>
+    <input class="my-input" placeholder="Choose a date" />
+  </template>
+</LitopisDatePicker>
+```
+
+For a split range, use the `input` and `end-input` slots.
+
 See the [Vue integration guide](https://dschewchenko.github.io/litopis/integrations/vue/) for component props, `v-model` and component refs.
 
 For a range, bind a `LitopisDateRange` with `v-model`, then set `selection="range"`,
