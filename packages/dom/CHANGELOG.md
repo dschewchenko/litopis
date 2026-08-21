@@ -1,5 +1,15 @@
 # @litopis/dom
 
+## 0.3.0
+
+### Minor Changes
+
+- 92b9991: Allow date pickers to use consumer-owned input elements through framework-native slots and children.
+
+### Patch Changes
+
+- @litopis/core@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
