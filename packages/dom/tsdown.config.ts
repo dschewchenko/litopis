@@ -10,6 +10,7 @@ export default defineConfig([
     },
     format: ["esm"],
     sourcemap: true,
+    target: "es2020",
   },
   {
     clean: false,
@@ -25,5 +26,6 @@ export default defineConfig([
       entryFileNames: "[name].global.js",
     },
     sourcemap: true,
+    target: "es2020",
   },
 ]);

@@ -17,6 +17,7 @@ export type {
   DateFieldOptions,
   DatePickerMode,
   DatePickerController,
+  DateDisabledPredicate,
   DatePickerLayout,
   DatePickerOptions,
   DatePickerRange,

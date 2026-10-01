@@ -9,7 +9,14 @@ import {
   toLocalDate,
 } from "./date";
 import { isDateInDateRange, isRangeBoundary } from "./range";
-import type { CalendarGrid, CalendarGridCell, DateRange, DateValue, FirstDayOfWeek } from "./types";
+import type {
+  CalendarGrid,
+  CalendarGridCell,
+  DateDisabledPredicate,
+  DateRange,
+  DateValue,
+  FirstDayOfWeek,
+} from "./types";
 
 export function createCalendarGrid(
   visibleMonth: DateValue,
@@ -20,6 +27,8 @@ export function createCalendarGrid(
   min: DateValue | null,
   max: DateValue | null,
   range: DateRange = { end: null, start: null },
+  disabledDates: readonly DateValue[] = [],
+  isDateDisabledPredicate?: DateDisabledPredicate,
 ): CalendarGrid {
   const monthStart = startOfMonth(visibleMonth);
   const firstDayOffset = (toLocalDate(monthStart).getDay() - firstDayOfWeek + 7) % 7;
@@ -35,7 +44,11 @@ export function createCalendarGrid(
 
       week.push({
         date,
-        disabled: !date || isDateDisabled(date, min, max),
+        disabled:
+          !date ||
+          isDateDisabled(date, min, max) ||
+          disabledDates.some((disabledDate) => isSameDate(disabledDate, date)) ||
+          Boolean(isDateDisabledPredicate?.(date)),
         outsideMonth: !date || date.month !== visibleMonth.month,
         inRange: date ? isDateInDateRange(date, range) : false,
         rangeEnd: date ? isRangeBoundary(date, { end: range.end, start: null }) : false,

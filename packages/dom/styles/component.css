@@ -25,6 +25,7 @@
   --litopis-popover-anchor-gap: 8px;
   --litopis-popover-min-width: 320px;
   --litopis-popover-z-index: 2147483647;
+  --litopis-range-background-fallback: rgba(52, 81, 178, 0.16);
   --litopis-today-padding-inline: 12px;
   --litopis-transition-duration: 150ms;
   --litopis-weekday-size: 28px;
@@ -38,6 +39,13 @@
   max-width: var(--litopis-width);
   position: relative;
   width: 100%;
+}
+
+@supports (color: color-mix(in srgb, black 50%, white)) {
+  .litopis,
+  .litopis-field {
+    --litopis-range-background-fallback: color-mix(in srgb, var(--litopis-accent) 16%, transparent);
+  }
 }
 
 .litopis *,
@@ -316,10 +324,7 @@
 .litopis-month-button[data-in-range],
 .litopis-year-button[data-in-range],
 .litopis-day[data-in-range]:not([data-range-start]):not([data-range-end]) {
-  background: var(
-    --litopis-range-background,
-    color-mix(in srgb, var(--litopis-accent) 16%, transparent)
-  );
+  background: var(--litopis-range-background, var(--litopis-range-background-fallback));
 }
 
 .litopis-grid {
@@ -414,10 +419,7 @@
 
 .litopis[data-range-complete="true"] .litopis-day[data-range-start]::before,
 .litopis[data-range-complete="true"] .litopis-day[data-range-end]::before {
-  background: var(
-    --litopis-range-background,
-    color-mix(in srgb, var(--litopis-accent) 16%, transparent)
-  );
+  background: var(--litopis-range-background, var(--litopis-range-background-fallback));
   content: "";
   inset-block: 0;
   position: absolute;
@@ -486,7 +488,9 @@
 .litopis-year-button[data-selected]:hover,
 .litopis-year-button[data-range-start]:hover,
 .litopis-year-button[data-range-end]:hover,
-.litopis-day[data-selected] .litopis-day-button:hover {
+.litopis-day[data-selected] .litopis-day-button:hover,
+.litopis-day[data-range-start] .litopis-day-button:hover,
+.litopis-day[data-range-end] .litopis-day-button:hover {
   background: var(--litopis-selected-background, var(--litopis-accent));
   color: var(--litopis-selected-foreground, var(--litopis-accent-foreground));
 }
@@ -504,8 +508,14 @@
 }
 
 .litopis-month-button[data-selected]:focus-visible,
+.litopis-month-button[data-range-start]:focus-visible,
+.litopis-month-button[data-range-end]:focus-visible,
 .litopis-year-button[data-selected]:focus-visible,
-.litopis-day[data-selected] .litopis-day-button:focus-visible {
+.litopis-year-button[data-range-start]:focus-visible,
+.litopis-year-button[data-range-end]:focus-visible,
+.litopis-day[data-selected] .litopis-day-button:focus-visible,
+.litopis-day[data-range-start] .litopis-day-button:focus-visible,
+.litopis-day[data-range-end] .litopis-day-button:focus-visible {
   box-shadow: inset 0 0 0 var(--litopis-focus-width)
     var(
       --litopis-selected-focus-color,
@@ -513,13 +523,15 @@
     );
 }
 
-.litopis :where(button):disabled {
+.litopis :where(button):disabled,
+.litopis :where(button)[aria-disabled="true"] {
   color: var(--litopis-disabled);
   cursor: not-allowed;
   text-decoration: none;
 }
 
-.litopis :where(button):disabled:hover {
+.litopis :where(button):disabled:hover,
+.litopis :where(button)[aria-disabled="true"]:hover {
   background: transparent;
 }
 

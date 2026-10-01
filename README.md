@@ -16,6 +16,8 @@ interaction in a DOM-free core, with rendering and CSS supplied as separate laye
 - Inline calendars and popovers built with the browser Popover API.
 - `YYYY-MM-DD`, `DD.MM.YYYY` and `MM/DD/YYYY` field formats.
 - Browser locale by default, with locale and first-day-of-week overrides.
+- Unavailable dates from explicit lists or a synchronous predicate, with month-change notifications
+  for loading availability windows.
 - `DateValue`, native `Date`, formatted field and ISO values.
 - One or two linked calendar panels.
 - Dates from `0001-01-01` to `9999-12-31`.

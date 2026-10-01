@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createDatePicker } from "./create-date-picker";
 
 describe("createDatePicker", () => {
@@ -90,6 +90,94 @@ describe("createDatePicker", () => {
     ).toBe(root.querySelector(".litopis-grid")?.id);
   });
 
+  it("prevents unavailable dates from pointer, keyboard, typed or programmatic selection", () => {
+    const root = document.createElement("div");
+    const changes: unknown[] = [];
+    const picker = createDatePicker(root, {
+      disabledDates: [{ day: 26, month: 6, year: 2026 }],
+      isDateDisabled: (date) => date.day === 28 && date.month === 6,
+      onValueChange: (value) => changes.push(value),
+      selected: { day: 25, month: 6, year: 2026 },
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const unavailable = root.querySelector<HTMLButtonElement>(
+      ".litopis-day[data-iso-date='2026-06-26'] button",
+    )!;
+
+    expect(unavailable.disabled).toBe(true);
+    expect(unavailable.getAttribute("aria-disabled")).toBe("true");
+    unavailable.click();
+    picker.setDate({ day: 26, month: 6, year: 2026 });
+
+    const grid = root.querySelector<HTMLElement>(".litopis-grid")!;
+    grid.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
+    const focusedUnavailable = root.querySelector<HTMLButtonElement>(
+      ".litopis-day[data-iso-date='2026-06-26'] button",
+    )!;
+    expect(focusedUnavailable.disabled).toBe(false);
+    expect(focusedUnavailable.getAttribute("aria-disabled")).toBe("true");
+    focusedUnavailable.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
+
+    expect(picker.getValue()).toEqual({ day: 25, month: 6, year: 2026 });
+    expect(picker.getISOValue()).toBe("2026-06-25");
+    expect(changes).toEqual([]);
+
+    const input = root.querySelector<HTMLInputElement>(".litopis-input")!;
+    input.value = "2026-06-26";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(picker.getValue()).toEqual({ day: 25, month: 6, year: 2026 });
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("rejects unavailable days within programmatic ranges and emits visible-month changes", () => {
+    const root = document.createElement("div");
+    const visibleMonths: string[] = [];
+    const picker = createDatePicker(root, {
+      disabledDates: [{ day: 26, month: 6, year: 2026 }],
+      onVisibleMonthChange: (month) =>
+        visibleMonths.push(`${month.year}-${month.month}-${month.day}`),
+      range: {
+        end: { day: 27, month: 6, year: 2026 },
+        start: { day: 25, month: 6, year: 2026 },
+      },
+      selection: "range",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    expect(picker.getValue()).toEqual({ end: null, start: null });
+    picker.setRange({
+      end: { day: 27, month: 6, year: 2026 },
+      start: { day: 25, month: 6, year: 2026 },
+    });
+    expect(picker.getValue()).toEqual({ end: null, start: null });
+
+    root.querySelector<HTMLButtonElement>(".litopis-nav-button[data-direction='next']")!.click();
+    expect(visibleMonths).toEqual(["2026-7-1"]);
+    picker.setVisibleMonth({ day: 1, month: 7, year: 2026 });
+    expect(visibleMonths).toHaveLength(1);
+  });
+
+  it("reconciles a selected value when reactive availability disables it", () => {
+    const root = document.createElement("div");
+    const changes: unknown[] = [];
+    const picker = createDatePicker(root, {
+      onValueChange: (value) => changes.push(value),
+      selected: { day: 25, month: 6, year: 2026 },
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    picker.setOptions({
+      disabledDates: [{ day: 25, month: 6, year: 2026 }],
+      onValueChange: (value) => changes.push(value),
+      selected: { day: 25, month: 6, year: 2026 },
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    expect(picker.getValue()).toBeNull();
+    expect(root.querySelector<HTMLInputElement>(".litopis-input")?.value).toBe("");
+    expect(changes).toEqual([null]);
+  });
+
   it("uses labelled navigation controls with CSS chevrons", () => {
     const root = document.createElement("div");
 
@@ -161,6 +249,52 @@ describe("createDatePicker", () => {
 
     expect(root.querySelector(".litopis-month-button")).toBe(january);
     expect(january.dataset.selected).toBe("");
+  });
+
+  it("projects a selected day into its month and year panels", () => {
+    const root = document.createElement("div");
+    const picker = createDatePicker(root, {
+      selected: { day: 25, month: 6, year: 2026 },
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    root.querySelector<HTMLButtonElement>(".litopis-caption")?.click();
+
+    expect(root.querySelector(".litopis-month-button[data-selected]")?.textContent).toBe("Jun");
+
+    root.querySelector<HTMLButtonElement>(".litopis-panel-title")?.click();
+
+    expect(root.querySelector(".litopis-year-button[data-selected]")?.textContent).toBe("2026");
+
+    picker.setDate(null);
+
+    expect(root.querySelector(".litopis-year-button[data-selected]")).toBeNull();
+  });
+
+  it("projects day range endpoints into their shared month and year", () => {
+    const root = document.createElement("div");
+    createDatePicker(root, {
+      range: {
+        end: { day: 18, month: 6, year: 2026 },
+        start: { day: 12, month: 6, year: 2026 },
+      },
+      selection: "range",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    root.querySelector<HTMLButtonElement>(".litopis-caption")?.click();
+
+    const selectedMonth = root.querySelector(
+      ".litopis-month-button[data-range-start][data-range-end]",
+    );
+    expect(selectedMonth?.textContent).toBe("Jun");
+
+    root.querySelector<HTMLButtonElement>(".litopis-panel-title")?.click();
+
+    const selectedYear = root.querySelector(
+      ".litopis-year-button[data-range-start][data-range-end]",
+    );
+    expect(selectedYear?.textContent).toBe("2026");
   });
 
   it("uses one calendar and native endpoint values for a split range form", () => {
@@ -369,7 +503,8 @@ describe("createDatePicker", () => {
     form.remove();
   });
 
-  it("restores the configured range after a native form reset", async () => {
+  it("restores the configured range after a form reset without queueMicrotask", async () => {
+    vi.stubGlobal("queueMicrotask", undefined);
     const form = document.createElement("form");
     const root = document.createElement("div");
     form.append(root);
@@ -397,6 +532,7 @@ describe("createDatePicker", () => {
     });
     expect(new FormData(form).get("stay[start]")).toBe("2026-06-12");
     expect(new FormData(form).get("stay[end]")).toBe("2026-06-18");
+    vi.unstubAllGlobals();
     form.remove();
   });
 
@@ -794,12 +930,128 @@ describe("createDatePicker", () => {
     expect(root.dataset.mode).toBe("popover");
     expect(root.dataset.calendarOpen).toBe("false");
     expect(root.dataset.size).toBe("comfortable");
-    expect(root.querySelector<HTMLElement>(".litopis-calendar")?.getAttribute("popover")).toBe(
-      "auto",
+    expect(root.querySelector<HTMLElement>(".litopis-calendar")?.hasAttribute("popover")).toBe(
+      false,
     );
+    expect(root.querySelector<HTMLElement>(".litopis-calendar")?.hidden).toBe(true);
 
     root.querySelector<HTMLInputElement>(".litopis-input")?.click();
 
     expect(root.dataset.calendarOpen).toBe("true");
+    expect(root.querySelector<HTMLElement>(".litopis-calendar")?.hidden).toBe(false);
+  });
+
+  it("positions and updates a popover when CSS anchors are unavailable", () => {
+    const supports = vi.fn().mockReturnValue(false);
+    vi.stubGlobal("CSS", { supports });
+    const root = document.createElement("div");
+    const picker = createDatePicker(root, {
+      mode: "popover",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const input = root.querySelector<HTMLInputElement>(".litopis-input")!;
+    const calendar = root.querySelector<HTMLElement>(".litopis-calendar")!;
+    let inputRect = new DOMRect(100, 100, 200, 40);
+    let nativePopoverOpen = false;
+    const matches = calendar.matches.bind(calendar);
+    input.getBoundingClientRect = () => inputRect;
+    calendar.getBoundingClientRect = () =>
+      new DOMRect(0, 0, Number.parseFloat(calendar.style.width) || 360, 300);
+    calendar.showPopover = () => {
+      nativePopoverOpen = true;
+    };
+    calendar.hidePopover = () => {
+      nativePopoverOpen = false;
+    };
+    calendar.matches = (selector) =>
+      selector === ":popover-open" ? nativePopoverOpen : matches(selector);
+
+    input.click();
+
+    expect(root.dataset.calendarOpen).toBe("true");
+    expect(supports).toHaveBeenCalledWith("top", "anchor(bottom)");
+    expect(calendar.style.left).toBe("100px");
+    expect(calendar.style.top).toBe("148px");
+    expect(calendar.style.width).toBe("320px");
+
+    inputRect = new DOMRect(200, 120, 200, 40);
+    window.dispatchEvent(new Event("resize"));
+
+    expect(calendar.style.left).toBe("200px");
+    expect(calendar.style.top).toBe("168px");
+
+    inputRect = new DOMRect(900, 700, 200, 40);
+    window.dispatchEvent(new Event("scroll"));
+
+    expect(calendar.style.left).toBe(`${window.innerWidth - 320 - 12}px`);
+    expect(calendar.style.top).toBe("392px");
+
+    picker.destroy();
+    vi.unstubAllGlobals();
+  });
+
+  it("matches native light dismiss and Escape behavior without the Popover API", () => {
+    const root = document.createElement("div");
+    const outsideButton = document.createElement("button");
+    document.body.append(root, outsideButton);
+    const picker = createDatePicker(root, {
+      mode: "popover",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const input = root.querySelector<HTMLInputElement>(".litopis-input")!;
+    const calendar = root.querySelector<HTMLElement>(".litopis-calendar")!;
+    Object.defineProperties(calendar, {
+      hidePopover: { configurable: true, value: undefined },
+      showPopover: { configurable: true, value: undefined },
+    });
+
+    input.click();
+
+    expect(root.dataset.calendarOpen).toBe("true");
+    expect(calendar.hasAttribute("popover")).toBe(false);
+    expect(calendar.hidden).toBe(false);
+
+    root.querySelector<HTMLButtonElement>(".litopis-caption")?.click();
+    expect(root.dataset.calendarOpen).toBe("true");
+
+    outsideButton.click();
+    expect(root.dataset.calendarOpen).toBe("false");
+    expect(calendar.hidden).toBe(true);
+
+    input.click();
+    root.querySelector<HTMLButtonElement>(".litopis-caption")?.focus();
+    document.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));
+
+    expect(root.dataset.calendarOpen).toBe("false");
+    expect(document.activeElement).toBe(input);
+
+    picker.destroy();
+    root.remove();
+    outsideButton.remove();
+  });
+
+  it("keeps only one DOM fallback popover open", () => {
+    const firstRoot = document.createElement("div");
+    const secondRoot = document.createElement("div");
+    document.body.append(firstRoot, secondRoot);
+    const firstPicker = createDatePicker(firstRoot, {
+      mode: "popover",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const secondPicker = createDatePicker(secondRoot, {
+      mode: "popover",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    firstRoot.querySelector<HTMLInputElement>(".litopis-input")?.click();
+    secondRoot.querySelector<HTMLInputElement>(".litopis-input")?.click();
+
+    expect(firstRoot.dataset.calendarOpen).toBe("false");
+    expect(secondRoot.dataset.calendarOpen).toBe("true");
+
+    firstPicker.destroy();
+    secondPicker.destroy();
+    firstRoot.remove();
+    secondRoot.remove();
   });
 });

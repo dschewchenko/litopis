@@ -1,7 +1,13 @@
-import type { CalendarGranularity, CalendarStateOptions, DateValue } from "@litopis/core";
+import type {
+  CalendarGranularity,
+  CalendarStateOptions,
+  DateDisabledPredicate,
+  DateValue,
+} from "@litopis/core";
 
 export type { DateValue } from "@litopis/core";
 export type { CalendarGranularity, DateRange } from "@litopis/core";
+export type { DateDisabledPredicate } from "@litopis/core";
 
 /** Selects the JavaScript representation used by picker selection APIs. */
 export type DatePickerValueAs = "date-value" | "date";
@@ -49,6 +55,8 @@ export interface DatePickerOptions<
   readonly selection?: Selection;
   readonly layout?: DatePickerLayout;
   readonly name?: string | DatePickerRangeNames;
+  /** Notifies when navigation changes the first day of the visible month. */
+  readonly onVisibleMonthChange?: (value: DateValue) => void;
   readonly granularity?: CalendarGranularity;
   readonly panels?: DatePickerPanels;
   readonly outsideDays?: boolean;
@@ -56,6 +64,8 @@ export interface DatePickerOptions<
   readonly todayButton?: boolean;
   readonly size?: DatePickerSize;
   readonly todayLabel?: string;
+  readonly disabledDates?: readonly DateValue[];
+  readonly isDateDisabled?: DateDisabledPredicate;
   /** Chooses DateValue objects or native local Date instances for selection APIs. */
   readonly valueAs?: ValueAs;
 }

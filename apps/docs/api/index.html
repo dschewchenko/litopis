@@ -375,6 +375,25 @@ const range: DatePickerRange&lt;"date"&gt; = rangePicker.getValue();</code></pre
                   </td>
                 </tr>
                 <tr>
+                  <td><code>disabledDates</code></td>
+                  <td><code>readonly DateValue[]</code></td>
+                  <td><code>[]</code></td>
+                  <td>
+                    Explicit unavailable calendar days. A complete range cannot include an
+                    unavailable day; replace the list through <code>setOptions</code> when it
+                    changes.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>isDateDisabled</code></td>
+                  <td><code>(date: DateValue) =&gt; boolean</code></td>
+                  <td>—</td>
+                  <td>
+                    A synchronous predicate for unavailable dates, combined with bounds and the
+                    explicit list.
+                  </td>
+                </tr>
+                <tr>
                   <td><code>onValueChange</code></td>
                   <td><code>(value: DateValue | Date | null) =&gt; void</code></td>
                   <td>—</td>
@@ -409,6 +428,15 @@ const range: DatePickerRange&lt;"date"&gt; = rangePicker.getValue();</code></pre
                     Called after either endpoint changes. The endpoint type follows
                     <code>valueAs</code>; the completed end is expanded to the final day of a
                     selected month or year.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>onVisibleMonthChange</code></td>
+                  <td><code>(month: DateValue) =&gt; void</code></td>
+                  <td>—</td>
+                  <td>
+                    Called whenever the visible month changes, with its first day. It does not fire
+                    on initial render.
                   </td>
                 </tr>
                 <tr>

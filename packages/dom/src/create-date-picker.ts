@@ -15,6 +15,9 @@ import {
   MIN_YEAR,
   moveFocus,
   isDateInDateRange,
+  isCalendarDateDisabled,
+  isCalendarDateExplicitlyDisabled,
+  isCalendarRangeDisabled,
   isSameDate,
   selectDate,
   selectFocusedDate,
@@ -25,6 +28,7 @@ import {
   normalizeDateForGranularity,
   normalizeDateRange,
   type CalendarMove,
+  type CalendarGranularity,
   type CalendarGrid,
   type CalendarGridCell,
   type CalendarState,
@@ -71,6 +75,7 @@ type PanelMode = "month" | "year";
 type InputStatus = "invalid" | "valid";
 type RangeEndpoint = "end" | "start";
 type InputSlot = "end-input" | "input";
+type FallbackPopoverClose = () => void;
 
 interface AttributeSnapshot {
   readonly name: string;
@@ -78,6 +83,10 @@ interface AttributeSnapshot {
 }
 
 let datePickerId = 0;
+let activeFallbackPopoverClose: FallbackPopoverClose | null = null;
+const DEFAULT_POPOVER_ANCHOR_GAP = 8;
+const DEFAULT_POPOVER_MIN_WIDTH = 320;
+const DEFAULT_POPOVER_VIEWPORT_PADDING = 12;
 
 export function createDatePicker(
   root: HTMLElement,
@@ -107,7 +116,10 @@ export function createDatePicker<
 ): DatePickerController<ValueAs, Selection> {
   let currentOptions = options;
   let state = createCalendarState(getCalendarStateOptions(currentOptions));
-  let range = normalizeDateRange(getInternalRange(currentOptions.range ?? createEmptyDateRange()));
+  let range =
+    state.selectionMode === "range"
+      ? state.range
+      : normalizeDateRange(getInternalRange(currentOptions.range ?? createEmptyDateRange()));
   const initialRange = range;
   let calendarOpen = getCalendarMode(currentOptions) === "inline";
   let resolvedPanelCount = 1;
@@ -115,6 +127,8 @@ export function createDatePicker<
   let panelMode: PanelMode = getGranularity(currentOptions) === "year" ? "year" : "month";
   let yearPageStart = getYearPageStart(state.visibleMonth.year);
   let suppressInputOpen = false;
+  let fallbackDismissActive = false;
+  let fallbackPositioningActive = false;
   const form = root.closest("form");
   const id = `litopis-date-picker-${datePickerId}`;
   const anchorName = `--${id}-anchor`;
@@ -349,7 +363,14 @@ export function createDatePicker<
     inputStatus: InputStatus = "valid",
     preserveInputValue = false,
   ): void {
+    const previousVisibleMonth = state.visibleMonth;
     state = nextState;
+    if (
+      previousVisibleMonth.month !== state.visibleMonth.month ||
+      previousVisibleMonth.year !== state.visibleMonth.year
+    ) {
+      currentOptions.onVisibleMonthChange?.(state.visibleMonth);
+    }
     const selected = getSelectedDate(state);
     const format = getInputFormat(currentOptions);
     const mode = getCalendarMode(currentOptions);
@@ -389,7 +410,7 @@ export function createDatePicker<
     clearButton.hidden = currentOptions.clearButton !== true;
     clearButton.disabled = !hasSelection();
     clearButton.textContent = currentOptions.clearLabel ?? "Clear";
-    todayButton.disabled = !isDateInRange(state.today, state.min, state.max);
+    todayButton.disabled = isCalendarDateDisabled(state, state.today);
     todayButton.hidden = currentOptions.todayButton !== true;
     todayButton.textContent = currentOptions.todayLabel ?? "Today";
     liveRegion.textContent = `${state.grid.label}. ${formatDate(state.focusedDate, state.locale, {
@@ -398,6 +419,8 @@ export function createDatePicker<
     renderMonthYearPanel();
     renderDayGrid();
     syncNativePopoverState();
+    syncPopoverPosition();
+    syncFallbackDismiss();
   }
 
   function renderFieldValues(selected: DateValue | null, format: DateFieldFormat): void {
@@ -465,6 +488,8 @@ export function createDatePicker<
       state.min,
       state.max,
       state.range,
+      state.disabledDates,
+      state.isDateDisabled ?? undefined,
     );
     renderDayGridFor(secondaryGrid, secondaryCalendarGrid);
   }
@@ -562,8 +587,10 @@ export function createDatePicker<
     setDataState(day, "rangeStart", cell.rangeStart);
     setDataState(day, "selected", cell.selected);
     setDataState(day, "today", cell.today);
-    setDisabled(button, cell.disabled);
-    const tabIndex = toIsoDate(date) === toIsoDate(state.focusedDate) ? 0 : -1;
+    const focused = toIsoDate(date) === toIsoDate(state.focusedDate);
+    setDisabled(button, cell.disabled && !focused);
+    setAttribute(button, "aria-disabled", String(cell.disabled));
+    const tabIndex = focused ? 0 : -1;
     if (button.getAttribute("tabindex") !== String(tabIndex)) {
       button.tabIndex = tabIndex;
     }
@@ -709,11 +736,7 @@ export function createDatePicker<
       );
       setDataValue(monthButton, "month", String(month));
 
-      syncPeriodSelection(
-        monthButton,
-        { day: 1, month, year: state.visibleMonth.year },
-        !isRangeSelection() && month === state.visibleMonth.month,
-      );
+      syncPeriodSelection(monthButton, { day: 1, month, year: state.visibleMonth.year }, "month");
     }
   }
 
@@ -734,11 +757,7 @@ export function createDatePicker<
       setText(yearButton, String(year));
       setDataValue(yearButton, "year", String(year));
 
-      syncPeriodSelection(
-        yearButton,
-        { day: 1, month: 1, year },
-        !isRangeSelection() && year === state.visibleMonth.year,
-      );
+      syncPeriodSelection(yearButton, { day: 1, month: 1, year }, "year");
     }
   }
 
@@ -759,15 +778,21 @@ export function createDatePicker<
   function syncPeriodSelection(
     button: HTMLButtonElement,
     value: DateValue,
-    selected: boolean,
+    granularity: CalendarGranularity,
   ): void {
-    const normalized = normalizeDateForGranularity(value, getGranularity(currentOptions));
+    const normalized = normalizeDateForGranularity(value, granularity);
+    const selected = state.selected
+      ? isSameDate(normalized, normalizeDateForGranularity(state.selected, granularity))
+      : false;
+    const projectedRange = normalizeDateRange(range, granularity);
     const rangeStart = Boolean(
-      isRangeSelection() && range.start && isSameDate(normalized, range.start),
+      isRangeSelection() && projectedRange.start && isSameDate(normalized, projectedRange.start),
     );
-    const rangeEnd = Boolean(isRangeSelection() && range.end && isSameDate(normalized, range.end));
+    const rangeEnd = Boolean(
+      isRangeSelection() && projectedRange.end && isSameDate(normalized, projectedRange.end),
+    );
     const inRange =
-      isRangeSelection() && isDateInDateRange(normalized, range, getGranularity(currentOptions));
+      isRangeSelection() && isDateInDateRange(normalized, projectedRange, granularity);
     setDataState(button, "inRange", inRange);
     setDataState(button, "rangeEnd", rangeEnd);
     setDataState(button, "rangeStart", rangeStart);
@@ -825,14 +850,15 @@ export function createDatePicker<
     render(nextState);
   }
 
-  function setSelectedDate(value: DateValue | null): void {
+  function setSelectedDate(value: DateValue | null): boolean {
+    if (value && isCalendarDateExplicitlyDisabled(state, value)) return false;
+
     if (isRangeSelection()) {
-      setSelectedRange(
+      return setSelectedRange(
         value
           ? selectDateRange(range, value, getGranularity(currentOptions))
           : createEmptyDateRange(),
       );
-      return;
     }
 
     input.value = value ? formatDateFieldValue(value, getInputFormat(currentOptions)) : "";
@@ -840,14 +866,20 @@ export function createDatePicker<
     yearPageStart = getYearPageStart(nextState.visibleMonth.year);
     render(nextState);
     emitValueChange(getSelectedDate(nextState));
+    return true;
   }
 
-  function setSelectedRange(value: DateRange, preserveVisibleMonth = false): void {
-    range = normalizeDateRange(value, getGranularity(currentOptions));
+  function setSelectedRange(value: DateRange, preserveVisibleMonth = false): boolean {
+    const nextRange = normalizeDateRange(value, getGranularity(currentOptions));
+    if (isCalendarRangeDisabled(nextRange, state.disabledDates, state.isDateDisabled)) {
+      return false;
+    }
+    range = nextRange;
     const nextState = preserveVisibleMonth ? getRangeSelectionState() : selectRange(state, range);
     yearPageStart = getYearPageStart(nextState.visibleMonth.year);
     render(nextState);
     emitRangeChange(range);
+    return true;
   }
 
   function emitValueChange(value: DateValue | null): void {
@@ -863,11 +895,13 @@ export function createDatePicker<
   function selectPeriod(value: DateValue): void {
     const normalized = normalizeDateForGranularity(value, getGranularity(currentOptions));
 
+    if (isCalendarDateExplicitlyDisabled(state, normalized)) return;
+
     if (isRangeSelection()) {
       const nextRange = selectDateRange(range, normalized, getGranularity(currentOptions));
-      setSelectedRange(nextRange, true);
+      const accepted = setSelectedRange(nextRange, true);
 
-      if (nextRange.end) {
+      if (accepted && nextRange.end) {
         closeAfterSelection();
       }
       return;
@@ -889,6 +923,8 @@ export function createDatePicker<
         state.min,
         state.max,
         range,
+        state.disabledDates,
+        state.isDateDisabled ?? undefined,
       ),
       range,
       selected: null,
@@ -913,20 +949,42 @@ export function createDatePicker<
     const previousMode = getCalendarMode(currentOptions);
     const previousSelection = isRangeSelection();
     const previousLayout = getFieldLayout(currentOptions);
+    const previousState = state;
+    const previousRange = range;
     currentOptions = nextOptions;
-    const selected = Object.hasOwn(nextOptions, "selected")
+    const selected = hasOwn(nextOptions, "selected")
       ? getInternalDate(nextOptions.selected ?? null)
-      : state.selected;
-    range = Object.hasOwn(nextOptions, "range")
+      : previousState.selected;
+    const requestedRange = hasOwn(nextOptions, "range")
       ? normalizeDateRange(
           getInternalRange(nextOptions.range ?? createEmptyDateRange()),
           getGranularity(nextOptions),
         )
-      : range;
-    state = createCalendarState(getCalendarStateOptions(currentOptions, selected));
-    state = isRangeSelection() ? selectRange(state, range) : state;
+      : previousRange;
+    range = requestedRange;
+    let nextState = createCalendarState(getCalendarStateOptions(currentOptions, selected));
+    nextState = isRangeSelection() ? selectRange(nextState, requestedRange) : nextState;
+
+    const hasNewSelectionTarget =
+      (nextState.selected !== null &&
+        !sameNullableDate(nextState.selected, previousState.selected)) ||
+      ((nextState.range.start !== null || nextState.range.end !== null) &&
+        !sameDateRange(nextState.range, previousRange));
+    if (!hasNewSelectionTarget) {
+      nextState = focusDate(nextState, previousState.focusedDate);
+    }
+
+    range = nextState.range;
+    if (
+      isRangeSelection() &&
+      isCalendarRangeDisabled(requestedRange, nextState.disabledDates, nextState.isDateDisabled)
+    ) {
+      emitRangeChange(nextState.range);
+    } else if (selected && !isRangeSelection() && !nextState.selected) {
+      emitValueChange(null);
+    }
     resolvedPanelCount = resolvePanelCount();
-    yearPageStart = getYearPageStart(state.visibleMonth.year);
+    yearPageStart = getYearPageStart(nextState.visibleMonth.year);
 
     if (getGranularity(currentOptions) !== "day") {
       monthYearPanelOpen = true;
@@ -947,7 +1005,7 @@ export function createDatePicker<
       mountStructure();
     }
 
-    render(state);
+    render(nextState);
   }
 
   function onKeydown(event: KeyboardEvent): void {
@@ -1051,7 +1109,9 @@ export function createDatePicker<
         format,
         getGranularity(currentOptions),
       );
-      if (parsedRange) setSelectedRange(parsedRange);
+      if (parsedRange) {
+        if (!setSelectedRange(parsedRange)) markUnavailableInput(target);
+      }
       return;
     }
 
@@ -1066,16 +1126,26 @@ export function createDatePicker<
     }
 
     if (parsed) {
-      if (!isDateInRange(parsed, state.min, state.max)) {
+      const normalized = normalizeDateForGranularity(parsed, getGranularity(currentOptions));
+      if (
+        !isDateInRange(parsed, state.min, state.max) ||
+        isCalendarDateDisabled(state, normalized)
+      ) {
         target.setAttribute("aria-invalid", "true");
-        getFieldMessage(target).textContent = getDateFieldError(parsed, state.min, state.max);
+        getFieldMessage(target).textContent = isDateInRange(parsed, state.min, state.max)
+          ? "Enter a valid date."
+          : getDateFieldError(parsed, state.min, state.max);
         return;
       }
 
       if (isRangeSelection()) {
-        setSelectedRange({ ...range, [endpoint]: parsed });
+        if (!setSelectedRange({ ...range, [endpoint]: parsed })) markUnavailableInput(target);
       } else {
         const nextState = selectFocusedDate(focusDate(state, parsed));
+        if (nextState === state) {
+          markUnavailableInput(target);
+          return;
+        }
         render(nextState);
         emitValueChange(getSelectedDate(nextState));
       }
@@ -1094,6 +1164,11 @@ export function createDatePicker<
 
   function onStartInput(): void {
     onInput(input, "start");
+  }
+
+  function markUnavailableInput(target: HTMLInputElement): void {
+    target.setAttribute("aria-invalid", "true");
+    getFieldMessage(target).textContent = "Enter a valid date.";
   }
 
   function onEndInput(): void {
@@ -1155,12 +1230,20 @@ export function createDatePicker<
       return;
     }
 
+    let accepted = true;
     if (isDateRange(parsed)) {
-      setSelectedRange(parsed);
+      accepted = setSelectedRange(parsed);
     } else if (isRangeSelection()) {
-      setSelectedRange({ ...range, [endpoint]: clampDateFieldValue(parsed, state.min, state.max) });
+      accepted = setSelectedRange({
+        ...range,
+        [endpoint]: clampDateFieldValue(parsed, state.min, state.max),
+      });
     } else {
-      setSelectedDate(clampDateFieldValue(parsed, state.min, state.max));
+      accepted = setSelectedDate(clampDateFieldValue(parsed, state.min, state.max));
+    }
+    if (!accepted) {
+      markUnavailableInput(target);
+      return;
     }
     target.setAttribute("aria-invalid", "false");
     getFieldMessage(target).textContent = "";
@@ -1225,7 +1308,7 @@ export function createDatePicker<
   }
 
   function onFormReset(): void {
-    queueMicrotask(() => {
+    scheduleMicrotask(() => {
       if (isRangeSelection()) {
         setSelectedRange(initialRange);
         return;
@@ -1356,7 +1439,11 @@ export function createDatePicker<
 
   function syncPopoverMode(mode: DatePickerMode): void {
     if (mode === "popover") {
-      calendar.setAttribute("popover", "auto");
+      if (supportsNativePopover()) {
+        calendar.setAttribute("popover", "auto");
+      } else {
+        calendar.removeAttribute("popover");
+      }
       input.style.setProperty("anchor-name", anchorName);
       calendar.style.setProperty("position-anchor", anchorName);
       return;
@@ -1428,6 +1515,120 @@ export function createDatePicker<
     render(state);
   }
 
+  function syncPopoverPosition(): void {
+    const useFallback =
+      getCalendarMode(currentOptions) === "popover" && calendarOpen && !supportsAnchorPositioning();
+
+    if (!useFallback) {
+      stopFallbackPositioning();
+      calendar.style.removeProperty("left");
+      calendar.style.removeProperty("top");
+      calendar.style.removeProperty("width");
+      return;
+    }
+
+    if (!fallbackPositioningActive) {
+      window.addEventListener("resize", positionFallbackPopover);
+      window.addEventListener("scroll", positionFallbackPopover, true);
+      fallbackPositioningActive = true;
+    }
+
+    positionFallbackPopover();
+  }
+
+  function positionFallbackPopover(): void {
+    if (!fallbackPositioningActive && !calendarOpen) return;
+
+    const inputRect = input.getBoundingClientRect();
+    const styles = window.getComputedStyle(calendar);
+    const anchorGap = getCssPixelValue(
+      styles.getPropertyValue("--litopis-popover-anchor-gap"),
+      DEFAULT_POPOVER_ANCHOR_GAP,
+    );
+    const minimumWidth = getCssPixelValue(
+      styles.getPropertyValue("--litopis-popover-min-width"),
+      DEFAULT_POPOVER_MIN_WIDTH,
+    );
+    const viewportGap = getCssPixelValue(
+      styles.getPropertyValue("--litopis-calendar-viewport-gap"),
+      DEFAULT_POPOVER_VIEWPORT_PADDING * 2,
+    );
+    const viewportPadding = viewportGap / 2;
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+    const availableWidth = Math.max(0, viewportWidth - viewportGap);
+    const width = Math.min(Math.max(inputRect.width, minimumWidth), availableWidth);
+    calendar.style.width = `${width}px`;
+    const calendarRect = calendar.getBoundingClientRect();
+    const below = inputRect.bottom + anchorGap;
+    const above = inputRect.top - calendarRect.height - anchorGap;
+    const preferredTop =
+      below + calendarRect.height <= viewportHeight - viewportPadding ? below : above;
+    const maxLeft = Math.max(viewportPadding, viewportWidth - calendarRect.width - viewportPadding);
+    const maxTop = Math.max(
+      viewportPadding,
+      viewportHeight - calendarRect.height - viewportPadding,
+    );
+    const left = Math.min(Math.max(inputRect.left, viewportPadding), maxLeft);
+    const top = Math.min(Math.max(preferredTop, viewportPadding), maxTop);
+
+    calendar.style.left = `${left}px`;
+    calendar.style.top = `${top}px`;
+  }
+
+  function stopFallbackPositioning(): void {
+    if (!fallbackPositioningActive) return;
+
+    window.removeEventListener("resize", positionFallbackPopover);
+    window.removeEventListener("scroll", positionFallbackPopover, true);
+    fallbackPositioningActive = false;
+  }
+
+  function syncFallbackDismiss(): void {
+    const useFallback =
+      getCalendarMode(currentOptions) === "popover" && calendarOpen && !supportsNativePopover();
+
+    if (!useFallback) {
+      stopFallbackDismiss();
+      return;
+    }
+
+    if (fallbackDismissActive) return;
+
+    if (activeFallbackPopoverClose && activeFallbackPopoverClose !== closeCalendar) {
+      activeFallbackPopoverClose();
+    }
+
+    document.addEventListener("click", onFallbackDocumentClick, true);
+    document.addEventListener("keydown", onFallbackDocumentKeydown);
+    activeFallbackPopoverClose = closeCalendar;
+    fallbackDismissActive = true;
+  }
+
+  function onFallbackDocumentClick(event: MouseEvent): void {
+    if (event.target instanceof Node && root.contains(event.target)) return;
+
+    closeCalendar();
+  }
+
+  function onFallbackDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== "Escape" || event.defaultPrevented) return;
+
+    event.preventDefault();
+    closeCalendarAndFocusInput();
+  }
+
+  function stopFallbackDismiss(): void {
+    if (!fallbackDismissActive) return;
+
+    document.removeEventListener("click", onFallbackDocumentClick, true);
+    document.removeEventListener("keydown", onFallbackDocumentKeydown);
+    if (activeFallbackPopoverClose === closeCalendar) {
+      activeFallbackPopoverClose = null;
+    }
+    fallbackDismissActive = false;
+  }
+
   caption.addEventListener("click", onCaptionClick);
   previousPanelButton.addEventListener("click", onPreviousPanelClick);
   nextPanelButton.addEventListener("click", onNextPanelClick);
@@ -1486,6 +1687,8 @@ export function createDatePicker<
       calendar.removeEventListener("toggle", onPopoverToggle);
       form?.removeEventListener("reset", onFormReset);
       resizeObserver?.disconnect();
+      stopFallbackDismiss();
+      stopFallbackPositioning();
       hideNativePopover();
       if (inputAttributes) restoreAttributes(input, inputAttributes);
       if (endInputAttributes) restoreAttributes(endInput, endInputAttributes);
@@ -1546,6 +1749,8 @@ function getCalendarStateOptions<ValueAs extends DatePickerValueAs>(
     ...(options.locale === undefined ? {} : { locale: options.locale }),
     ...(options.max === undefined ? {} : { max: options.max }),
     ...(options.min === undefined ? {} : { min: options.min }),
+    ...(options.disabledDates === undefined ? {} : { disabledDates: options.disabledDates }),
+    ...(options.isDateDisabled === undefined ? {} : { isDateDisabled: options.isDateDisabled }),
     ...(options.range === undefined ? {} : { range: getInternalRange(options.range) }),
     selected,
     selectionMode: options.selection ?? "single",
@@ -1555,6 +1760,15 @@ function getCalendarStateOptions<ValueAs extends DatePickerValueAs>(
 
 function getSelectedDate(state: CalendarState): DateValue | null {
   return state.selected;
+}
+
+function sameNullableDate(left: DateValue | null, right: DateValue | null): boolean {
+  if (left === null || right === null) return left === right;
+  return isSameDate(left, right);
+}
+
+function sameDateRange(left: DateRange, right: DateRange): boolean {
+  return sameNullableDate(left.start, right.start) && sameNullableDate(left.end, right.end);
 }
 
 function getCalendarMode<ValueAs extends DatePickerValueAs>(
@@ -1807,4 +2021,26 @@ function appendToken(value: string | null, token: string): string {
   const tokens = new Set(value?.split(/\s+/).filter(Boolean) ?? []);
   tokens.add(token);
   return [...tokens].join(" ");
+}
+
+function supportsAnchorPositioning(): boolean {
+  return typeof globalThis.CSS !== "undefined" && globalThis.CSS.supports("top", "anchor(bottom)");
+}
+
+function getCssPixelValue(value: string, fallback: number): number {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function scheduleMicrotask(callback: VoidFunction): void {
+  if (typeof queueMicrotask === "function") {
+    queueMicrotask(callback);
+    return;
+  }
+
+  void Promise.resolve().then(callback);
+}
+
+function hasOwn(value: object, property: PropertyKey): boolean {
+  return Object.prototype.hasOwnProperty.call(value, property);
 }

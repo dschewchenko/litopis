@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disabled dates browser fixture</title>
+  </head>
+  <body>
+    <div id="availability-picker"></div>
+    <script type="module">
+      import { createDatePicker } from "@litopis/dom";
+      import "@litopis/dom/styles/base.css";
+
+      const visibleMonths = [];
+      const picker = createDatePicker(document.querySelector("#availability-picker"), {
+        disabledDates: [{ day: 26, month: 6, year: 2026 }],
+        onVisibleMonthChange(month) {
+          visibleMonths.push(`${month.year}-${month.month}-${month.day}`);
+        },
+        selected: { day: 25, month: 6, year: 2026 },
+        today: { day: 25, month: 6, year: 2026 },
+      });
+
+      Object.assign(window, {
+        availabilityPicker: picker,
+        availabilityVisibleMonths: visibleMonths,
+      });
+    </script>
+  </body>
+</html>

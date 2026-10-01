@@ -23,6 +23,9 @@ export { DEFAULT_LOCALE, getLocaleFirstDayOfWeek, resolveLocale } from "./locale
 export {
   createCalendarState,
   focusDate,
+  isCalendarDateDisabled,
+  isCalendarDateExplicitlyDisabled,
+  isCalendarRangeDisabled,
   moveFocus,
   selectDate,
   selectRange,
@@ -46,6 +49,7 @@ export type {
   CalendarMove,
   CalendarState,
   CalendarStateOptions,
+  DateDisabledPredicate,
   CalendarSelectionMode,
   DateRange,
   DateValue,

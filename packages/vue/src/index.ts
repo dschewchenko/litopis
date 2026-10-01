@@ -9,7 +9,7 @@ import {
   type PropType,
 } from "vue";
 import { createDatePicker } from "@litopis/dom";
-import type { FirstDayOfWeek } from "@litopis/core";
+import type { DateDisabledPredicate, FirstDayOfWeek } from "@litopis/core";
 import type {
   CalendarGranularity,
   DateFieldFormat,
@@ -42,6 +42,7 @@ const datePickerProps = {
   clearButton: optionalBooleanProp,
   clearLabel: String,
   closeOnSelect: optionalBooleanProp,
+  disabledDates: Array as PropType<readonly DateValue[]>,
   firstDayOfWeek: Number as PropType<FirstDayOfWeek>,
   format: String as PropType<DateFieldFormat>,
   from: Object as PropType<LitopisDatePickerRangeEndpoint>,
@@ -51,6 +52,7 @@ const datePickerProps = {
   locale: String,
   max: Object as PropType<DateValue>,
   min: Object as PropType<DateValue>,
+  isDateDisabled: Function as PropType<DateDisabledPredicate>,
   mode: String as PropType<DatePickerMode>,
   modelValue: Object as PropType<LitopisDatePickerModelValue>,
   name: [String, Object] as PropType<string | DatePickerRangeNames>,
@@ -86,6 +88,7 @@ export const LitopisDatePicker = defineComponent({
     "update:from": (_value: LitopisDatePickerRangeEndpoint) => true,
     "update:modelValue": (_value: LitopisDatePickerModelValue) => true,
     "update:to": (_value: LitopisDatePickerRangeEndpoint) => true,
+    "visible-month-change": (_value: DateValue) => true,
   },
   setup(props, { emit, expose, slots }) {
     const root = ref<HTMLElement | null>(null);
@@ -164,6 +167,9 @@ export const LitopisDatePicker = defineComponent({
         ...getPickerOptions(),
         onRangeChange: emitRangeModelValue,
         onValueChange: emitModelValue,
+        onVisibleMonthChange(value) {
+          emit("visible-month-change", value);
+        },
       });
     }
 
@@ -181,6 +187,9 @@ export const LitopisDatePicker = defineComponent({
           ...getPickerOptions(),
           onRangeChange: emitRangeModelValue,
           onValueChange: emitModelValue,
+          onVisibleMonthChange(value) {
+            emit("visible-month-change", value);
+          },
         });
       },
       { deep: true },

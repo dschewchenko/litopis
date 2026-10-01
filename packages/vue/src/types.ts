@@ -17,7 +17,7 @@ export type LitopisDatePickerRangeEndpoint = DatePickerValue<DatePickerValueAs> 
 
 export type LitopisDatePickerOptions = Omit<
   DatePickerOptions<DatePickerValueAs, DatePickerSelection>,
-  "onRangeChange" | "onValueChange" | "range" | "selected"
+  "onRangeChange" | "onValueChange" | "onVisibleMonthChange" | "range" | "selected"
 >;
 
 export type LitopisDatePickerControllerOptions = DatePickerOptions<

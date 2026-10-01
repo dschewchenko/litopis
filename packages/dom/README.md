@@ -20,6 +20,37 @@ const picker = createDatePicker(document.querySelector("#picker")!, {
 
 The controller returns an ISO `YYYY-MM-DD` value through `picker.getISOValue()`.
 
+## Unavailable dates and availability loading
+
+Pass `disabledDates` for a reactive availability snapshot, `isDateDisabled` for a synchronous
+predicate or both. Disabled days cannot be selected by the calendar, typed input or controller
+selection methods. A complete range is rejected when any day inside it is unavailable. Controller
+selection methods leave the current value unchanged when a requested day or range is unavailable.
+`onVisibleMonthChange` receives the first day whenever the displayed month changes, including after
+navigation or selection; it does not fire on initial render.
+
+```ts
+import type { DateValue } from "@litopis/core";
+import { createDatePicker } from "@litopis/dom";
+
+const root = document.querySelector("#picker")!;
+let unavailableDates: readonly DateValue[] = [];
+const options = {
+  disabledDates: unavailableDates,
+  onVisibleMonthChange(month) {
+    void loadAvailability(month);
+  },
+};
+const picker = createDatePicker(root, options);
+
+async function loadAvailability(month: DateValue): Promise<void> {
+  const dates = await fetchUnavailableDates(month); // Your availability request.
+  unavailableDates = dates;
+  // Replace the list after loading; the visible grid updates in place.
+  picker.setOptions({ ...options, disabledDates: unavailableDates });
+}
+```
+
 ## Custom input
 
 Place an input directly inside the picker root with `slot="input"`. Litopis keeps the same element,

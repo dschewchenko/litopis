@@ -4,6 +4,9 @@ export interface DateValue {
   readonly year: number;
 }
 
+/** Returns whether a calendar day is unavailable for selection. */
+export type DateDisabledPredicate = (value: DateValue) => boolean;
+
 export interface DateRange {
   readonly end: DateValue | null;
   readonly start: DateValue | null;
@@ -32,7 +35,9 @@ export interface CalendarGrid {
 }
 
 export interface CalendarStateOptions {
+  readonly disabledDates?: readonly DateValue[];
   readonly firstDayOfWeek?: FirstDayOfWeek;
+  readonly isDateDisabled?: DateDisabledPredicate;
   readonly locale?: string;
   readonly max?: DateValue;
   readonly min?: DateValue;
@@ -43,12 +48,14 @@ export interface CalendarStateOptions {
 }
 
 export interface CalendarState {
+  readonly disabledDates: readonly DateValue[];
   readonly firstDayOfWeek: FirstDayOfWeek;
   readonly focusedDate: DateValue;
   readonly grid: CalendarGrid;
   readonly locale: string;
   readonly max: DateValue | null;
   readonly min: DateValue | null;
+  readonly isDateDisabled: DateDisabledPredicate | null;
   readonly selected: DateValue | null;
   readonly range: DateRange;
   readonly selectionMode: CalendarSelectionMode;

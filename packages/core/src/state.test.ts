@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { getLocaleFirstDayOfWeek, resolveLocale } from "./locale";
-import { createCalendarState, focusDate, moveFocus, selectFocusedDate } from "./state";
+import {
+  createCalendarState,
+  focusDate,
+  moveFocus,
+  selectDate,
+  selectFocusedDate,
+  selectRange,
+} from "./state";
 import { getDateRangeBoundaries, isDateInDateRange, selectDateRange } from "./range";
 import { getDateRangeLength, getPeriodEnd, normalizeDateRange } from "./range";
 
@@ -147,6 +154,39 @@ describe("calendar state", () => {
     });
 
     expect(selectFocusedDate(state).selected).toEqual({ day: 25, month: 6, year: 2026 });
+  });
+
+  it("disables explicit and predicate dates across rendering and every state selection path", () => {
+    const unavailable = { day: 26, month: 6, year: 2026 };
+    const state = createCalendarState({
+      disabledDates: [unavailable],
+      isDateDisabled: (date) => date.day === 28 && date.month === 6,
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const cells = state.grid.weeks.flat();
+
+    expect(cells.find((cell) => cell.date?.day === 26)?.disabled).toBe(true);
+    expect(cells.find((cell) => cell.date?.day === 28)?.disabled).toBe(true);
+    expect(selectDate(state, unavailable)).toBe(state);
+    expect(selectDate(state, { day: 28, month: 6, year: 2026 })).toBe(state);
+    expect(selectFocusedDate(focusDate(state, unavailable)).selected).toBeNull();
+    expect(
+      selectRange(state, {
+        end: { day: 27, month: 6, year: 2026 },
+        start: { day: 25, month: 6, year: 2026 },
+      }),
+    ).toBe(state);
+  });
+
+  it("does not loop or select while every navigable date is unavailable", () => {
+    const state = createCalendarState({
+      isDateDisabled: () => true,
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const next = moveFocus(state, "next-day");
+
+    expect(next.focusedDate).toEqual({ day: 26, month: 6, year: 2026 });
+    expect(selectFocusedDate(next).selected).toBeNull();
   });
 
   it("builds, completes and restarts a chronological date range", () => {

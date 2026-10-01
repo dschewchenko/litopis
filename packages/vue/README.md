@@ -36,3 +36,32 @@ See the [Vue integration guide](https://dschewchenko.github.io/litopis/integrati
 
 For a range, bind a `LitopisDateRange` with `v-model`, then set `selection="range"`,
 `name` for synchronized native form values.
+
+Use `disabled-dates` for reactive availability snapshots or `is-date-disabled` for a synchronous
+predicate. The picker emits `visible-month-change` with the first day whenever the displayed month
+changes, including after navigation or selection (not on initial render), so an application can
+load another availability window.
+Unavailable dates cannot be selected by pointer, keyboard, typed input or controller methods. A
+complete range is rejected when it contains any unavailable day.
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import type { LitopisDateValue } from "@litopis/vue";
+
+const appointment = ref<LitopisDateValue | null>(null);
+const disabledDates = ref<LitopisDateValue[]>([]);
+
+function loadAvailability(month: LitopisDateValue): void {
+  // Replace disabledDates.value with the availability for this month.
+}
+</script>
+
+<template>
+  <LitopisDatePicker
+    v-model="appointment"
+    :disabled-dates="disabledDates"
+    @visible-month-change="loadAvailability"
+  />
+</template>
+```

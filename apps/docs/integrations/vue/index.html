@@ -183,6 +183,24 @@ const to = ref&lt;LitopisDateValue | null&gt;(null);
 &lt;/template&gt;</code></pre>
             </div>
           </section>
+          <section id="availability">
+            <h2>Unavailable dates</h2>
+            <p>
+              Bind <code>disabled-dates</code> to an availability snapshot or pass
+              <code>is-date-disabled</code> for a synchronous predicate. A complete range cannot
+              include an unavailable day. The picker emits <code>visible-month-change</code> with
+              the first day whenever the displayed month changes, including after navigation or
+              selection, but not on initial render.
+            </p>
+            <div class="language-vue vp-code-group">
+              <span class="lang">vue</span>
+              <pre><code>&lt;LitopisDatePicker
+  v-model="appointment"
+  :disabled-dates="disabledDates"
+  @visible-month-change="loadAvailability"
+/&gt;</code></pre>
+            </div>
+          </section>
           <section id="custom-input">
             <h2>Custom input</h2>
             <p>
@@ -217,6 +235,7 @@ const to = ref&lt;LitopisDateValue | null&gt;(null);
             ><a class="outline-link" href="#controlled-value">Value</a
             ><a class="outline-link" href="#component-ref">Component ref</a
             ><a class="outline-link" href="#range">Range</a
+            ><a class="outline-link" href="#availability">Unavailable dates</a
             ><a class="outline-link" href="#custom-input">Custom input</a
             ><a class="outline-link" href="#styling">Styling</a>
           </nav>

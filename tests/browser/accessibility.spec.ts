@@ -559,26 +559,161 @@ test("open popover and month selection states have no detectable violations", as
   expect(results.violations).toEqual([]);
 });
 
-test("selected periods keep their selection styling on hover", async ({ page }) => {
+test("popover fallback stays aligned when CSS anchors are unavailable", async ({ page }) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/dom/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <style>
+      body { margin: 0; min-height: 2000px; padding: 100px; }
+      #picker { width: 200px; }
+    </style>
+    <div id="picker"></div>
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <script>
+      LitopisDOM.createDatePicker(document.querySelector("#picker"), {
+        mode: "popover",
+      });
+    </script>
+  `);
+
+  const input = page.getByRole("combobox", { name: "Date" });
+  await input.click();
+
+  const nativeRect = await page.locator(".litopis-calendar").boundingBox();
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => {
+    const nativeCssSupports = CSS.supports.bind(CSS);
+    CSS.supports = new Proxy(nativeCssSupports, {
+      apply(target, thisArgument, argumentsList) {
+        if (argumentsList[0] === "top" && argumentsList[1] === "anchor(bottom)") return false;
+
+        return Reflect.apply(target, thisArgument, argumentsList);
+      },
+    });
+    document.querySelector<HTMLElement>(".litopis-calendar")?.style.setProperty("margin-top", "0");
+  });
+  await input.click();
+
+  const fallbackRect = await page.locator(".litopis-calendar").boundingBox();
+  const inputRect = await input.boundingBox();
+  const offsets = await page.evaluate(() => {
+    const input = document.querySelector(".litopis-input");
+    const calendar = document.querySelector(".litopis-calendar");
+    if (!(input instanceof HTMLElement) || !(calendar instanceof HTMLElement)) return null;
+    const inputRect = input.getBoundingClientRect();
+    const calendarRect = calendar.getBoundingClientRect();
+
+    return {
+      left: calendarRect.left - inputRect.left,
+      top: calendarRect.top - inputRect.bottom,
+    };
+  });
+
+  expect(offsets).not.toBeNull();
+  expect(nativeRect).not.toBeNull();
+  expect(fallbackRect).not.toBeNull();
+  expect(inputRect).not.toBeNull();
+  expect(Math.abs(offsets!.left)).toBeLessThan(1);
+  expect(Math.abs(offsets!.top - 8)).toBeLessThan(1);
+  expect(Math.abs(fallbackRect!.x - nativeRect!.x)).toBeLessThan(1);
+  expect(Math.abs(fallbackRect!.y - nativeRect!.y)).toBeLessThan(1);
+  expect(Math.abs(fallbackRect!.width - nativeRect!.width)).toBeLessThan(1);
+  expect(inputRect!.width).toBe(200);
+  expect(fallbackRect!.width).toBe(320);
+});
+
+test("popover fallback matches native dismiss behavior without the Popover API", async ({
+  page,
+}) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/dom/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <style>
+      body { margin: 0; min-height: 2000px; padding: 100px; }
+      #picker { width: 360px; }
+    </style>
+    <script>
+      Object.defineProperties(HTMLElement.prototype, {
+        hidePopover: { configurable: true, value: undefined },
+        showPopover: { configurable: true, value: undefined },
+      });
+      const nativeCssSupports = CSS.supports.bind(CSS);
+      CSS.supports = (property, value) =>
+        property === "top" && value === "anchor(bottom)"
+          ? false
+          : nativeCssSupports(property, value);
+    </script>
+    <div id="picker"></div>
+    <button id="outside" type="button">Outside</button>
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <script>
+      LitopisDOM.createDatePicker(document.querySelector("#picker"), {
+        mode: "popover",
+      });
+    </script>
+  `);
+
+  const picker = page.locator("#picker");
+  const input = picker.getByRole("combobox", { name: "Date" });
+  const calendar = picker.locator(".litopis-calendar");
+  await input.click();
+
+  await expect(picker).toHaveAttribute("data-calendar-open", "true");
+  await expect(calendar).not.toHaveAttribute("popover");
+  await expect(calendar).toBeVisible();
+
+  await picker.getByRole("button", { name: "Choose month and year" }).click();
+  await expect(picker).toHaveAttribute("data-calendar-open", "true");
+
+  await page.getByRole("button", { name: "Outside" }).click();
+  await expect(picker).toHaveAttribute("data-calendar-open", "false");
+  await expect(calendar).toBeHidden();
+
+  await input.click();
+  await picker.getByRole("button", { name: "Choose month and year" }).click();
+  await picker.locator(".litopis-panel-title").focus();
+  await page.keyboard.press("Escape");
+
+  await expect(picker).toHaveAttribute("data-calendar-open", "false");
+  await expect(input).toBeFocused();
+});
+
+test("selected day, month and year keep the same selection styling", async ({ page }) => {
   await page.goto("./examples/");
   const input = page.getByRole("combobox", { name: "Дата події" });
   const picker = input.locator("..");
+  const selectedDay = picker.locator(".litopis-day[data-selected] .litopis-day-button");
+  const selectedBackground = await selectedDay.evaluate(
+    (element) => getComputedStyle(element).backgroundColor,
+  );
+  const selectedForeground = await selectedDay.evaluate(
+    (element) => getComputedStyle(element).color,
+  );
 
   await picker.getByRole("button", { name: "Choose month and year" }).click();
 
   const selectedMonth = picker.locator(".litopis-month-button[data-selected]");
   await expect(selectedMonth).toHaveCount(1);
-  const selectedBackground = await selectedMonth.evaluate(
-    (element) => getComputedStyle(element).backgroundColor,
-  );
-  const selectedForeground = await selectedMonth.evaluate(
-    (element) => getComputedStyle(element).color,
-  );
+  await expect(selectedMonth).toHaveCSS("background-color", selectedBackground);
+  await expect(selectedMonth).toHaveCSS("color", selectedForeground);
 
   await selectedMonth.hover();
 
   await expect(selectedMonth).toHaveCSS("background-color", selectedBackground);
   await expect(selectedMonth).toHaveCSS("color", selectedForeground);
+
+  await picker.getByRole("button", { name: "Choose year" }).click();
+
+  const selectedYear = picker.locator(".litopis-year-button[data-selected]");
+  await expect(selectedYear).toHaveCount(1);
+  await expect(selectedYear).toHaveCSS("background-color", selectedBackground);
+  await expect(selectedYear).toHaveCSS("color", selectedForeground);
 });
 
 test("the published browser bundle defines a working custom element", async ({ page }) => {
