@@ -1,5 +1,11 @@
 # @litopis/core
 
+## 0.4.0
+
+### Minor Changes
+
+- 7223034: Add explicit unavailable-date lists, date-disabled predicates and availability-aware calendar updates.
+
 ## 0.3.0
 
 ## 0.2.0
