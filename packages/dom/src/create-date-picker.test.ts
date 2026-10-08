@@ -198,6 +198,50 @@ describe("createDatePicker", () => {
     expect(nextButton?.textContent).toBe("");
   });
 
+  it("merges partial message overrides with the English defaults", () => {
+    const root = document.createElement("div");
+
+    createDatePicker(root, {
+      clearButton: true,
+      messages: {
+        nextMonth: "Advance month",
+        seasons: { summer: "Warm season" },
+      },
+      season: true,
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    expect(
+      root
+        .querySelector<HTMLButtonElement>(".litopis-nav-button[data-direction='next']")
+        ?.getAttribute("aria-label"),
+    ).toBe("Advance month");
+    expect(
+      root
+        .querySelector<HTMLButtonElement>(".litopis-nav-button[data-direction='previous']")
+        ?.getAttribute("aria-label"),
+    ).toBe("Previous month");
+    expect(root.querySelector(".litopis-season")?.textContent).toBe("Warm season");
+    expect(root.querySelector(".litopis-clear-button")?.textContent).toBe("Clear");
+  });
+
+  it("keeps English defaults when an override is undefined", () => {
+    const root = document.createElement("div");
+
+    createDatePicker(root, {
+      messages: { nextMonth: undefined, seasons: { winter: undefined } },
+      season: true,
+      today: { day: 25, month: 12, year: 2026 },
+    });
+
+    expect(
+      root
+        .querySelector<HTMLButtonElement>(".litopis-nav-button[data-direction='next']")
+        ?.getAttribute("aria-label"),
+    ).toBe("Next month");
+    expect(root.querySelector(".litopis-season")?.textContent).toBe("Winter");
+  });
+
   it("renders only Litopis-owned styling hooks", () => {
     const root = document.createElement("div");
 
@@ -827,6 +871,24 @@ describe("createDatePicker", () => {
     expect(input?.value).toBe("25.06.2026");
     expect(picker.getValue()).toEqual({ day: 25, month: 6, year: 2026 });
     expect(picker.getISOValue()).toBe("2026-06-25");
+  });
+
+  it("masks and parses localized month inputs with their configured separator", () => {
+    const root = document.createElement("div");
+
+    const picker = createDatePicker(root, {
+      format: "dd/mm/yyyy",
+      granularity: "month",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+
+    const input = root.querySelector<HTMLInputElement>(".litopis-input");
+    input!.value = "062026";
+    input!.dispatchEvent(new Event("input"));
+
+    expect(input?.value).toBe("06/2026");
+    expect(picker.getValue()).toEqual({ day: 1, month: 6, year: 2026 });
+    expect(picker.getISOValue()).toBe("2026-06-01");
   });
 
   it("allows editing the masked year and clamps committed values", () => {

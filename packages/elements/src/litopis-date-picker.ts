@@ -2,6 +2,7 @@ import { createDatePicker, parseDateFieldValue, type DatePickerController } from
 import { toIsoDate } from "@litopis/core";
 import type {
   DatePickerOptions,
+  DatePickerMessageOverrides,
   DatePickerPanels,
   DatePickerRangeLabels,
   DatePickerRangeNames,
@@ -9,7 +10,7 @@ import type {
   DateValue,
 } from "@litopis/dom";
 
-type ElementDateFieldFormat = "dd.mm.yyyy" | "mm/dd/yyyy" | "yyyy-mm-dd";
+type ElementDateFieldFormat = "dd.mm.yyyy" | "dd/mm/yyyy" | "mm/dd/yyyy" | "yyyy-mm-dd";
 type ElementFirstDayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 type ElementMode = "inline" | "popover";
 type ElementSize = "comfortable" | "compact";
@@ -20,6 +21,7 @@ type ElementSelection = "single" | "range";
 
 const dateFieldFormats: readonly ElementDateFieldFormat[] = [
   "dd.mm.yyyy",
+  "dd/mm/yyyy",
   "mm/dd/yyyy",
   "yyyy-mm-dd",
 ];
@@ -36,6 +38,7 @@ const firstDaysOfWeek = new Map<string, ElementFirstDayOfWeek>([
 
 export class LitopisDatePickerElement extends HTMLElement {
   #controller: DatePickerController | null = null;
+  #messages: DatePickerMessageOverrides | null = null;
   #rangeLabels: DatePickerRangeLabels | null = null;
   #rangeNames: DatePickerRangeNames | null = null;
   #range: DateRange = { end: null, start: null };
@@ -158,6 +161,15 @@ export class LitopisDatePickerElement extends HTMLElement {
     this.#controller?.setOptions(this.#getOptions());
   }
 
+  get messages(): DatePickerMessageOverrides | null {
+    return this.#messages;
+  }
+
+  set messages(value: DatePickerMessageOverrides | null) {
+    this.#messages = value;
+    this.#controller?.setOptions(this.#getOptions());
+  }
+
   #mount(): void {
     this.#controller?.destroy();
     this.#controller = createDatePicker(this, this.#getOptions());
@@ -219,6 +231,7 @@ export class LitopisDatePickerElement extends HTMLElement {
       ...(this.getAttribute("today-label") === null
         ? {}
         : { todayLabel: this.getAttribute("today-label") ?? "Today" }),
+      ...(this.#messages === null ? {} : { messages: this.#messages }),
     };
   }
 }

@@ -39,7 +39,6 @@ import {
 import {
   clampDateFieldValue,
   formatDateFieldValue,
-  getDateFieldError,
   getDateFieldPlaceholder,
   isDateInRange,
   maskDateFieldEdit,
@@ -51,6 +50,7 @@ import type {
   DatePickerMode,
   DatePickerController,
   DatePickerLayout,
+  DatePickerMessages,
   DatePickerOptions,
   DatePickerRange,
   DatePickerRangeOptions,
@@ -59,6 +59,7 @@ import type {
   DatePickerValue,
   DatePickerValueAs,
 } from "./types";
+import { resolveDatePickerMessages } from "./locale";
 
 const keyMoves = new Map<string, CalendarMove>([
   ["ArrowRight", "next-day"],
@@ -141,6 +142,7 @@ export function createDatePicker<
   const endInputAttributes = suppliedEndInput ? getAttributeSnapshot(suppliedEndInput) : null;
   const inputPlaceholder = suppliedInput?.getAttribute("placeholder") ?? null;
   const endInputPlaceholder = suppliedEndInput?.getAttribute("placeholder") ?? null;
+  const initialMessages = resolveDatePickerMessages(currentOptions.messages);
 
   root.classList.add("litopis");
   root.replaceChildren();
@@ -229,12 +231,12 @@ export function createDatePicker<
   previousMonthButton.className = "litopis-nav-button";
   previousMonthButton.dataset.direction = "previous";
   previousMonthButton.type = "button";
-  previousMonthButton.setAttribute("aria-label", "Previous month");
+  previousMonthButton.setAttribute("aria-label", initialMessages.previousMonth);
 
   const caption = document.createElement("button");
   caption.className = "litopis-caption";
   caption.type = "button";
-  caption.setAttribute("aria-label", "Choose month and year");
+  caption.setAttribute("aria-label", initialMessages.chooseMonthAndYear);
 
   const captionLabel = document.createElement("span");
   captionLabel.className = "litopis-caption-label";
@@ -248,7 +250,7 @@ export function createDatePicker<
   nextMonthButton.className = "litopis-nav-button";
   nextMonthButton.dataset.direction = "next";
   nextMonthButton.type = "button";
-  nextMonthButton.setAttribute("aria-label", "Next month");
+  nextMonthButton.setAttribute("aria-label", initialMessages.nextMonth);
 
   calendarHeader.append(previousMonthButton, caption, nextMonthButton);
 
@@ -375,6 +377,7 @@ export function createDatePicker<
     const format = getInputFormat(currentOptions);
     const mode = getCalendarMode(currentOptions);
     const displaySeason = currentOptions.season ?? false;
+    const messages = resolveDatePickerMessages(currentOptions.messages);
 
     root.dataset.mode = mode;
     root.dataset.calendarOpen = String(calendarOpen);
@@ -384,10 +387,10 @@ export function createDatePicker<
     root.dataset.resolvedPanels = String(resolvedPanelCount);
     setDataValue(root, "rangeComplete", String(Boolean(range.start && range.end)));
     syncPopoverMode(mode);
-    label.textContent = getStartLabel(currentOptions);
+    label.textContent = getStartLabel(currentOptions, messages);
     input.placeholder =
       inputPlaceholder ?? getFieldPlaceholder(format, getGranularity(currentOptions));
-    endLabel.textContent = getEndLabel(currentOptions);
+    endLabel.textContent = getEndLabel(currentOptions, messages);
     endInput.placeholder =
       endInputPlaceholder ?? getFieldPlaceholder(format, getGranularity(currentOptions));
     if (!preserveInputValue) {
@@ -395,10 +398,13 @@ export function createDatePicker<
     }
     input.setAttribute("aria-expanded", String(calendarOpen));
     input.setAttribute("aria-invalid", String(inputStatus === "invalid"));
-    fieldMessage.textContent = inputStatus === "invalid" ? "Enter a valid date." : "";
+    fieldMessage.textContent = inputStatus === "invalid" ? messages.enterValidDate : "";
     calendar.hidden = mode === "popover" && !supportsNativePopover() && !calendarOpen;
     calendarHeader.hidden = getGranularity(currentOptions) !== "day" || monthYearPanelOpen;
     captionLabel.textContent = getCalendarCaption();
+    setAttribute(caption, "aria-label", messages.chooseMonthAndYear);
+    setAttribute(previousMonthButton, "aria-label", messages.previousMonth);
+    setAttribute(nextMonthButton, "aria-label", messages.nextMonth);
     caption.setAttribute("aria-expanded", String(monthYearPanelOpen));
     caption.disabled = getGranularity(currentOptions) !== "day";
     previousMonthButton.disabled = isAdjacentMonthDisabled(-1);
@@ -409,10 +415,10 @@ export function createDatePicker<
       currentOptions.todayButton !== true && currentOptions.clearButton !== true;
     clearButton.hidden = currentOptions.clearButton !== true;
     clearButton.disabled = !hasSelection();
-    clearButton.textContent = currentOptions.clearLabel ?? "Clear";
+    clearButton.textContent = currentOptions.clearLabel ?? messages.clear;
     todayButton.disabled = isCalendarDateDisabled(state, state.today);
     todayButton.hidden = currentOptions.todayButton !== true;
-    todayButton.textContent = currentOptions.todayLabel ?? "Today";
+    todayButton.textContent = currentOptions.todayLabel ?? messages.today;
     liveRegion.textContent = `${state.grid.label}. ${formatDate(state.focusedDate, state.locale, {
       dateStyle: "full",
     })}`;
@@ -682,15 +688,17 @@ export function createDatePicker<
     monthYearPanel.hidden = !monthYearPanelOpen;
     if (!monthYearPanelOpen) return;
 
+    const messages = resolveDatePickerMessages(currentOptions.messages);
+
     if (panelMode === "year") {
       ensurePeriodPanelStructure("year");
-      setAttribute(panelGrid, "aria-label", "Choose year");
+      setAttribute(panelGrid, "aria-label", messages.chooseYear);
       renderYearPanel();
       return;
     }
 
     ensurePeriodPanelStructure("month");
-    setAttribute(panelGrid, "aria-label", "Choose month");
+    setAttribute(panelGrid, "aria-label", messages.chooseMonth);
     renderMonthPanel();
   }
 
@@ -717,12 +725,13 @@ export function createDatePicker<
   }
 
   function renderMonthPanel(): void {
+    const messages = resolveDatePickerMessages(currentOptions.messages);
     setText(panelTitleButton, String(state.visibleMonth.year));
-    setAttribute(panelTitleButton, "aria-label", "Choose year");
+    setAttribute(panelTitleButton, "aria-label", messages.chooseYear);
     setDisabled(previousPanelButton, isYearDisabled(state.visibleMonth.year - 1));
     setDisabled(nextPanelButton, isYearDisabled(state.visibleMonth.year + 1));
-    setAttribute(previousPanelButton, "aria-label", "Previous year");
-    setAttribute(nextPanelButton, "aria-label", "Next year");
+    setAttribute(previousPanelButton, "aria-label", messages.previousYear);
+    setAttribute(nextPanelButton, "aria-label", messages.nextYear);
     const monthButtons = panelGrid.querySelectorAll<HTMLButtonElement>(".litopis-month-button");
 
     for (let month = 1; month <= 12; month += 1) {
@@ -741,14 +750,15 @@ export function createDatePicker<
   }
 
   function renderYearPanel(): void {
+    const messages = resolveDatePickerMessages(currentOptions.messages);
     const yearPageEnd = yearPageStart + 11;
     setText(panelTitleButton, `${yearPageStart}–${yearPageEnd}`);
     setDisabled(panelTitleButton, getGranularity(currentOptions) === "year");
-    setAttribute(panelTitleButton, "aria-label", "Current year page");
+    setAttribute(panelTitleButton, "aria-label", messages.currentYearPage);
     setDisabled(previousPanelButton, isYearRangeDisabled(yearPageStart - 12, yearPageStart - 1));
     setDisabled(nextPanelButton, isYearRangeDisabled(yearPageStart + 12, yearPageStart + 23));
-    setAttribute(previousPanelButton, "aria-label", "Previous years");
-    setAttribute(nextPanelButton, "aria-label", "Next years");
+    setAttribute(previousPanelButton, "aria-label", messages.previousYears);
+    setAttribute(nextPanelButton, "aria-label", messages.nextYears);
     const yearButtons = panelGrid.querySelectorAll<HTMLButtonElement>(".litopis-year-button");
 
     for (let year = yearPageStart; year <= yearPageEnd; year += 1) {
@@ -828,19 +838,21 @@ export function createDatePicker<
   }
 
   function getSeasonLabel(month: number): string {
+    const messages = resolveDatePickerMessages(currentOptions.messages);
+
     if (month === 12 || month <= 2) {
-      return "Winter";
+      return messages.seasons.winter;
     }
 
     if (month <= 5) {
-      return "Spring";
+      return messages.seasons.spring;
     }
 
     if (month <= 8) {
-      return "Summer";
+      return messages.seasons.summer;
     }
 
-    return "Autumn";
+    return messages.seasons.autumn;
   }
 
   function focusMonthYear(month: number, year: number): void {
@@ -1132,9 +1144,10 @@ export function createDatePicker<
         isCalendarDateDisabled(state, normalized)
       ) {
         target.setAttribute("aria-invalid", "true");
+        const messages = resolveDatePickerMessages(currentOptions.messages);
         getFieldMessage(target).textContent = isDateInRange(parsed, state.min, state.max)
-          ? "Enter a valid date."
-          : getDateFieldError(parsed, state.min, state.max);
+          ? messages.enterValidDate
+          : getDatePickerFieldError(parsed, state.min, state.max, messages);
         return;
       }
 
@@ -1168,7 +1181,9 @@ export function createDatePicker<
 
   function markUnavailableInput(target: HTMLInputElement): void {
     target.setAttribute("aria-invalid", "true");
-    getFieldMessage(target).textContent = "Enter a valid date.";
+    getFieldMessage(target).textContent = resolveDatePickerMessages(
+      currentOptions.messages,
+    ).enterValidDate;
   }
 
   function onEndInput(): void {
@@ -1797,6 +1812,7 @@ function getFieldLayout<ValueAs extends DatePickerValueAs>(
 
 function getStartLabel<ValueAs extends DatePickerValueAs>(
   options: DatePickerOptions<ValueAs>,
+  messages: DatePickerMessages,
 ): string {
   if (options.selection === "range") {
     if (typeof options.label === "object") return options.label.start;
@@ -1804,16 +1820,29 @@ function getStartLabel<ValueAs extends DatePickerValueAs>(
       return options.label;
     }
 
-    return "Start";
+    return messages.start;
   }
 
-  return typeof options.label === "string" ? options.label : "Date";
+  return typeof options.label === "string" ? options.label : messages.date;
 }
 
 function getEndLabel<ValueAs extends DatePickerValueAs>(
   options: DatePickerOptions<ValueAs>,
+  messages: DatePickerMessages,
 ): string {
-  return typeof options.label === "object" ? options.label.end : "End";
+  return typeof options.label === "object" ? options.label.end : messages.end;
+}
+
+function getDatePickerFieldError(
+  value: DateValue | null,
+  min: DateValue | null,
+  max: DateValue | null,
+  messages: DatePickerMessages,
+): string {
+  if (!value) return messages.enterValidDate;
+  if (min && compareDates(value, min) < 0) return messages.dateOnOrAfter(toIsoDate(min));
+  if (max && compareDates(value, max) > 0) return messages.dateOnOrBefore(toIsoDate(max));
+  return "";
 }
 
 function getRangeFieldName<ValueAs extends DatePickerValueAs>(
@@ -1832,7 +1861,10 @@ function getFieldPlaceholder(
   granularity: "day" | "month" | "year",
 ): string {
   if (granularity === "year") return "YYYY";
-  if (granularity === "month") return format === "yyyy-mm-dd" ? "YYYY-MM" : "MM.YYYY";
+  if (granularity === "month") {
+    if (format === "yyyy-mm-dd") return "YYYY-MM";
+    return format === "dd/mm/yyyy" ? "MM/YYYY" : "MM.YYYY";
+  }
   return getDateFieldPlaceholder(format);
 }
 
@@ -1846,7 +1878,8 @@ function formatPeriodFieldValue(
 
   const year = String(value.year).padStart(4, "0");
   const month = String(value.month).padStart(2, "0");
-  return format === "yyyy-mm-dd" ? `${year}-${month}` : `${month}.${year}`;
+  if (format === "yyyy-mm-dd") return `${year}-${month}`;
+  return format === "dd/mm/yyyy" ? `${month}/${year}` : `${month}.${year}`;
 }
 
 function parsePeriodFieldValue(
@@ -1880,7 +1913,8 @@ function maskPeriodFieldEdit(
     return clipped.length > 4 ? `${clipped.slice(0, 4)}-${clipped.slice(4)}` : clipped;
   }
 
-  return clipped.length > 2 ? `${clipped.slice(0, 2)}.${clipped.slice(2)}` : clipped;
+  const separator = format === "dd/mm/yyyy" ? "/" : ".";
+  return clipped.length > 2 ? `${clipped.slice(0, 2)}${separator}${clipped.slice(2)}` : clipped;
 }
 
 function parseRangeFieldValue(

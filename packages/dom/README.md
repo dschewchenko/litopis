@@ -20,6 +20,24 @@ const picker = createDatePicker(document.querySelector("#picker")!, {
 
 The controller returns an ISO `YYYY-MM-DD` value through `picker.getISOValue()`.
 
+## Locale messages and date formats
+
+Pass a BCP 47 locale to use its native month names and weekday order. Control messages use English
+defaults and can be overridden per caller with the typed `messages` option. Partial overrides are
+merged with the defaults, including the seasonal labels.
+
+```ts
+createDatePicker(document.querySelector("#picker")!, {
+  format: "dd/mm/yyyy",
+  locale: navigator.language,
+  messages: {
+    chooseMonthAndYear: "Select month and year",
+  },
+});
+```
+
+Supported input formats are `yyyy-mm-dd`, `dd.mm.yyyy`, `dd/mm/yyyy`, and `mm/dd/yyyy`.
+
 ## Unavailable dates and availability loading
 
 Pass `disabledDates` for a reactive availability snapshot, `isDateDisabled` for a synchronous

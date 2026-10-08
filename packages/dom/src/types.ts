@@ -33,6 +33,48 @@ export interface DatePickerRangeLabels {
   readonly start: string;
 }
 
+/** Labels used by the date picker controls and its accessible status messages. */
+export interface DatePickerMessages {
+  readonly clear: string;
+  readonly chooseMonth: string;
+  readonly chooseMonthAndYear: string;
+  readonly chooseYear: string;
+  readonly currentYearPage: string;
+  readonly date: string;
+  readonly dateOnOrAfter: (date: string) => string;
+  readonly dateOnOrBefore: (date: string) => string;
+  readonly end: string;
+  readonly enterValidDate: string;
+  readonly nextMonth: string;
+  readonly nextYear: string;
+  readonly nextYears: string;
+  readonly previousMonth: string;
+  readonly previousYear: string;
+  readonly previousYears: string;
+  readonly seasons: DatePickerSeasonMessages;
+  readonly start: string;
+  readonly today: string;
+}
+
+/** Seasonal labels displayed when the optional season text is enabled. */
+export interface DatePickerSeasonMessages {
+  readonly autumn: string;
+  readonly spring: string;
+  readonly summer: string;
+  readonly winter: string;
+}
+
+type OptionalMessageOverrides<T> = {
+  readonly [Key in keyof T]?: T[Key] | undefined;
+};
+
+/** Optional message overrides merged with the built-in English defaults. */
+export type DatePickerMessageOverrides = OptionalMessageOverrides<
+  Omit<DatePickerMessages, "seasons">
+> & {
+  readonly seasons?: OptionalMessageOverrides<DatePickerSeasonMessages> | undefined;
+};
+
 export type DatePickerSelectionValue<
   ValueAs extends DatePickerValueAs,
   Selection extends DatePickerSelection,
@@ -45,6 +87,7 @@ export interface DatePickerOptions<
   readonly clearButton?: boolean;
   readonly clearLabel?: string;
   readonly closeOnSelect?: boolean;
+  readonly messages?: DatePickerMessageOverrides;
   readonly mode?: DatePickerMode;
   readonly format?: DateFieldFormat;
   readonly label?: string | DatePickerRangeLabels;
@@ -94,7 +137,7 @@ export interface DatePickerController<
   toggle(): void;
 }
 
-export type DateFieldFormat = "yyyy-mm-dd" | "dd.mm.yyyy" | "mm/dd/yyyy";
+export type DateFieldFormat = "yyyy-mm-dd" | "dd.mm.yyyy" | "dd/mm/yyyy" | "mm/dd/yyyy";
 
 export type DatePickerLayout = "single" | "split";
 
