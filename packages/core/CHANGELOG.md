@@ -1,5 +1,11 @@
 # @litopis/core
 
+## 0.5.0
+
+### Minor Changes
+
+- 37835bf: Add typed custom date-picker messages and the `dd/mm/yyyy` input format.
+
 ## 0.4.0
 
 ### Minor Changes
