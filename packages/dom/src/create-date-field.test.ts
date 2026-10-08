@@ -12,6 +12,12 @@ describe("createDateField", () => {
       month: 6,
       year: 2026,
     });
+    expect(maskDateFieldInput("25062026", "dd/mm/yyyy")).toBe("25/06/2026");
+    expect(parseDateFieldValue("25/06/2026", "dd/mm/yyyy")).toEqual({
+      day: 25,
+      month: 6,
+      year: 2026,
+    });
     expect(parseDateFieldValue("0001-01-01", "yyyy-mm-dd")).toEqual({
       day: 1,
       month: 1,

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { DatePickerRangeNames } from "@litopis/dom";
+import type { DatePickerMessageOverrides, DatePickerRangeNames } from "@litopis/dom";
 import { defineLitopisElements } from "./index";
 
 interface TestLitopisDatePickerElement extends HTMLElement {
   name: string | DatePickerRangeNames | null;
+  messages: DatePickerMessageOverrides | null;
   value: string;
 }
 
@@ -114,6 +115,21 @@ describe("LitopisDatePickerElement", () => {
 
     expect(element.querySelector<HTMLButtonElement>(".litopis-clear-button")?.hidden).toBe(false);
     expect(element.dataset.calendarOpen).toBe("true");
+    element.remove();
+  });
+
+  it("passes typed message overrides to the controller", () => {
+    defineLitopisElements();
+    const element = document.createElement("litopis-date-picker") as TestLitopisDatePickerElement;
+
+    element.messages = { nextMonth: "Advance month" };
+    document.body.append(element);
+
+    expect(
+      element
+        .querySelector<HTMLButtonElement>(".litopis-nav-button[data-direction='next']")
+        ?.getAttribute("aria-label"),
+    ).toBe("Advance month");
     element.remove();
   });
 });

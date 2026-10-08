@@ -27,6 +27,8 @@ export function formatDateFieldValue(value: DateValue, format: DateFieldFormat):
   switch (format) {
     case "dd.mm.yyyy":
       return `${day}.${month}.${year}`;
+    case "dd/mm/yyyy":
+      return `${day}/${month}/${year}`;
     case "mm/dd/yyyy":
       return `${month}/${day}/${year}`;
     case "yyyy-mm-dd":
@@ -40,6 +42,8 @@ export function maskDateFieldInput(value: string, format: DateFieldFormat): stri
   switch (format) {
     case "dd.mm.yyyy":
       return joinDateParts([parts.day, parts.month, parts.year], ".");
+    case "dd/mm/yyyy":
+      return joinDateParts([parts.day, parts.month, parts.year], "/");
     case "mm/dd/yyyy":
       return joinDateParts([parts.month, parts.day, parts.year], "/");
     case "yyyy-mm-dd":
@@ -111,7 +115,8 @@ export function parseDateFieldPreviewMonth(
   const digits = value.replace(/\D/g, "");
 
   switch (format) {
-    case "dd.mm.yyyy": {
+    case "dd.mm.yyyy":
+    case "dd/mm/yyyy": {
       if (digits.length < 4) {
         return null;
       }
@@ -143,6 +148,8 @@ export function getDateFieldPlaceholder(format: DateFieldFormat): string {
   switch (format) {
     case "dd.mm.yyyy":
       return "DD.MM.YYYY";
+    case "dd/mm/yyyy":
+      return "DD/MM/YYYY";
     case "mm/dd/yyyy":
       return "MM/DD/YYYY";
     case "yyyy-mm-dd":
@@ -195,6 +202,7 @@ function getPartialFormatParts(value: string, format: DateFieldFormat): FormatPa
 
   switch (format) {
     case "dd.mm.yyyy":
+    case "dd/mm/yyyy":
       return {
         day: digits.slice(0, 2),
         month: digits.slice(2, 4),
@@ -242,6 +250,7 @@ function getFormatParts(value: string, format: DateFieldFormat): FormatParts | n
 
   switch (format) {
     case "dd.mm.yyyy":
+    case "dd/mm/yyyy":
       return {
         day: digits.slice(0, 2),
         month: digits.slice(2, 4),
