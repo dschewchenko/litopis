@@ -1025,8 +1025,10 @@ describe("createDatePicker", () => {
     calendar.hidePopover = () => {
       nativePopoverOpen = false;
     };
-    calendar.matches = (selector) =>
-      selector === ":popover-open" ? nativePopoverOpen : matches(selector);
+    calendar.matches = ((selector: string) =>
+      selector === ":popover-open"
+        ? nativePopoverOpen
+        : matches(selector)) as typeof calendar.matches;
 
     input.click();
 

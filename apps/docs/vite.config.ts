@@ -7,7 +7,8 @@ export default defineConfig({
   base: "/litopis/",
   plugins: [tailwindcss()],
   build: {
-    rollupOptions: {
+    target: ["chrome107", "edge107", "firefox104", "safari16.0"],
+    rolldownOptions: {
       input: {
         accessibility: new URL("accessibility/index.html", root).pathname,
         api: new URL("api/index.html", root).pathname,

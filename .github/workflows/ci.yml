@@ -16,6 +16,8 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
 
       - name: Install
         run: bun install --frozen-lockfile
@@ -36,6 +38,8 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
 
       - name: Install
         run: bun install --frozen-lockfile
@@ -51,11 +55,11 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ matrix.project }}-${{ hashFiles('bun.lock') }}
 
       - name: Install browser dependencies
-        run: bunx playwright install-deps ${{ matrix.project }}
+        run: bunx --bun playwright install-deps ${{ matrix.project }}
 
       - name: Install browser
         if: steps.playwright-browsers.outputs.cache-hit != 'true'
-        run: bunx playwright install --only-shell ${{ matrix.project }}
+        run: bunx --bun playwright install --only-shell ${{ matrix.project }}
 
       - name: Browser tests
-        run: bunx playwright test --project ${{ matrix.project }}
+        run: bunx --bun playwright test --project ${{ matrix.project }}
