@@ -553,7 +553,11 @@ test("open popover and month selection states have no detectable violations", as
   const input = picker.getByRole("combobox", { name: "Departure date" });
 
   await input.click();
-  await picker.getByRole("button", { name: "Choose month and year" }).click();
+  const caption = picker.locator(".litopis-caption");
+  const visibleCaption = await picker.locator(".litopis-caption-label").textContent();
+  await expect(caption).toHaveAccessibleName(new RegExp(visibleCaption ?? "^$"));
+  await expect(caption).toHaveAccessibleDescription("Choose month and year");
+  await caption.click();
   const results = await new AxeBuilder({ page }).analyze();
 
   expect(results.violations).toEqual([]);
@@ -668,7 +672,7 @@ test("popover fallback matches native dismiss behavior without the Popover API",
   await expect(calendar).not.toHaveAttribute("popover");
   await expect(calendar).toBeVisible();
 
-  await picker.getByRole("button", { name: "Choose month and year" }).click();
+  await picker.locator(".litopis-caption").click();
   await expect(picker).toHaveAttribute("data-calendar-open", "true");
 
   await page.getByRole("button", { name: "Outside" }).click();
@@ -676,7 +680,7 @@ test("popover fallback matches native dismiss behavior without the Popover API",
   await expect(calendar).toBeHidden();
 
   await input.click();
-  await picker.getByRole("button", { name: "Choose month and year" }).click();
+  await picker.locator(".litopis-caption").click();
   await picker.locator(".litopis-panel-title").focus();
   await page.keyboard.press("Escape");
 
@@ -696,7 +700,7 @@ test("selected day, month and year keep the same selection styling", async ({ pa
     (element) => getComputedStyle(element).color,
   );
 
-  await picker.getByRole("button", { name: "Choose month and year" }).click();
+  await picker.locator(".litopis-caption").click();
 
   const selectedMonth = picker.locator(".litopis-month-button[data-selected]");
   await expect(selectedMonth).toHaveCount(1);
@@ -708,7 +712,13 @@ test("selected day, month and year keep the same selection styling", async ({ pa
   await expect(selectedMonth).toHaveCSS("background-color", selectedBackground);
   await expect(selectedMonth).toHaveCSS("color", selectedForeground);
 
-  await picker.getByRole("button", { name: "Choose year" }).click();
+  const yearChooser = picker.locator(".litopis-panel-title");
+  const visibleYear = await yearChooser.textContent();
+  await expect(yearChooser).toHaveAccessibleName(new RegExp(visibleYear ?? "^$"));
+  await expect(yearChooser).toHaveAccessibleDescription("Choose year");
+  await yearChooser.click();
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
 
   const selectedYear = picker.locator(".litopis-year-button[data-selected]");
   await expect(selectedYear).toHaveCount(1);

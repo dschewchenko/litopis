@@ -236,7 +236,7 @@ export function createDatePicker<
   const caption = document.createElement("button");
   caption.className = "litopis-caption";
   caption.type = "button";
-  caption.setAttribute("aria-label", initialMessages.chooseMonthAndYear);
+  caption.setAttribute("aria-description", initialMessages.chooseMonthAndYear);
 
   const captionLabel = document.createElement("span");
   captionLabel.className = "litopis-caption-label";
@@ -402,7 +402,6 @@ export function createDatePicker<
     calendar.hidden = mode === "popover" && !supportsNativePopover() && !calendarOpen;
     calendarHeader.hidden = getGranularity(currentOptions) !== "day" || monthYearPanelOpen;
     captionLabel.textContent = getCalendarCaption();
-    setAttribute(caption, "aria-label", messages.chooseMonthAndYear);
     setAttribute(previousMonthButton, "aria-label", messages.previousMonth);
     setAttribute(nextMonthButton, "aria-label", messages.nextMonth);
     caption.setAttribute("aria-expanded", String(monthYearPanelOpen));
@@ -411,6 +410,7 @@ export function createDatePicker<
     nextMonthButton.disabled = isAdjacentMonthDisabled(1);
     season.hidden = !displaySeason;
     season.textContent = displaySeason ? getSeasonLabel(state.visibleMonth.month) : "";
+    setAttribute(caption, "aria-description", messages.chooseMonthAndYear);
     calendarFooter.hidden =
       currentOptions.todayButton !== true && currentOptions.clearButton !== true;
     clearButton.hidden = currentOptions.clearButton !== true;
@@ -727,7 +727,7 @@ export function createDatePicker<
   function renderMonthPanel(): void {
     const messages = resolveDatePickerMessages(currentOptions.messages);
     setText(panelTitleButton, String(state.visibleMonth.year));
-    setAttribute(panelTitleButton, "aria-label", messages.chooseYear);
+    setAttribute(panelTitleButton, "aria-description", messages.chooseYear);
     setDisabled(previousPanelButton, isYearDisabled(state.visibleMonth.year - 1));
     setDisabled(nextPanelButton, isYearDisabled(state.visibleMonth.year + 1));
     setAttribute(previousPanelButton, "aria-label", messages.previousYear);
@@ -754,7 +754,7 @@ export function createDatePicker<
     const yearPageEnd = yearPageStart + 11;
     setText(panelTitleButton, `${yearPageStart}–${yearPageEnd}`);
     setDisabled(panelTitleButton, getGranularity(currentOptions) === "year");
-    setAttribute(panelTitleButton, "aria-label", messages.currentYearPage);
+    setAttribute(panelTitleButton, "aria-description", messages.currentYearPage);
     setDisabled(previousPanelButton, isYearRangeDisabled(yearPageStart - 12, yearPageStart - 1));
     setDisabled(nextPanelButton, isYearRangeDisabled(yearPageStart + 12, yearPageStart + 23));
     setAttribute(previousPanelButton, "aria-label", messages.previousYears);
