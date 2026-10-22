@@ -21,6 +21,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write
       id-token: write
@@ -57,6 +58,7 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ hashFiles('bun.lock') }}
 
       - name: Install browser dependencies
+        timeout-minutes: 10
         run: bunx --bun playwright install-deps chromium firefox webkit
 
       - name: Install browsers
