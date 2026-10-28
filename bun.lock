@@ -53,28 +53,28 @@
     },
     "packages/core": {
       "name": "@litopis/core",
-      "version": "0.5.0",
+      "version": "0.5.1",
     },
     "packages/dom": {
       "name": "@litopis/dom",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
-        "@litopis/core": "^0.5.0",
+        "@litopis/core": "^0.5.1",
       },
     },
     "packages/elements": {
       "name": "@litopis/elements",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
-        "@litopis/core": "^0.5.0",
-        "@litopis/dom": "^0.5.0",
+        "@litopis/core": "^0.5.1",
+        "@litopis/dom": "^0.5.1",
       },
     },
     "packages/react": {
       "name": "@litopis/react",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
-        "@litopis/dom": "^0.5.0",
+        "@litopis/dom": "^0.5.1",
       },
       "peerDependencies": {
         "react": ">=18.0.0",
@@ -82,9 +82,9 @@
     },
     "packages/solid": {
       "name": "@litopis/solid",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
-        "@litopis/dom": "^0.5.0",
+        "@litopis/dom": "^0.5.1",
       },
       "peerDependencies": {
         "solid-js": ">=1.8.0",
@@ -92,9 +92,9 @@
     },
     "packages/svelte": {
       "name": "@litopis/svelte",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
-        "@litopis/dom": "^0.5.0",
+        "@litopis/dom": "^0.5.1",
       },
       "peerDependencies": {
         "svelte": ">=4.0.0",
@@ -102,9 +102,9 @@
     },
     "packages/vue": {
       "name": "@litopis/vue",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
-        "@litopis/dom": "^0.5.0",
+        "@litopis/dom": "^0.5.1",
       },
       "peerDependencies": {
         "vue": ">=3.4.0",

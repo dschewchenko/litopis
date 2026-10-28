@@ -1,5 +1,12 @@
 # @litopis/dom
 
+## 0.5.1
+
+### Patch Changes
+
+- 3e92247: Size popovers independently from inputs and adapt panels to the available viewport.
+- @litopis/core@0.5.1
+
 ## 0.5.0
 
 ### Minor Changes

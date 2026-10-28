@@ -1,6 +1,6 @@
 {
   "name": "@litopis/core",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Headless date and calendar engine for Litopis.",
   "keywords": [
     "accessibility",
