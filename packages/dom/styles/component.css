@@ -19,11 +19,10 @@
   --litopis-input-padding-inline: 12px;
   --litopis-label-popover-gap: 8px;
   --litopis-month-year-gap: 12px;
-  --litopis-panel-title-size: 18px;
+  --litopis-panel-title-size: 1.125em;
   --litopis-panel-title-weight: 700;
-  --litopis-panel-title-line-height: 24px;
+  --litopis-panel-title-line-height: 1.333;
   --litopis-popover-anchor-gap: 8px;
-  --litopis-popover-min-width: 320px;
   --litopis-popover-z-index: 2147483647;
   --litopis-range-background-fallback: rgba(52, 81, 178, 0.16);
   --litopis-today-padding-inline: 12px;
@@ -57,6 +56,10 @@
   display: block;
 }
 
+.litopis[data-mode="inline"] {
+  max-width: none;
+}
+
 .litopis[data-size="comfortable"] {
   --litopis-control-size: var(--litopis-comfortable-target-size);
   --litopis-day-size: var(--litopis-comfortable-target-size);
@@ -69,9 +72,9 @@
 
 .litopis-label {
   color: var(--litopis-foreground);
-  font-size: var(--litopis-label-font-size, 14px);
+  font-size: var(--litopis-label-font-size, 0.875em);
   font-weight: var(--litopis-label-font-weight, 600);
-  line-height: var(--litopis-label-line-height, 20px);
+  line-height: var(--litopis-label-line-height, 1.43);
 }
 
 .litopis-input {
@@ -80,9 +83,11 @@
   border-radius: var(--litopis-radius);
   color: var(--litopis-input-foreground, var(--litopis-foreground));
   font: inherit;
-  height: var(--litopis-control-size);
+  height: auto;
+  line-height: 1.25;
+  min-height: var(--litopis-control-size);
   outline: 0;
-  padding: 0 var(--litopis-input-padding-inline);
+  padding: 4px var(--litopis-input-padding-inline);
   transition-duration: var(--litopis-transition-duration);
   transition-property: border-color, box-shadow;
   width: 100%;
@@ -99,8 +104,8 @@
 
 .litopis-field-message {
   color: var(--litopis-danger);
-  font-size: var(--litopis-message-font-size, 13px);
-  line-height: var(--litopis-message-line-height, 18px);
+  font-size: var(--litopis-message-font-size, 0.8125em);
+  line-height: var(--litopis-message-line-height, 1.385);
   margin: 0;
 }
 
@@ -145,6 +150,10 @@
     calc(var(--litopis-calendar-viewport-gap) / 2);
   margin: 0;
   max-width: calc(100vw - var(--litopis-calendar-viewport-gap));
+  max-height: calc(100vh - var(--litopis-calendar-viewport-gap));
+  max-height: calc(100dvh - var(--litopis-calendar-viewport-gap));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   position: fixed;
   width: min(var(--litopis-width), calc(100vw - var(--litopis-calendar-viewport-gap)));
   z-index: var(--litopis-popover-z-index);
@@ -154,20 +163,43 @@
   background: transparent;
 }
 
+@position-try --litopis-calendar-fit-viewport {
+  margin-top: 0;
+  max-height: calc(100vh - var(--litopis-calendar-viewport-gap));
+  max-height: calc(100dvh - var(--litopis-calendar-viewport-gap));
+  top: calc(var(--litopis-calendar-viewport-gap) / 2);
+}
+
 @supports (top: anchor(bottom)) {
   .litopis[data-mode="popover"] .litopis-calendar {
     inset: auto;
-    left: anchor(left);
+    left: clamp(
+      calc(var(--litopis-calendar-viewport-gap) / 2),
+      anchor(left),
+      calc(
+        100vw - var(--litopis-calendar-viewport-gap) / 2 -
+          min(var(--litopis-width), calc(100vw - var(--litopis-calendar-viewport-gap)))
+      )
+    );
     margin-top: var(--litopis-popover-anchor-gap);
     position-try-fallbacks:
       flip-block,
       flip-inline,
-      flip-block flip-inline;
+      flip-block flip-inline,
+      --litopis-calendar-fit-viewport;
     top: anchor(bottom);
-    width: min(
-      max(anchor-size(width), var(--litopis-popover-min-width)),
-      calc(100vw - var(--litopis-calendar-viewport-gap))
-    );
+    width: min(var(--litopis-width), calc(100vw - var(--litopis-calendar-viewport-gap)));
+  }
+}
+
+@media (max-width: 360px) {
+  .litopis[data-mode="popover"] {
+    --litopis-calendar-viewport-gap: 0px;
+  }
+
+  .litopis[data-mode="popover"] .litopis-calendar {
+    --litopis-calendar-padding: 6px;
+    left: 0;
   }
 }
 
@@ -256,16 +288,19 @@
 }
 
 .litopis-caption-label {
-  font-size: var(--litopis-caption-font-size, 15px);
+  font-size: var(--litopis-caption-font-size, 0.9375em);
   font-weight: var(--litopis-caption-font-weight, 700);
-  line-height: var(--litopis-caption-line-height, 20px);
+  line-height: var(--litopis-caption-line-height, 1.333);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .litopis-season {
   color: var(--litopis-muted-foreground);
-  font-size: var(--litopis-season-font-size, 12px);
+  font-size: var(--litopis-season-font-size, 0.75em);
   font-weight: var(--litopis-season-font-weight, 600);
-  line-height: var(--litopis-season-line-height, 16px);
+  line-height: var(--litopis-season-line-height, 1.333);
   margin: 0;
   text-align: center;
 }
@@ -283,8 +318,11 @@
   font-size: var(--litopis-panel-title-size);
   font-weight: var(--litopis-panel-title-weight);
   line-height: var(--litopis-panel-title-line-height);
+  height: auto;
   min-height: var(--litopis-control-size);
+  overflow-wrap: anywhere;
   text-align: center;
+  white-space: normal;
 }
 
 .litopis-panel-grid {
@@ -305,9 +343,14 @@
   background: transparent;
   border: 0;
   border-radius: var(--litopis-radius);
-  font-size: var(--litopis-option-font-size, 14px);
+  font-size: var(--litopis-option-font-size, 0.875em);
   font-weight: var(--litopis-option-font-weight, 600);
-  height: var(--litopis-control-size);
+  height: auto;
+  line-height: 1.2;
+  min-height: var(--litopis-control-size);
+  overflow-wrap: anywhere;
+  padding: 4px;
+  white-space: normal;
 }
 
 .litopis-month-button[data-selected],
@@ -352,6 +395,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.litopis[data-resolved-panels="2"][data-stacked-panels="true"] .litopis-grids {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .litopis[data-resolved-panels="2"] .litopis-grid-secondary {
   display: block;
 }
@@ -370,10 +417,13 @@
 
 .litopis-weekday {
   color: var(--litopis-muted-foreground);
-  font-size: var(--litopis-weekday-font-size, 12px);
+  display: grid;
+  font-size: var(--litopis-weekday-font-size, 0.75em);
   font-weight: var(--litopis-weekday-font-weight, 700);
-  height: var(--litopis-weekday-size);
-  line-height: var(--litopis-weekday-size);
+  line-height: 1.2;
+  min-height: var(--litopis-weekday-size);
+  overflow-wrap: anywhere;
+  place-items: center;
   text-align: center;
   text-transform: uppercase;
 }
@@ -395,10 +445,12 @@
   border: 0;
   border-radius: var(--litopis-radius);
   display: inline-flex;
-  font-size: var(--litopis-day-font-size, 14px);
-  height: var(--litopis-day-size);
+  font-size: var(--litopis-day-font-size, 0.875em);
+  height: auto;
   justify-content: center;
   max-width: 100%;
+  min-height: var(--litopis-day-size);
+  min-width: var(--litopis-day-size);
   padding: 0;
   width: var(--litopis-day-size);
 }
@@ -471,7 +523,7 @@
   background: var(--litopis-today-background, var(--litopis-muted));
   border: 0;
   border-radius: var(--litopis-radius);
-  font-size: var(--litopis-today-font-size, 13px);
+  font-size: var(--litopis-today-font-size, 0.8125em);
   font-weight: var(--litopis-today-font-weight, 700);
   min-height: var(--litopis-control-size);
   padding: 0 var(--litopis-today-padding-inline);

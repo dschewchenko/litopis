@@ -88,6 +88,12 @@ Range selection stays on `createDatePicker`. Use `selection: "range"` with `name
 endpoint values, or `layout: "single"` with `name` for one
 serialized range value.
 
+Styled popovers use the calendar's preferred width, independent of the anchored input, and stay
+within the viewport. At narrow widths, `panels: "auto"` shows one month; explicit `panels: 2`
+stacks both months vertically when they cannot fit side by side. Inline calendars fill their
+container. Default text sizes follow the surrounding font size, headings can wrap, and popovers
+scroll vertically when their content is taller than the viewport.
+
 The JavaScript package is unstyled and does not import CSS. Choose one styling layer:
 
 - No stylesheet: fully unstyled, with all behavior and accessibility intact.
