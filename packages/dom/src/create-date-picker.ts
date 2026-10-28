@@ -86,8 +86,8 @@ interface AttributeSnapshot {
 let datePickerId = 0;
 let activeFallbackPopoverClose: FallbackPopoverClose | null = null;
 const DEFAULT_POPOVER_ANCHOR_GAP = 8;
-const DEFAULT_POPOVER_MIN_WIDTH = 320;
 const DEFAULT_POPOVER_VIEWPORT_PADDING = 12;
+const DEFAULT_CALENDAR_WIDTH = 360;
 
 export function createDatePicker(
   root: HTMLElement,
@@ -124,6 +124,7 @@ export function createDatePicker<
   const initialRange = range;
   let calendarOpen = getCalendarMode(currentOptions) === "inline";
   let resolvedPanelCount = 1;
+  let stackedPanels = false;
   let monthYearPanelOpen = getGranularity(currentOptions) !== "day";
   let panelMode: PanelMode = getGranularity(currentOptions) === "year" ? "year" : "month";
   let yearPageStart = getYearPageStart(state.visibleMonth.year);
@@ -146,8 +147,6 @@ export function createDatePicker<
 
   root.classList.add("litopis");
   root.replaceChildren();
-  resolvedPanelCount = resolvePanelCount();
-
   const label = document.createElement("label");
   label.className = "litopis-label";
 
@@ -316,12 +315,10 @@ export function createDatePicker<
     typeof ResizeObserver === "undefined"
       ? null
       : new ResizeObserver(() => {
-          const nextPanelCount = resolvePanelCount();
-          if (nextPanelCount === resolvedPanelCount) return;
-          resolvedPanelCount = nextPanelCount;
-          render(state);
+          if (syncPanelLayout()) render(state, "valid", true);
         });
   resizeObserver?.observe(root);
+  window.addEventListener("resize", onViewportResize);
 
   function isRangeSelection(): boolean {
     return currentOptions.selection === "range";
@@ -350,11 +347,100 @@ export function createDatePicker<
     root.append(label, input, fieldMessage, hiddenValueInput, calendar);
   }
 
+  function syncPanelLayout(): boolean {
+    const nextPanelCount = resolvePanelCount();
+    const nextStackedPanels = resolveStackedPanels(nextPanelCount);
+    const changed = nextPanelCount !== resolvedPanelCount || nextStackedPanels !== stackedPanels;
+
+    resolvedPanelCount = nextPanelCount;
+    stackedPanels = nextStackedPanels;
+    return changed;
+  }
+
   function resolvePanelCount(): 1 | 2 {
-    if (getVisiblePanels(currentOptions) === 1) return 1;
-    const width = root.getBoundingClientRect().width;
-    if (width === 0) return getVisiblePanels(currentOptions) === 2 ? 2 : 1;
-    return width >= 640 ? 2 : 1;
+    const visiblePanels = getVisiblePanels(currentOptions);
+    if (visiblePanels === 1) return 1;
+    if (visiblePanels === 2) return 2;
+
+    const availableWidth = getAvailableCalendarWidth();
+    if (availableWidth === 0) return 1;
+    return availableWidth >= getMinimumCalendarWidth(2) ? 2 : 1;
+  }
+
+  function resolveStackedPanels(panelCount: 1 | 2): boolean {
+    return (
+      panelCount === 2 &&
+      getVisiblePanels(currentOptions) === 2 &&
+      getAvailableCalendarWidth() < getMinimumCalendarWidth(2)
+    );
+  }
+
+  function getAvailableCalendarWidth(): number {
+    if (getCalendarMode(currentOptions) !== "popover") {
+      return root.getBoundingClientRect().width;
+    }
+
+    const inlineWidth = calendar.style.width;
+    calendar.style.removeProperty("width");
+    const calendarStyles = window.getComputedStyle(calendar);
+    const viewportGap = getCssPixelValue(
+      calendarStyles.getPropertyValue("--litopis-calendar-viewport-gap"),
+      DEFAULT_POPOVER_VIEWPORT_PADDING * 2,
+    );
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const preferredWidth = getCalendarWidth(calendarStyles);
+    if (inlineWidth) calendar.style.width = inlineWidth;
+
+    return Math.min(preferredWidth, Math.max(0, viewportWidth - viewportGap));
+  }
+
+  function getCalendarWidth(styles: CSSStyleDeclaration): number {
+    const width = getCssPixelValue(styles.width, 0);
+    if (width > 0) return width;
+
+    const probe = document.createElement("div");
+    probe.style.height = "0";
+    probe.style.position = "absolute";
+    probe.style.visibility = "hidden";
+    probe.style.width = "var(--litopis-width)";
+    root.append(probe);
+    const measuredWidth = probe.getBoundingClientRect().width;
+    probe.remove();
+
+    return (
+      measuredWidth ||
+      getCssPixelValue(styles.getPropertyValue("--litopis-width"), DEFAULT_CALENDAR_WIDTH)
+    );
+  }
+
+  function getMinimumCalendarWidth(panelCount: 1 | 2): number {
+    const calendarStyles = window.getComputedStyle(calendar);
+    const week = calendar.querySelector<HTMLElement>(".litopis-week");
+    const weekStyles = week ? window.getComputedStyle(week) : null;
+    const fallbackDaySize = getTargetSize(currentOptions) === "comfortable" ? 44 : 40;
+    const panelWidth = getCssPixelValue(weekStyles?.minWidth ?? "", fallbackDaySize * 7);
+    const calendarPadding = getCssPixelValue(
+      calendarStyles.getPropertyValue("--litopis-calendar-padding"),
+      12,
+    );
+    const horizontalPadding =
+      getCssPixelValue(calendarStyles.paddingLeft, calendarPadding) +
+      getCssPixelValue(calendarStyles.paddingRight, calendarPadding);
+    const panelGap = getCssPixelValue(
+      calendarStyles.columnGap,
+      getCssPixelValue(calendarStyles.getPropertyValue("--litopis-calendar-gap"), 12),
+    );
+
+    return panelWidth * panelCount + panelGap * (panelCount - 1) + horizontalPadding;
+  }
+
+  function onViewportResize(): void {
+    if (syncPanelLayout()) {
+      render(state, "valid", true);
+      return;
+    }
+
+    if (fallbackPositioningActive) syncPopoverPosition();
   }
   function getFieldMessage(target: HTMLInputElement): HTMLParagraphElement {
     return target === endInput ? endFieldMessage : fieldMessage;
@@ -363,7 +449,7 @@ export function createDatePicker<
   function render(
     nextState: CalendarState = state,
     inputStatus: InputStatus = "valid",
-    preserveInputValue = false,
+    preserveInputState = false,
   ): void {
     const previousVisibleMonth = state.visibleMonth;
     state = nextState;
@@ -384,7 +470,9 @@ export function createDatePicker<
     root.dataset.size = getTargetSize(currentOptions);
     root.dataset.selection = currentOptions.selection ?? "single";
     root.dataset.panels = String(getVisiblePanels(currentOptions));
+    syncPanelLayout();
     root.dataset.resolvedPanels = String(resolvedPanelCount);
+    root.dataset.stackedPanels = String(stackedPanels);
     setDataValue(root, "rangeComplete", String(Boolean(range.start && range.end)));
     syncPopoverMode(mode);
     label.textContent = getStartLabel(currentOptions, messages);
@@ -393,12 +481,14 @@ export function createDatePicker<
     endLabel.textContent = getEndLabel(currentOptions, messages);
     endInput.placeholder =
       endInputPlaceholder ?? getFieldPlaceholder(format, getGranularity(currentOptions));
-    if (!preserveInputValue) {
+    if (!preserveInputState) {
       renderFieldValues(selected, format);
     }
     input.setAttribute("aria-expanded", String(calendarOpen));
-    input.setAttribute("aria-invalid", String(inputStatus === "invalid"));
-    fieldMessage.textContent = inputStatus === "invalid" ? messages.enterValidDate : "";
+    if (!preserveInputState) {
+      input.setAttribute("aria-invalid", String(inputStatus === "invalid"));
+      fieldMessage.textContent = inputStatus === "invalid" ? messages.enterValidDate : "";
+    }
     calendar.hidden = mode === "popover" && !supportsNativePopover() && !calendarOpen;
     calendarHeader.hidden = getGranularity(currentOptions) !== "day" || monthYearPanelOpen;
     captionLabel.textContent = getCalendarCaption();
@@ -425,6 +515,13 @@ export function createDatePicker<
     renderMonthYearPanel();
     renderDayGrid();
     syncNativePopoverState();
+    if (syncPanelLayout()) {
+      root.dataset.resolvedPanels = String(resolvedPanelCount);
+      root.dataset.stackedPanels = String(stackedPanels);
+      captionLabel.textContent = getCalendarCaption();
+      renderMonthYearPanel();
+      renderDayGrid();
+    }
     syncPopoverPosition();
     syncFallbackDismiss();
   }
@@ -1532,18 +1629,21 @@ export function createDatePicker<
 
   function syncPopoverPosition(): void {
     const useFallback =
-      getCalendarMode(currentOptions) === "popover" && calendarOpen && !supportsAnchorPositioning();
+      getCalendarMode(currentOptions) === "popover" &&
+      calendarOpen &&
+      (!supportsAnchorPositioning() || !isCalendarWithinViewport());
 
     if (!useFallback) {
       stopFallbackPositioning();
       calendar.style.removeProperty("left");
       calendar.style.removeProperty("top");
       calendar.style.removeProperty("width");
+      calendar.style.removeProperty("max-height");
+      calendar.style.removeProperty("margin-top");
       return;
     }
 
     if (!fallbackPositioningActive) {
-      window.addEventListener("resize", positionFallbackPopover);
       window.addEventListener("scroll", positionFallbackPopover, true);
       fallbackPositioningActive = true;
     }
@@ -1551,18 +1651,28 @@ export function createDatePicker<
     positionFallbackPopover();
   }
 
+  function isCalendarWithinViewport(): boolean {
+    const calendarRect = calendar.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+
+    return (
+      calendarRect.left >= 0 &&
+      calendarRect.top >= 0 &&
+      calendarRect.right <= viewportWidth &&
+      calendarRect.bottom <= viewportHeight
+    );
+  }
+
   function positionFallbackPopover(): void {
     if (!fallbackPositioningActive && !calendarOpen) return;
 
     const inputRect = input.getBoundingClientRect();
+    calendar.style.removeProperty("width");
     const styles = window.getComputedStyle(calendar);
     const anchorGap = getCssPixelValue(
       styles.getPropertyValue("--litopis-popover-anchor-gap"),
       DEFAULT_POPOVER_ANCHOR_GAP,
-    );
-    const minimumWidth = getCssPixelValue(
-      styles.getPropertyValue("--litopis-popover-min-width"),
-      DEFAULT_POPOVER_MIN_WIDTH,
     );
     const viewportGap = getCssPixelValue(
       styles.getPropertyValue("--litopis-calendar-viewport-gap"),
@@ -1572,8 +1682,11 @@ export function createDatePicker<
     const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
     const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
     const availableWidth = Math.max(0, viewportWidth - viewportGap);
-    const width = Math.min(Math.max(inputRect.width, minimumWidth), availableWidth);
+    const preferredWidth = getCalendarWidth(styles);
+    const width = Math.min(preferredWidth, availableWidth);
     calendar.style.width = `${width}px`;
+    calendar.style.maxHeight = `${Math.max(0, viewportHeight - viewportGap)}px`;
+    calendar.style.marginTop = "0px";
     const calendarRect = calendar.getBoundingClientRect();
     const below = inputRect.bottom + anchorGap;
     const above = inputRect.top - calendarRect.height - anchorGap;
@@ -1594,7 +1707,6 @@ export function createDatePicker<
   function stopFallbackPositioning(): void {
     if (!fallbackPositioningActive) return;
 
-    window.removeEventListener("resize", positionFallbackPopover);
     window.removeEventListener("scroll", positionFallbackPopover, true);
     fallbackPositioningActive = false;
   }
@@ -1702,6 +1814,7 @@ export function createDatePicker<
       calendar.removeEventListener("toggle", onPopoverToggle);
       form?.removeEventListener("reset", onFormReset);
       resizeObserver?.disconnect();
+      window.removeEventListener("resize", onViewportResize);
       stopFallbackDismiss();
       stopFallbackPositioning();
       hideNativePopover();
@@ -1716,6 +1829,7 @@ export function createDatePicker<
       delete root.dataset.panels;
       delete root.dataset.rangeComplete;
       delete root.dataset.resolvedPanels;
+      delete root.dataset.stackedPanels;
     },
     getInputValue() {
       return getFormattedSelectionValue(range, getSelectedDate(state), currentOptions);

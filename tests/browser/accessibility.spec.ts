@@ -405,24 +405,40 @@ test("responsive range panels use available width without squeezing the month gr
   await expect(playground.locator(".litopis-week").first()).toHaveCSS("min-width", "280px");
 });
 
-test("range width follows the requested number of panels", async ({ page }) => {
+test("inline range picker fills its container for either panel count", async ({ page }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  const picker = playground.locator(".litopis");
 
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-panels]").selectOption("1");
-  const onePanelWidth = await playground
-    .locator(".litopis")
-    .evaluate((picker) => Math.round(picker.getBoundingClientRect().width));
+  const onePanel = await picker.evaluate((element) => ({
+    width: element.getBoundingClientRect().width,
+    parentWidth: element.parentElement
+      ? element.parentElement.clientWidth -
+        Number.parseFloat(getComputedStyle(element.parentElement).paddingLeft) -
+        Number.parseFloat(getComputedStyle(element.parentElement).paddingRight)
+      : 0,
+    resolvedPanels: element.dataset.resolvedPanels,
+  }));
 
   await playground.locator("[data-playground-panels]").selectOption("2");
-  const twoPanelWidth = await playground
-    .locator(".litopis")
-    .evaluate((picker) => Math.round(picker.getBoundingClientRect().width));
+  const twoPanels = await picker.evaluate((element) => ({
+    width: element.getBoundingClientRect().width,
+    parentWidth: element.parentElement
+      ? element.parentElement.clientWidth -
+        Number.parseFloat(getComputedStyle(element.parentElement).paddingLeft) -
+        Number.parseFloat(getComputedStyle(element.parentElement).paddingRight)
+      : 0,
+    resolvedPanels: element.dataset.resolvedPanels,
+  }));
 
-  expect(onePanelWidth).toBe(360);
-  expect(twoPanelWidth).toBeGreaterThan(onePanelWidth);
-  expect(twoPanelWidth).toBeLessThanOrEqual(720);
+  expect(onePanel.resolvedPanels).toBe("1");
+  expect(twoPanels.resolvedPanels).toBe("2");
+  expect(onePanel.width).toBeGreaterThan(360);
+  expect(Math.abs(onePanel.width - onePanel.parentWidth)).toBeLessThan(1);
+  expect(Math.abs(twoPanels.width - twoPanels.parentWidth)).toBeLessThan(1);
+  expect(Math.abs(twoPanels.width - onePanel.width)).toBeLessThan(1);
 });
 
 test("range highlights start and end at the center of their cells", async ({ page }) => {
@@ -597,7 +613,6 @@ test("popover fallback stays aligned when CSS anchors are unavailable", async ({
         return Reflect.apply(target, thisArgument, argumentsList);
       },
     });
-    document.querySelector<HTMLElement>(".litopis-calendar")?.style.setProperty("margin-top", "0");
   });
   await input.click();
 
@@ -626,7 +641,7 @@ test("popover fallback stays aligned when CSS anchors are unavailable", async ({
   expect(Math.abs(fallbackRect!.y - nativeRect!.y)).toBeLessThan(1);
   expect(Math.abs(fallbackRect!.width - nativeRect!.width)).toBeLessThan(1);
   expect(inputRect!.width).toBe(200);
-  expect(fallbackRect!.width).toBe(320);
+  expect(fallbackRect!.width).toBe(360);
 });
 
 test("popover fallback matches native dismiss behavior without the Popover API", async ({
@@ -641,6 +656,7 @@ test("popover fallback matches native dismiss behavior without the Popover API",
     <style>
       body { margin: 0; min-height: 2000px; padding: 100px; }
       #picker { width: 360px; }
+      #outside { position: fixed; top: 10px; left: 10px; }
     </style>
     <script>
       Object.defineProperties(HTMLElement.prototype, {

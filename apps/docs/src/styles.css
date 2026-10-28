@@ -1474,10 +1474,6 @@ litopis-date-picker {
     width: 100%;
   }
 
-  .litopis-calendar-header {
-    grid-template-columns: 40px minmax(0, 1fr) 40px;
-  }
-
   .litopis-week {
     grid-template-columns: repeat(7, minmax(0, 1fr));
   }

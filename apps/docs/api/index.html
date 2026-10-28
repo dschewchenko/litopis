@@ -291,7 +291,10 @@ const range: DatePickerRange&lt;"date"&gt; = rangePicker.getValue();</code></pre
                   <td><code>"auto"</code> for range</td>
                   <td>
                     <code>1</code> shows one month; <code>2</code> shows adjacent months;
-                    <code>"auto"</code> uses two when the container is at least 640px wide.
+                    <code>2</code> stacks them vertically when the available calendar width is too
+                    narrow; <code>"auto"</code> shows two side by side only when both grids fit.
+                    Popovers use the calendar width and clamp it to the viewport, independent of the
+                    input width. Inline calendars fill their container.
                   </td>
                 </tr>
                 <tr>

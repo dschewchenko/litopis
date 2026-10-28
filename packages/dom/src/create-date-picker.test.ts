@@ -1013,7 +1013,8 @@ describe("createDatePicker", () => {
     });
     const input = root.querySelector<HTMLInputElement>(".litopis-input")!;
     const calendar = root.querySelector<HTMLElement>(".litopis-calendar")!;
-    let inputRect = new DOMRect(100, 100, 200, 40);
+    root.style.maxWidth = "120px";
+    let inputRect = new DOMRect(100, 100, 120, 40);
     let nativePopoverOpen = false;
     const matches = calendar.matches.bind(calendar);
     input.getBoundingClientRect = () => inputRect;
@@ -1036,7 +1037,7 @@ describe("createDatePicker", () => {
     expect(supports).toHaveBeenCalledWith("top", "anchor(bottom)");
     expect(calendar.style.left).toBe("100px");
     expect(calendar.style.top).toBe("148px");
-    expect(calendar.style.width).toBe("320px");
+    expect(calendar.style.width).toBe("360px");
 
     inputRect = new DOMRect(200, 120, 200, 40);
     window.dispatchEvent(new Event("resize"));
@@ -1047,11 +1048,55 @@ describe("createDatePicker", () => {
     inputRect = new DOMRect(900, 700, 200, 40);
     window.dispatchEvent(new Event("scroll"));
 
-    expect(calendar.style.left).toBe(`${window.innerWidth - 320 - 12}px`);
+    expect(calendar.style.left).toBe(`${window.innerWidth - 360 - 12}px`);
     expect(calendar.style.top).toBe("392px");
 
     picker.destroy();
     vi.unstubAllGlobals();
+  });
+
+  it("preserves a partial range value and validation when viewport resizing changes panel count", () => {
+    const root = document.createElement("div");
+    const originalInnerWidth = Object.getOwnPropertyDescriptor(window, "innerWidth");
+    root.getBoundingClientRect = () => new DOMRect(0, 0, window.innerWidth, 400);
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 320 });
+    const picker = createDatePicker(root, {
+      format: "yyyy-mm-dd",
+      min: { day: 25, month: 6, year: 2026 },
+      mode: "inline",
+      panels: "auto",
+      selection: "range",
+      size: "comfortable",
+      today: { day: 25, month: 6, year: 2026 },
+    });
+    const input = root.querySelector<HTMLInputElement>(".litopis-input")!;
+    const message = root.querySelector<HTMLElement>(".litopis-field-message")!;
+
+    try {
+      expect(root.dataset.resolvedPanels).toBe("1");
+
+      input.value = "2026-06-24";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+
+      expect(input.getAttribute("aria-invalid")).toBe("true");
+      expect(message.textContent).not.toBe("");
+
+      Object.defineProperty(window, "innerWidth", { configurable: true, value: 800 });
+      window.dispatchEvent(new Event("resize"));
+
+      expect(root.dataset.resolvedPanels).toBe("2");
+      expect(input.value).toBe("2026-06-24");
+      expect(input.getAttribute("aria-invalid")).toBe("true");
+      expect(message.textContent).not.toBe("");
+    } finally {
+      picker.destroy();
+      root.remove();
+      if (originalInnerWidth) {
+        Object.defineProperty(window, "innerWidth", originalInnerWidth);
+      } else {
+        Reflect.deleteProperty(window, "innerWidth");
+      }
+    }
   });
 
   it("matches native light dismiss and Escape behavior without the Popover API", () => {
