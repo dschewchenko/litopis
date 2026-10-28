@@ -656,6 +656,7 @@ test("popover fallback matches native dismiss behavior without the Popover API",
     <style>
       body { margin: 0; min-height: 2000px; padding: 100px; }
       #picker { width: 360px; }
+      #outside { position: fixed; top: 10px; left: 10px; }
     </style>
     <script>
       Object.defineProperties(HTMLElement.prototype, {
