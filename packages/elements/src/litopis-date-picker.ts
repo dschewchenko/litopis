@@ -39,6 +39,8 @@ const firstDaysOfWeek = new Map<string, ElementFirstDayOfWeek>([
 export class LitopisDatePickerElement extends HTMLElement {
   #controller: DatePickerController | null = null;
   #messages: DatePickerMessageOverrides | null = null;
+  #pendingMountDocument: Document | null = null;
+  #pendingMountListener: EventListener | null = null;
   #rangeLabels: DatePickerRangeLabels | null = null;
   #rangeNames: DatePickerRangeNames | null = null;
   #range: DateRange = { end: null, start: null };
@@ -92,10 +94,41 @@ export class LitopisDatePickerElement extends HTMLElement {
       return;
     }
 
+    const ownerDocument = this.ownerDocument;
+
+    if (this.#pendingMountDocument && this.#pendingMountDocument !== ownerDocument) {
+      this.#cancelPendingMount();
+    }
+
+    if (this.#pendingMountListener) {
+      return;
+    }
+
+    if (ownerDocument.readyState === "loading") {
+      const listener: EventListener = () => {
+        if (this.#pendingMountListener !== listener) {
+          return;
+        }
+
+        this.#pendingMountDocument = null;
+        this.#pendingMountListener = null;
+
+        if (this.isConnected && this.ownerDocument === ownerDocument) {
+          this.#mount();
+        }
+      };
+
+      this.#pendingMountDocument = ownerDocument;
+      this.#pendingMountListener = listener;
+      ownerDocument.addEventListener("DOMContentLoaded", listener, { once: true });
+      return;
+    }
+
     this.#mount();
   }
 
   disconnectedCallback(): void {
+    this.#cancelPendingMount();
     const value = this.#controller?.getValue();
 
     if (isDateRange(value)) {
@@ -173,6 +206,16 @@ export class LitopisDatePickerElement extends HTMLElement {
   #mount(): void {
     this.#controller?.destroy();
     this.#controller = createDatePicker(this, this.#getOptions());
+  }
+
+  #cancelPendingMount(): void {
+    if (!this.#pendingMountDocument || !this.#pendingMountListener) {
+      return;
+    }
+
+    this.#pendingMountDocument.removeEventListener("DOMContentLoaded", this.#pendingMountListener);
+    this.#pendingMountDocument = null;
+    this.#pendingMountListener = null;
   }
 
   #getOptions(): DatePickerOptions {

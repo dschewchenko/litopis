@@ -22,16 +22,17 @@ The controller returns an ISO `YYYY-MM-DD` value through `picker.getISOValue()`.
 
 ## Locale messages and date formats
 
-Pass a BCP 47 locale to use its native month names and weekday order. Control messages use English
-defaults and can be overridden per caller with the typed `messages` option. Partial overrides are
-merged with the defaults, including the seasonal labels.
+Pass a BCP 47 locale to use its native month names, weekday order, and built-in controls. The
+date picker includes localized control messages for English, Ukrainian, German, Spanish, French,
+and Brazilian Portuguese. The `messages` option can override only the labels that need a product
+specific wording; its keys are typed and its seasonal labels can be overridden independently.
 
 ```ts
 createDatePicker(document.querySelector("#picker")!, {
   format: "dd/mm/yyyy",
-  locale: navigator.language,
+  locale: "fr-FR",
   messages: {
-    chooseMonthAndYear: "Select month and year",
+    chooseMonthAndYear: "Choisir une période",
   },
 });
 ```
@@ -72,7 +73,8 @@ async function loadAvailability(month: DateValue): Promise<void> {
 ## Custom input
 
 Place an input directly inside the picker root with `slot="input"`. Litopis keeps the same element,
-adds its behavior and accessibility attributes, and preserves your classes and placeholder.
+classes and placeholder. It adds date entry and accessibility attributes. Your stylesheet controls
+the input's appearance. Litopis input styles apply only to generated fields.
 
 ```html
 <div id="picker">

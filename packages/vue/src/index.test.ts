@@ -50,7 +50,7 @@ describe("LitopisDatePicker for Vue", () => {
     await nextTick();
 
     const input = host.querySelector<HTMLInputElement>(".custom-input");
-    expect(input?.classList.contains("litopis-input")).toBe(true);
+    expect(input?.className).toBe("custom-input");
     expect(input?.getAttribute("slot")).toBe("input");
     expect(input?.placeholder).toBe("Choose a date");
     expect(input?.value).toBe("2026-06-25");

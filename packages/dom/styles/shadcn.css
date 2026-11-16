@@ -14,11 +14,11 @@
   --litopis-danger: var(--destructive);
   --litopis-disabled: color-mix(in oklab, var(--muted-foreground) 45%, transparent);
   --litopis-focus-color: var(--ring);
-  --litopis-focus-ring: color-mix(in oklab, var(--ring) 28%, transparent);
   --litopis-foreground: var(--foreground);
+  --litopis-font-family: inherit;
+  --litopis-font-size: inherit;
   --litopis-hover-background: var(--accent);
   --litopis-hover-foreground: var(--accent-foreground);
-  --litopis-input-border: var(--input);
   --litopis-muted: var(--muted);
   --litopis-muted-foreground: var(--muted-foreground);
   --litopis-popover-shadow:

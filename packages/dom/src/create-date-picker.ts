@@ -143,7 +143,7 @@ export function createDatePicker<
   const endInputAttributes = suppliedEndInput ? getAttributeSnapshot(suppliedEndInput) : null;
   const inputPlaceholder = suppliedInput?.getAttribute("placeholder") ?? null;
   const endInputPlaceholder = suppliedEndInput?.getAttribute("placeholder") ?? null;
-  const initialMessages = resolveDatePickerMessages(currentOptions.messages);
+  const initialMessages = resolveDatePickerMessages(state.locale, currentOptions.messages);
 
   root.classList.add("litopis");
   root.replaceChildren();
@@ -152,7 +152,7 @@ export function createDatePicker<
 
   const input = suppliedInput ?? document.createElement("input");
   input.autocomplete ||= "off";
-  input.classList.add("litopis-input");
+  if (!suppliedInput) input.classList.add("litopis-input");
   input.id ||= `${id}-input`;
   input.inputMode ||= "numeric";
   input.removeAttribute("name");
@@ -168,7 +168,6 @@ export function createDatePicker<
 
   const endInput = suppliedEndInput ?? (input.cloneNode() as HTMLInputElement);
   endInput.autocomplete ||= "off";
-  endInput.classList.add("litopis-input");
   endInput.id = suppliedEndInput?.id || `${id}-end-input`;
   endInput.inputMode ||= "numeric";
   endInput.removeAttribute("name");
@@ -418,7 +417,14 @@ export function createDatePicker<
     const week = calendar.querySelector<HTMLElement>(".litopis-week");
     const weekStyles = week ? window.getComputedStyle(week) : null;
     const fallbackDaySize = getTargetSize(currentOptions) === "comfortable" ? 44 : 40;
-    const panelWidth = getCssPixelValue(weekStyles?.minWidth ?? "", fallbackDaySize * 7);
+    const dayProbe = document.createElement("div");
+    dayProbe.style.position = "absolute";
+    dayProbe.style.visibility = "hidden";
+    dayProbe.style.width = "var(--litopis-day-size)";
+    root.append(dayProbe);
+    const daySize = dayProbe.getBoundingClientRect().width || fallbackDaySize;
+    dayProbe.remove();
+    const panelWidth = Math.max(getCssPixelValue(weekStyles?.minWidth ?? "", 0), daySize * 7);
     const calendarPadding = getCssPixelValue(
       calendarStyles.getPropertyValue("--litopis-calendar-padding"),
       12,
@@ -440,7 +446,7 @@ export function createDatePicker<
       return;
     }
 
-    if (fallbackPositioningActive) syncPopoverPosition();
+    if (calendarOpen) syncPopoverPosition();
   }
   function getFieldMessage(target: HTMLInputElement): HTMLParagraphElement {
     return target === endInput ? endFieldMessage : fieldMessage;
@@ -463,7 +469,7 @@ export function createDatePicker<
     const format = getInputFormat(currentOptions);
     const mode = getCalendarMode(currentOptions);
     const displaySeason = currentOptions.season ?? false;
-    const messages = resolveDatePickerMessages(currentOptions.messages);
+    const messages = resolveDatePickerMessages(state.locale, currentOptions.messages);
 
     root.dataset.mode = mode;
     root.dataset.calendarOpen = String(calendarOpen);
@@ -485,6 +491,7 @@ export function createDatePicker<
       renderFieldValues(selected, format);
     }
     input.setAttribute("aria-expanded", String(calendarOpen));
+    endInput.setAttribute("aria-expanded", String(calendarOpen));
     if (!preserveInputState) {
       input.setAttribute("aria-invalid", String(inputStatus === "invalid"));
       fieldMessage.textContent = inputStatus === "invalid" ? messages.enterValidDate : "";
@@ -785,7 +792,7 @@ export function createDatePicker<
     monthYearPanel.hidden = !monthYearPanelOpen;
     if (!monthYearPanelOpen) return;
 
-    const messages = resolveDatePickerMessages(currentOptions.messages);
+    const messages = resolveDatePickerMessages(state.locale, currentOptions.messages);
 
     if (panelMode === "year") {
       ensurePeriodPanelStructure("year");
@@ -822,7 +829,7 @@ export function createDatePicker<
   }
 
   function renderMonthPanel(): void {
-    const messages = resolveDatePickerMessages(currentOptions.messages);
+    const messages = resolveDatePickerMessages(state.locale, currentOptions.messages);
     setText(panelTitleButton, String(state.visibleMonth.year));
     setAttribute(panelTitleButton, "aria-description", messages.chooseYear);
     setDisabled(previousPanelButton, isYearDisabled(state.visibleMonth.year - 1));
@@ -847,7 +854,7 @@ export function createDatePicker<
   }
 
   function renderYearPanel(): void {
-    const messages = resolveDatePickerMessages(currentOptions.messages);
+    const messages = resolveDatePickerMessages(state.locale, currentOptions.messages);
     const yearPageEnd = yearPageStart + 11;
     setText(panelTitleButton, `${yearPageStart}–${yearPageEnd}`);
     setDisabled(panelTitleButton, getGranularity(currentOptions) === "year");
@@ -935,7 +942,7 @@ export function createDatePicker<
   }
 
   function getSeasonLabel(month: number): string {
-    const messages = resolveDatePickerMessages(currentOptions.messages);
+    const messages = resolveDatePickerMessages(state.locale, currentOptions.messages);
 
     if (month === 12 || month <= 2) {
       return messages.seasons.winter;
@@ -1240,8 +1247,8 @@ export function createDatePicker<
         !isDateInRange(parsed, state.min, state.max) ||
         isCalendarDateDisabled(state, normalized)
       ) {
+        const messages = resolveDatePickerMessages(state.locale, currentOptions.messages);
         target.setAttribute("aria-invalid", "true");
-        const messages = resolveDatePickerMessages(currentOptions.messages);
         getFieldMessage(target).textContent = isDateInRange(parsed, state.min, state.max)
           ? messages.enterValidDate
           : getDatePickerFieldError(parsed, state.min, state.max, messages);
@@ -1279,6 +1286,7 @@ export function createDatePicker<
   function markUnavailableInput(target: HTMLInputElement): void {
     target.setAttribute("aria-invalid", "true");
     getFieldMessage(target).textContent = resolveDatePickerMessages(
+      state.locale,
       currentOptions.messages,
     ).enterValidDate;
   }

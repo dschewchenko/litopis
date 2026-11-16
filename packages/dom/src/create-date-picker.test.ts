@@ -2,6 +2,30 @@ import { describe, expect, it, vi } from "vitest";
 import { createDatePicker } from "./create-date-picker";
 
 describe("createDatePicker", () => {
+  it("preserves consumer input styling and disabled state", () => {
+    const root = document.createElement("div");
+    const input = document.createElement("input");
+    input.setAttribute("slot", "input");
+    input.className = "app-input";
+    input.style.fontSize = "24px";
+    input.style.fontFamily = "Georgia";
+    input.disabled = true;
+    root.append(input);
+
+    const picker = createDatePicker(root, { mode: "popover" });
+    picker.setDate({ day: 25, month: 6, year: 2026 });
+
+    expect(root.querySelector("input")).toBe(input);
+    expect(input.style.fontSize).toBe("24px");
+    expect(input.style.fontFamily).toBe("Georgia");
+    expect(input.disabled).toBe(true);
+    expect(input.className).toBe("app-input");
+    picker.destroy();
+    expect(input.className).toBe("app-input");
+    expect(input.style.fontSize).toBe("24px");
+    expect(input.disabled).toBe(true);
+  });
+
   it("uses and restores supplied input slots", () => {
     const root = document.createElement("div");
     const input = document.createElement("input");
@@ -21,8 +45,8 @@ describe("createDatePicker", () => {
       today: { day: 25, month: 6, year: 2026 },
     });
 
-    expect(root.querySelector<HTMLInputElement>(".litopis-input")).toBe(input);
-    expect(input.classList.contains("custom-input")).toBe(true);
+    expect(root.querySelector<HTMLInputElement>("[role='combobox']")).toBe(input);
+    expect(input.className).toBe("custom-input");
     expect(input.id).toBe("appointment-date");
     expect(input.name).toBe("");
     expect(input.placeholder).toBe("Choose a date");
@@ -57,6 +81,8 @@ describe("createDatePicker", () => {
     const root = document.createElement("div");
     const startInput = document.createElement("input");
     const endInput = document.createElement("input");
+    startInput.className = "start-app-input input-sm";
+    endInput.className = "end-app-input input-lg";
     startInput.setAttribute("slot", "input");
     endInput.setAttribute("slot", "end-input");
     root.append(startInput, endInput);
@@ -71,8 +97,37 @@ describe("createDatePicker", () => {
     });
 
     expect([...root.querySelectorAll("[role='combobox']")]).toEqual([startInput, endInput]);
+    expect(startInput.className).toBe("start-app-input input-sm");
+    expect(endInput.className).toBe("end-app-input input-lg");
     expect(startInput.value).toBe("2026-06-12");
     expect(endInput.value).toBe("2026-06-18");
+    expect(startInput.getAttribute("aria-expanded")).toBe("true");
+    expect(endInput.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("copies the supplied input classes to a cloned split-range field", () => {
+    const root = document.createElement("div");
+    const startInput = document.createElement("input");
+    startInput.className = "app-input input-lg";
+    startInput.setAttribute("slot", "input");
+    root.append(startInput);
+
+    const picker = createDatePicker(root, {
+      layout: "split",
+      range: { end: null, start: null },
+      selection: "range",
+    });
+    const [renderedStart, renderedEnd] =
+      root.querySelectorAll<HTMLInputElement>("[role='combobox']");
+
+    expect(renderedStart).toBe(startInput);
+    expect(renderedEnd).not.toBe(startInput);
+    expect(renderedStart?.className).toBe("app-input input-lg");
+    expect(renderedEnd?.className).toBe("app-input input-lg");
+
+    picker.destroy();
+    expect([...root.children]).toEqual([startInput]);
+    expect(startInput.className).toBe("app-input input-lg");
   });
 
   it("renders a keyboard reachable grid", () => {
@@ -241,6 +296,100 @@ describe("createDatePicker", () => {
     ).toBe("Next month");
     expect(root.querySelector(".litopis-season")?.textContent).toBe("Winter");
   });
+
+  it.each([
+    {
+      locale: "en-US",
+      captionDescription: "Choose month and year",
+      clear: "Clear",
+      nextMonth: "Next month",
+      previousMonth: "Previous month",
+      season: "Summer",
+      today: "Today",
+    },
+    {
+      locale: "uk-UA",
+      captionDescription: "Вибрати місяць і рік",
+      clear: "Очистити",
+      nextMonth: "Наступний місяць",
+      previousMonth: "Попередній місяць",
+      season: "Літо",
+      today: "Сьогодні",
+    },
+    {
+      locale: "de-DE",
+      captionDescription: "Monat und Jahr auswählen",
+      clear: "Löschen",
+      nextMonth: "Nächster Monat",
+      previousMonth: "Vorheriger Monat",
+      season: "Sommer",
+      today: "Heute",
+    },
+    {
+      locale: "es-ES",
+      captionDescription: "Elegir mes y año",
+      clear: "Borrar",
+      nextMonth: "Mes siguiente",
+      previousMonth: "Mes anterior",
+      season: "Verano",
+      today: "Hoy",
+    },
+    {
+      locale: "fr-FR",
+      captionDescription: "Choisir le mois et l'année",
+      clear: "Effacer",
+      nextMonth: "Mois suivant",
+      previousMonth: "Mois précédent",
+      season: "Été",
+      today: "Aujourd'hui",
+    },
+    {
+      locale: "pt-BR",
+      captionDescription: "Escolher mês e ano",
+      clear: "Limpar",
+      nextMonth: "Próximo mês",
+      previousMonth: "Mês anterior",
+      season: "Verão",
+      today: "Hoje",
+    },
+  ])(
+    "localizes the calendar controls for $locale",
+    ({ locale, captionDescription, clear, nextMonth, previousMonth, season, today }) => {
+      const root = document.createElement("div");
+
+      createDatePicker(root, {
+        clearButton: true,
+        locale,
+        season: true,
+        today: { day: 25, month: 6, year: 2026 },
+        todayButton: true,
+      });
+
+      expect(
+        root
+          .querySelector<HTMLButtonElement>(".litopis-nav-button[data-direction='previous']")
+          ?.getAttribute("aria-label"),
+      ).toBe(previousMonth);
+      expect(
+        root
+          .querySelector<HTMLButtonElement>(".litopis-nav-button[data-direction='next']")
+          ?.getAttribute("aria-label"),
+      ).toBe(nextMonth);
+      const caption = root.querySelector<HTMLButtonElement>(".litopis-caption");
+      expect(caption?.hasAttribute("aria-label")).toBe(false);
+      expect(caption?.getAttribute("aria-description")).toBe(captionDescription);
+      expect(root.querySelector(".litopis-season")?.textContent).toBe(season);
+      expect(root.querySelector(".litopis-clear-button")?.textContent).toBe(clear);
+      expect(root.querySelector(".litopis-today-button")?.textContent).toBe(today);
+      const captionLabel = new Intl.DateTimeFormat(locale, {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(2026, 5, 1, 12));
+      expect(caption?.textContent).toContain(captionLabel);
+      expect(root.querySelector(".litopis-caption-label")?.textContent).toBe(captionLabel);
+      expect(root.querySelector(".litopis-weekdays")?.textContent).not.toContain("Sunday");
+    },
+  );
 
   it("renders only Litopis-owned styling hooks", () => {
     const root = document.createElement("div");

@@ -12,22 +12,37 @@
   --litopis-control-size: calc(var(--size-field, 0.25rem) * 10);
   --litopis-danger: var(--color-error);
   --litopis-disabled: color-mix(in oklab, var(--color-base-content) 35%, transparent);
-  --litopis-focus-ring: color-mix(in oklab, var(--color-primary) 24%, transparent);
+  --litopis-focus-color: var(--color-base-content);
+  --litopis-font-family: inherit;
+  --litopis-font-size: inherit;
   --litopis-foreground: var(--color-base-content);
-  --litopis-input-border: color-mix(in oklab, var(--color-base-content) 20%, transparent);
-  --litopis-input-padding-inline: 0.75rem;
   --litopis-muted: var(--color-base-200);
   --litopis-muted-foreground: color-mix(in oklab, var(--color-base-content) 62%, transparent);
   --litopis-radius: var(--radius-field);
+  --litopis-range-background: var(--color-base-content);
+  --litopis-selected-background: var(--color-base-content);
+  --litopis-selected-foreground: var(--color-base-100);
   --litopis-popover-shadow:
     0 0 0 var(--border) var(--color-base-300),
     0 18px 48px color-mix(in oklab, var(--color-base-content) 14%, transparent),
     0 2px 8px color-mix(in oklab, var(--color-base-content) 10%, transparent);
 }
 
-.litopis-input:focus {
-  box-shadow: 0 1px
-    color-mix(in oklab, var(--color-base-content) calc(var(--depth, 0) * 10%), transparent);
-  outline: 2px solid var(--color-base-content);
-  outline-offset: 2px;
+:where(.litopis, .litopis-field)
+  .litopis-day[data-in-range]:not([data-range-start]):not([data-range-end])
+  .litopis-day-button {
+  color: var(--color-base-100);
+}
+
+:where(.litopis, .litopis-field)
+  .litopis-day[data-in-range]:not([data-range-start]):not([data-range-end])
+  .litopis-day-button:hover {
+  background: var(--color-base-content);
+  color: var(--color-base-100);
+}
+
+:where(.litopis, .litopis-field)
+  .litopis-day[data-in-range]:not([data-range-start]):not([data-range-end])
+  .litopis-day-button:focus-visible {
+  box-shadow: inset 0 0 0 var(--litopis-focus-width) var(--color-base-100);
 }

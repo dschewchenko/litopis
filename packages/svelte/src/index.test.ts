@@ -15,7 +15,7 @@ describe("litopisDatePicker for Svelte", () => {
     });
 
     expect(host.querySelector<HTMLInputElement>(".custom-input")).toBe(input);
-    expect(input.classList.contains("litopis-input")).toBe(true);
+    expect(input.className).toBe("custom-input");
     expect(input.placeholder).toBe("Choose a date");
     expect(input.value).toBe("2026-06-25");
     action.destroy();

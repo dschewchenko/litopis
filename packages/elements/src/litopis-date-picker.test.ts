@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { DatePickerMessageOverrides, DatePickerRangeNames } from "@litopis/dom";
 import { defineLitopisElements } from "./index";
 
@@ -55,15 +55,69 @@ describe("LitopisDatePickerElement", () => {
 
     document.body.append(element);
 
-    expect(element.querySelector<HTMLInputElement>(".litopis-input")).toBe(input);
+    expect(element.querySelector<HTMLInputElement>("[role='combobox']")).toBe(input);
+    expect(input.className).toBe("custom-input");
     expect(input.classList.contains("custom-input")).toBe(true);
 
     element.remove();
     expect(element.querySelector("[slot='input']")).toBe(input);
 
     document.body.append(element);
-    expect(element.querySelector<HTMLInputElement>(".litopis-input")).toBe(input);
+    expect(element.querySelector<HTMLInputElement>("[role='combobox']")).toBe(input);
+    expect(input.className).toBe("custom-input");
     element.remove();
+  });
+
+  it("waits for parser children before mounting while the document is loading", () => {
+    defineLitopisElements();
+    const readyState = vi.spyOn(document, "readyState", "get").mockReturnValue("loading");
+    const element = document.createElement("litopis-date-picker") as TestLitopisDatePickerElement;
+    const input = document.createElement("input");
+    input.setAttribute("slot", "input");
+    input.style.fontSize = "24px";
+
+    try {
+      document.body.append(element);
+
+      expect(element.querySelector("[role='combobox']")).toBeNull();
+
+      element.append(input);
+      document.dispatchEvent(new Event("DOMContentLoaded"));
+
+      expect(element.querySelector("[role='combobox']")).toBe(input);
+      expect(input.className).toBe("");
+      expect(input.style.fontSize).toBe("24px");
+    } finally {
+      element.remove();
+      readyState.mockRestore();
+    }
+  });
+
+  it("cancels a pending mount on disconnect and mounts after reconnect", () => {
+    defineLitopisElements();
+    const readyState = vi.spyOn(document, "readyState", "get").mockReturnValue("loading");
+    const element = document.createElement("litopis-date-picker") as TestLitopisDatePickerElement;
+    const input = document.createElement("input");
+    input.setAttribute("slot", "input");
+
+    try {
+      document.body.append(element);
+      element.append(input);
+      element.remove();
+      document.dispatchEvent(new Event("DOMContentLoaded"));
+
+      expect(element.querySelector("[role='combobox']")).toBeNull();
+      expect(element.classList.contains("litopis")).toBe(false);
+
+      document.body.append(element);
+      document.dispatchEvent(new Event("DOMContentLoaded"));
+
+      expect(element.querySelector("[role='combobox']")).toBe(input);
+      expect(input.className).toBe("");
+    } finally {
+      element.remove();
+      readyState.mockRestore();
+    }
   });
 
   it("accepts the initial value attribute and later attribute updates", () => {
