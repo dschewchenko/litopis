@@ -26,7 +26,7 @@
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link active" href="/litopis/" aria-current="page">Getting started</a>
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
-            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/guides/">Guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
             <div class="sidebar-subnav">
               <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
@@ -44,6 +44,7 @@
             </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/integrations/daisyui/">daisyUI</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
@@ -51,34 +52,283 @@
         <main class="vp-doc home-doc" tabindex="-1">
           <section class="home-hero">
             <h1>Litopis date picker</h1>
-            <p class="hero-lead">
-              <em>Litopis</em> is Ukrainian for “chronicle”: date fields and calendars for plain
-              DOM, Web Components, React, Vue, Solid and Svelte.
+            <p class="hero-lead">Date fields and calendars for JavaScript apps.</p>
+            <p class="home-links">
+              <a href="/litopis/integrations/">Choose your framework</a>
+              <a href="/litopis/api/">API reference</a>
             </p>
-            <div class="hero-actions">
-              <a class="btn btn-neutral primary-action" href="#quick-start">Getting started</a>
-              <a class="btn btn-ghost secondary-action" href="/litopis/integrations/"
-                >Integrations</a
-              >
+          </section>
+
+          <section id="quick-start" class="workbench">
+            <div class="workbench-example">
+              <h2>Try it</h2>
+              <p>Open the date field and select a date. Its form value appears below.</p>
+              <div class="playground" data-playground>
+                <form class="demo-block hero-demo" data-playground-native-form>
+                  <div data-playground-picker>
+                    <input slot="input" class="input w-full" />
+                  </div>
+                  <div class="playground-actions">
+                    <button class="btn btn-ghost btn-sm" type="reset">Reset values</button>
+                  </div>
+                </form>
+                <p class="demo-value" data-playground-value aria-live="polite">
+                  No period selected
+                </p>
+                <form class="playground-controls" data-playground-form>
+                  <fieldset class="playground-control-group playground-basic">
+                    <legend class="sr-only">Picker options</legend>
+                    <label>
+                      Selection
+                      <select data-playground-selection>
+                        <option value="single">Single</option>
+                        <option value="range">Range</option>
+                      </select>
+                    </label>
+                    <label>
+                      Period
+                      <select data-playground-granularity>
+                        <option value="day">Day</option>
+                        <option value="month">Month</option>
+                        <option value="year">Year</option>
+                      </select>
+                    </label>
+                    <label>
+                      Calendar
+                      <select data-playground-calendar>
+                        <option value="popover">Popup</option>
+                        <option value="inline">Inline</option>
+                      </select>
+                    </label>
+                  </fieldset>
+                  <details class="playground-advanced" data-playground-advanced>
+                    <summary>More options</summary>
+                    <fieldset class="playground-control-group">
+                      <legend>Range</legend>
+
+                      <label>
+                        Panels
+                        <select data-playground-panels>
+                          <option value="auto">Responsive</option>
+                          <option value="1">One</option>
+                          <option value="2">Two</option>
+                        </select>
+                      </label>
+                    </fieldset>
+
+                    <fieldset class="playground-control-group">
+                      <legend>Fields</legend>
+                      <label>
+                        Layout
+                        <select data-playground-layout>
+                          <option value="single">One text field</option>
+                          <option value="split">Start and end fields</option>
+                        </select>
+                      </label>
+                      <label>
+                        Format
+                        <select data-playground-format>
+                          <option value="dd.mm.yyyy">DD.MM.YYYY</option>
+                          <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                          <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                        </select>
+                      </label>
+                      <label>
+                        Field size
+                        <select data-playground-size>
+                          <option value="compact">Compact</option>
+                          <option value="comfortable">Comfortable</option>
+                        </select>
+                      </label>
+                    </fieldset>
+
+                    <fieldset class="playground-control-group">
+                      <legend>Locale and calendar</legend>
+                      <label>
+                        Locale
+                        <select data-playground-locale>
+                          <option value="auto">Browser default</option>
+                          <option value="en-US">English</option>
+                          <option value="uk-UA">Ukrainian</option>
+                          <option value="de-DE">German</option>
+                          <option value="fr-FR">French</option>
+                          <option value="es-ES">Spanish</option>
+                          <option value="pt-BR">Portuguese (Brazil)</option>
+                          <option value="ja-JP">Japanese</option>
+                        </select>
+                      </label>
+                      <label>
+                        Week starts
+                        <select data-playground-first-day>
+                          <option value="auto">Locale default</option>
+                          <option value="0">Sunday</option>
+                          <option value="1">Monday</option>
+                          <option value="2">Tuesday</option>
+                          <option value="3">Wednesday</option>
+                          <option value="4">Thursday</option>
+                          <option value="5">Friday</option>
+                          <option value="6">Saturday</option>
+                        </select>
+                      </label>
+
+                      <label class="playground-toggle">
+                        <input data-playground-outside-days type="checkbox" checked />
+                        Show adjacent days
+                      </label>
+                      <label class="playground-toggle">
+                        <input data-playground-season type="checkbox" />
+                        Show season
+                      </label>
+                    </fieldset>
+
+                    <fieldset class="playground-control-group">
+                      <legend>Values</legend>
+                      <label>
+                        Return as
+                        <select data-playground-value-as>
+                          <option value="date-value">DateValue object</option>
+                          <option value="date">Native Date</option>
+                        </select>
+                      </label>
+                      <div
+                        data-playground-date-field="start-value"
+                        data-label="Initial start"
+                      ></div>
+                      <div data-playground-date-field="end-value" data-label="Initial end"></div>
+                    </fieldset>
+
+                    <fieldset class="playground-control-group">
+                      <legend>Limits and actions</legend>
+                      <div data-playground-date-field="min" data-label="Minimum date"></div>
+                      <div data-playground-date-field="max" data-label="Maximum date"></div>
+                      <div data-playground-date-field="today" data-label="Today reference"></div>
+                      <label class="playground-toggle">
+                        <input data-playground-close-on-select type="checkbox" checked />
+                        Close on select
+                      </label>
+                      <label class="playground-toggle">
+                        <input data-playground-clear-button type="checkbox" checked />
+                        Show clear button
+                      </label>
+                      <label class="playground-toggle">
+                        <input data-playground-today-button type="checkbox" />
+                        Show today button
+                      </label>
+                    </fieldset>
+
+                    <div class="playground-control-actions">
+                      <button class="btn btn-ghost btn-sm" type="reset">Reset controls</button>
+                    </div>
+                  </details>
+                </form>
+
+                <details class="playground-code">
+                  <summary>Copy this setup</summary>
+                  <p>
+                    This playground uses daisyUI. Follow the
+                    <a href="/litopis/integrations/daisyui/">daisyUI setup</a> and add this markup.
+                  </p>
+                  <div class="language-html vp-code-group">
+                    <span class="lang">html</span>
+                    <pre><code>&lt;form id="travel-form"&gt;
+  &lt;div id="travel-date"&gt;
+    &lt;input slot="input" class="input w-full" /&gt;
+  &lt;/div&gt;
+  &lt;button type="submit"&gt;Read form values&lt;/button&gt;
+&lt;/form&gt;
+&lt;output id="travel-value"&gt;&lt;/output&gt;</code></pre>
+                  </div>
+                  <p>Add this code to your TypeScript entry file.</p>
+                  <div class="language-ts vp-code-group">
+                    <span class="lang">ts</span>
+                    <pre><code data-playground-code></code></pre>
+                  </div>
+                </details>
+              </div>
+            </div>
+
+            <div class="quick-start-panel">
+              <h2 id="install">Add it to your app</h2>
+              <p>Use this setup in a JavaScript app with a bundler such as Vite.</p>
+              <div class="package-install" data-package-install="@litopis/dom">
+                <div class="package-install-tabs" role="tablist" aria-label="Package manager">
+                  <button type="button" role="tab" aria-selected="true" data-package-manager="npm">
+                    npm
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-package-manager="pnpm"
+                  >
+                    pnpm
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-package-manager="yarn"
+                  >
+                    yarn
+                  </button>
+                  <button type="button" role="tab" aria-selected="false" data-package-manager="bun">
+                    Bun
+                  </button>
+                </div>
+                <div class="language-sh vp-code-group" data-package-install-panel>
+                  <span class="lang">sh</span>
+                  <pre><code>npm install @litopis/dom</code></pre>
+                </div>
+              </div>
+              <p>Put the container inside your form.</p>
+              <div class="language-html vp-code-group">
+                <span class="lang">html</span>
+                <pre><code>&lt;form&gt;
+  &lt;div id="travel-date"&gt;&lt;/div&gt;
+&lt;/form&gt;</code></pre>
+              </div>
+              <p>Add the picker to your JavaScript entry file.</p>
+              <div class="language-js vp-code-group">
+                <span class="lang">js</span>
+                <pre><code>import { createDatePicker } from "@litopis/dom";
+import "@litopis/dom/styles/base.css";
+
+const root = document.querySelector("#travel-date");
+
+if (root) {
+  createDatePicker(root, {
+    mode: "popover",
+    format: "dd.mm.yyyy",
+    label: "Travel date",
+    name: "travelDate",
+  });
+}</code></pre>
+              </div>
+              <p class="panel-note">
+                The form submits <code>travelDate</code> as <code>YYYY-MM-DD</code>. Framework
+                components handle mounting and cleanup for you.
+                <a href="/litopis/integrations/">Choose a framework guide</a>.
+                <a href="/litopis/examples/#range">Read form values in a working example</a>.
+              </p>
             </div>
           </section>
 
-          <section class="home-strengths" aria-label="Why Litopis">
+          <section id="features" class="home-strengths" aria-label="Features">
             <div>
               <h2>Keyboard interaction</h2>
-              <p>Day, month and year views share focus movement, selection and range behavior.</p>
+              <p>Use the keyboard to select days, months or years.</p>
             </div>
             <div>
               <h2>Native form support</h2>
-              <p>Use one formatted field or two endpoints without inventing a form abstraction.</p>
+              <p>Submit one date or separate start and end values through a native form.</p>
             </div>
             <div>
               <h2>Headless core</h2>
-              <p>Calendar state and date math stay independent of the DOM and CSS.</p>
+              <p>Use date math and selection state with your own markup.</p>
             </div>
             <div>
               <h2>Optional CSS</h2>
-              <p>Use the base stylesheet or a theme adapter for your design system.</p>
+              <p>Choose base styles, a UI theme adapter or your own CSS.</p>
             </div>
           </section>
 
@@ -134,238 +384,6 @@
             </div>
           </section>
 
-          <section id="quick-start" class="workbench">
-            <div class="workbench-example">
-              <h2>Try the date picker</h2>
-              <p>
-                Choose the kind of period, fields and calendar you need. Form data updates as you
-                select.
-              </p>
-              <div class="playground" data-playground>
-                <form class="playground-controls" data-playground-form>
-                  <fieldset class="playground-control-group">
-                    <legend>Selection</legend>
-                    <label>
-                      Selection
-                      <select data-playground-selection>
-                        <option value="single">One period</option>
-                        <option value="range">Range</option>
-                      </select>
-                    </label>
-                    <label>
-                      Period
-                      <select data-playground-granularity>
-                        <option value="day">Day</option>
-                        <option value="month">Month</option>
-                        <option value="year">Year</option>
-                      </select>
-                    </label>
-                    <label>
-                      Panels
-                      <select data-playground-panels>
-                        <option value="auto">Responsive</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                      </select>
-                    </label>
-                  </fieldset>
-
-                  <fieldset class="playground-control-group">
-                    <legend>Fields</legend>
-                    <label>
-                      Layout
-                      <select data-playground-layout>
-                        <option value="single">One text field</option>
-                        <option value="split">Start and end fields</option>
-                      </select>
-                    </label>
-                    <label>
-                      Format
-                      <select data-playground-format>
-                        <option value="dd.mm.yyyy">DD.MM.YYYY</option>
-                        <option value="yyyy-mm-dd">YYYY-MM-DD</option>
-                        <option value="mm/dd/yyyy">MM/DD/YYYY</option>
-                      </select>
-                    </label>
-                    <label>
-                      Field size
-                      <select data-playground-size>
-                        <option value="compact">Compact</option>
-                        <option value="comfortable">Comfortable</option>
-                      </select>
-                    </label>
-                  </fieldset>
-
-                  <fieldset class="playground-control-group">
-                    <legend>Locale and calendar</legend>
-                    <label>
-                      Locale
-                      <input
-                        data-playground-locale
-                        list="playground-locales"
-                        type="text"
-                        value="auto"
-                      />
-                    </label>
-                    <label>
-                      Week starts
-                      <select data-playground-first-day>
-                        <option value="auto">Locale default</option>
-                        <option value="0">Sunday</option>
-                        <option value="1">Monday</option>
-                        <option value="2">Tuesday</option>
-                        <option value="3">Wednesday</option>
-                        <option value="4">Thursday</option>
-                        <option value="5">Friday</option>
-                        <option value="6">Saturday</option>
-                      </select>
-                    </label>
-                    <label>
-                      Calendar
-                      <select data-playground-calendar>
-                        <option value="inline">Inline</option>
-                        <option value="popover">Popover</option>
-                      </select>
-                    </label>
-                    <label class="playground-toggle">
-                      <input data-playground-outside-days type="checkbox" checked />
-                      Show adjacent days
-                    </label>
-                    <label class="playground-toggle">
-                      <input data-playground-season type="checkbox" />
-                      Show season
-                    </label>
-                  </fieldset>
-
-                  <fieldset class="playground-control-group">
-                    <legend>Values</legend>
-                    <label>
-                      Return as
-                      <select data-playground-value-as>
-                        <option value="date-value">DateValue object</option>
-                        <option value="date">Native Date</option>
-                      </select>
-                    </label>
-                    <label>
-                      Initial start
-                      <input data-playground-start-value type="date" />
-                    </label>
-                    <label>
-                      Initial end
-                      <input data-playground-end-value type="date" />
-                    </label>
-                  </fieldset>
-
-                  <fieldset class="playground-control-group">
-                    <legend>Limits and actions</legend>
-                    <label>
-                      Minimum date
-                      <input data-playground-min type="date" />
-                    </label>
-                    <label>
-                      Maximum date
-                      <input data-playground-max type="date" />
-                    </label>
-                    <label>
-                      Today reference
-                      <input data-playground-today type="date" />
-                    </label>
-                    <label class="playground-toggle">
-                      <input data-playground-close-on-select type="checkbox" checked />
-                      Close on select
-                    </label>
-                    <label class="playground-toggle">
-                      <input data-playground-clear-button type="checkbox" checked />
-                      Show clear button
-                    </label>
-                    <label class="playground-toggle">
-                      <input data-playground-today-button type="checkbox" />
-                      Show today button
-                    </label>
-                  </fieldset>
-
-                  <div class="playground-control-actions">
-                    <button class="btn btn-ghost btn-sm" type="reset">Reset controls</button>
-                  </div>
-                </form>
-                <datalist id="playground-locales">
-                  <option value="auto">Auto (browser)</option>
-                  <option value="en-US">English (United States)</option>
-                  <option value="uk-UA">Ukrainian</option>
-                  <option value="de-DE">German</option>
-                  <option value="fr-FR">French</option>
-                  <option value="ja-JP">Japanese</option>
-                </datalist>
-                <form class="demo-block hero-demo" data-playground-native-form>
-                  <div data-playground-picker></div>
-                  <div class="playground-actions">
-                    <button class="btn btn-ghost btn-sm" type="reset">Reset values</button>
-                  </div>
-                </form>
-                <p class="demo-value" data-playground-value aria-live="polite">
-                  No period selected
-                </p>
-                <div class="language-ts vp-code-group">
-                  <span class="lang">ts</span>
-                  <pre><code data-playground-code></code></pre>
-                </div>
-              </div>
-            </div>
-
-            <div class="quick-start-panel">
-              <h2>Install and mount</h2>
-              <div class="package-install" data-package-install="@litopis/dom">
-                <div class="package-install-tabs" role="tablist" aria-label="Package manager">
-                  <button type="button" role="tab" aria-selected="true" data-package-manager="npm">
-                    npm
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected="false"
-                    data-package-manager="pnpm"
-                  >
-                    pnpm
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected="false"
-                    data-package-manager="yarn"
-                  >
-                    yarn
-                  </button>
-                  <button type="button" role="tab" aria-selected="false" data-package-manager="bun">
-                    Bun
-                  </button>
-                </div>
-                <div class="language-sh vp-code-group" data-package-install-panel>
-                  <span class="lang">sh</span>
-                  <pre><code>npm install @litopis/dom</code></pre>
-                </div>
-              </div>
-              <div class="language-ts vp-code-group">
-                <span class="lang">ts</span>
-                <pre><code>import { createDatePicker } from "@litopis/dom";
-import "@litopis/dom/styles/base.css";
-
-const root = document.querySelector&lt;HTMLElement&gt;("#travel-date");
-
-if (root) {
-  createDatePicker(root, {
-    mode: "popover",
-    format: "dd.mm.yyyy",
-    label: "Travel date",
-    locale: "uk-UA",
-  });
-}</code></pre>
-              </div>
-              <p class="panel-note">
-                Styles are optional. Date input and keyboard support still work.
-              </p>
-            </div>
-          </section>
-
           <section id="integrations">
             <h2>Integrations</h2>
             <ul class="integration-links">
@@ -385,7 +403,8 @@ if (root) {
                 Import foundation, base, daisyUI, shadcn or Bootstrap styles from
                 <code>@litopis/dom/styles</code>.
               </p>
-              <a class="text-action" href="/litopis/styling/">Styling guide →</a>
+              <a class="text-action" href="/litopis/styling/">Styling guide</a>
+              <a class="text-action" href="/litopis/integrations/daisyui/">daisyUI example</a>
             </div>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
@@ -403,7 +422,9 @@ if (root) {
         <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
           <nav aria-label="Page outline">
-            <a class="outline-link" href="#quick-start">Quick start</a>
+            <a class="outline-link" href="#quick-start">Try it</a>
+            <a class="outline-link" href="#install">Installation</a>
+            <a class="outline-link" href="#features">Features</a>
             <a class="outline-link" href="#integrations">Integrations</a>
             <a class="outline-link" href="#styling-model">Styling</a>
           </nav>

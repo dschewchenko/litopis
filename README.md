@@ -2,12 +2,14 @@
 
 Date fields and calendars for plain DOM, Web Components, React, Vue, Solid and Svelte.
 
-_Litopis_ means “chronicle” in Ukrainian. The package keeps date math, selection and keyboard
-interaction in a DOM-free core, with rendering and CSS supplied as separate layers.
+The core handles date math, selection and keyboard state without the DOM. The DOM package renders
+fields and calendars. Optional stylesheets and framework packages provide styling and framework
+bindings.
 
 [Documentation](https://dschewchenko.github.io/litopis/) ·
 [Examples](https://dschewchenko.github.io/litopis/examples/) ·
-[API reference](https://dschewchenko.github.io/litopis/api/)
+[API reference](https://dschewchenko.github.io/litopis/api/) ·
+[AI agent index](https://dschewchenko.github.io/litopis/llms.txt)
 
 ## Features
 
@@ -139,6 +141,9 @@ import "@litopis/dom/styles/base.css";
 
 Theme adapters are CSS-only and use the host design system's variables. See the
 [styling guide](https://dschewchenko.github.io/litopis/styling/) for tokens and setup.
+
+To use a daisyUI, Bootstrap or shadcn input, pass it through `slot="input"` with its normal
+classes. Your UI library styles the input. Litopis adds date entry and calendar behavior.
 
 ## Bundle size
 

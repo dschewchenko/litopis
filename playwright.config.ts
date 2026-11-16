@@ -7,8 +7,8 @@ export default defineConfig({
   fullyParallel: true,
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: "chrome",
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
     },
     {
       name: "firefox",
@@ -23,8 +23,10 @@ export default defineConfig({
   testDir: "./tests/browser",
   use: {
     baseURL,
+    headless: true,
     trace: "retain-on-failure",
   },
+  workers: 2,
   webServer: {
     command: `bun run dev -- --port ${docsPort}`,
     reuseExistingServer: !process.env.CI,

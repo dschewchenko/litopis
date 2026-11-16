@@ -24,7 +24,7 @@
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link" href="/litopis/">Getting started</a>
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
-            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/guides/">Guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
             <div class="sidebar-subnav">
               <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
@@ -45,6 +45,7 @@
             </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/integrations/daisyui/">daisyUI</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
@@ -60,8 +61,11 @@
             </p>
           </section>
           <section id="install">
-            <h2>Installation</h2>
-            <div class="package-install" data-package-install="@litopis/elements @litopis/dom">
+            <h2>Quick start</h2>
+            <div
+              class="package-install"
+              data-package-install="@litopis/elements @litopis/dom @litopis/dom"
+            >
               <div class="package-install-tabs" role="tablist" aria-label="Package manager">
                 <button type="button" role="tab" aria-selected="true" data-package-manager="npm">
                   npm
@@ -78,8 +82,24 @@
               </div>
               <div class="language-sh vp-code-group" data-package-install-panel>
                 <span class="lang">sh</span>
-                <pre><code>npm install @litopis/elements @litopis/dom</code></pre>
+                <pre><code>npm install @litopis/elements @litopis/dom @litopis/dom</code></pre>
               </div>
+            </div>
+            <p>
+              Register the custom element in <code>src/main.ts</code>. Add this markup to
+              <code>index.html</code>.
+            </p>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;form&gt;
+  &lt;litopis-date-picker
+    mode="popover"
+    format="dd.mm.yyyy"
+    label="Appointment date"
+    name="appointment"
+  &gt;&lt;/litopis-date-picker&gt;
+  &lt;button type="submit"&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code></pre>
             </div>
             <div class="language-ts vp-code-group">
               <span class="lang">ts</span>
@@ -88,7 +108,7 @@ import "@litopis/dom/styles/base.css";</code></pre>
             </div>
           </section>
           <section id="live-example">
-            <h2>Example</h2>
+            <h2>Interactive example</h2>
             <div class="demo-block integration-demo">
               <litopis-date-picker
                 data-integration-demo="web-components"
@@ -181,17 +201,15 @@ if (picker) {
           </section>
           <section id="styling">
             <h2>Styling</h2>
-            <p>
-              Import a Litopis stylesheet, then override its CSS variables or selectors as needed.
-            </p>
+            <p>Import a Litopis stylesheet. Override its CSS variables or selectors as needed.</p>
             <a class="text-action" href="/litopis/styling/">Styling guide →</a>
           </section>
         </main>
         <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
           <nav aria-label="Page outline">
-            <a class="outline-link" href="#install">Installation</a
-            ><a class="outline-link" href="#live-example">Example</a
+            <a class="outline-link" href="#install">Quick start</a
+            ><a class="outline-link" href="#live-example">Interactive example</a
             ><a class="outline-link" href="#attributes">HTML attributes</a
             ><a class="outline-link" href="#range">Range</a
             ><a class="outline-link" href="#custom-input">Custom input</a

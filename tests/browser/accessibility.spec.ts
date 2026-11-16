@@ -7,6 +7,7 @@ const documentationPages = [
   "./examples/",
   "./guides/",
   "./integrations/",
+  "./integrations/daisyui/",
   "./integrations/react/",
   "./integrations/vue/",
   "./integrations/solid/",
@@ -116,7 +117,7 @@ test("example previews mount real pickers and expose keyboard-operated code tabs
 }) => {
   await page.goto("./examples/");
 
-  await expect(page.locator("[data-litopis-picker].litopis")).toHaveCount(10);
+  await expect(page.locator(".example-preview .litopis")).toHaveCount(14);
 
   const basicCard = page.locator("#basic");
   const previewTab = basicCard.getByRole("tab", { name: "Preview" });
@@ -128,20 +129,66 @@ test("example previews mount real pickers and expose keyboard-operated code tabs
   await expect(codeTab).toBeFocused();
   await expect(codeTab).toHaveAttribute("aria-selected", "true");
   await expect(basicCard.getByRole("tabpanel", { name: "Code" })).toBeVisible();
-  await expect(basicCard.getByRole("button", { name: "Copy code" })).toBeVisible();
+  await expect(basicCard.getByRole("button", { name: "Copy code" })).toHaveCount(2);
+  await expect(basicCard.locator("[data-source-code]")).toContainText(
+    'import { createDatePicker, type DatePickerController } from "@litopis/dom"',
+  );
 });
 
 test("headless example updates core state without generating a calendar", async ({ page }) => {
   await page.goto("./examples/");
 
-  const headlessExample = page.locator("[data-core-example]");
-  const state = headlessExample.locator("[data-core-state]");
+  const headlessExample = page.locator("#headless");
+  const state = headlessExample.locator("#headless-state");
   const initialState = await state.textContent();
 
   await headlessExample.getByRole("button", { name: "Next week" }).click();
 
   await expect(state).not.toHaveText(initialState ?? "");
   await expect(headlessExample.locator(".litopis")).toHaveCount(0);
+});
+
+test("range recipe submits ISO endpoints and replaces unavailable date snapshots", async ({
+  page,
+}) => {
+  await page.goto("./examples/");
+  const range = page.locator("#range");
+  await range.getByRole("combobox", { name: "Departure", exact: true }).fill("2026-06-12");
+  await range.getByRole("combobox", { name: "Return", exact: true }).fill("2026-06-18");
+  await range.getByRole("button", { name: "Read submitted dates" }).click();
+  await expect(range.locator("#range-value")).toContainText("2026-06-12");
+  await expect(range.locator("#range-value")).toContainText("2026-06-18");
+
+  const availability = page.locator("#disabled-dates");
+  const unavailableDates = await availability.locator("#disabled-dates-list").textContent();
+  await availability.getByRole("button", { name: "Block a second date" }).click();
+  await expect(availability.locator("#disabled-dates-list")).not.toHaveText(unavailableDates ?? "");
+  await expect(availability.getByRole("combobox", { name: "Arrival date" })).toBeVisible();
+  await availability.getByRole("button", { name: "Use one unavailable date" }).click();
+  await expect(availability.locator("#disabled-dates-list")).toHaveText(unavailableDates ?? "");
+});
+
+test("example Markdown contains the same complete source as its preview", async ({
+  page,
+  request,
+}) => {
+  await page.goto("./examples/");
+  const cards = page.locator("article.example-card");
+  await expect(cards).toHaveCount(11);
+
+  for (const card of await cards.all()) {
+    const id = await card.getAttribute("id");
+    const response = await request.get(`./examples/${id}.md`);
+    expect(response.ok(), `${id} Markdown should resolve`).toBe(true);
+    const markdown = await response.text();
+    const source = await card.locator("[data-source-code]").textContent();
+    expect(source?.trim()).toBeTruthy();
+    expect(markdown).toContain(source!.trim());
+    expect(markdown).toContain("npm install @litopis/");
+  }
+
+  const index = await request.get("./llms.txt");
+  expect(await index.text()).toContain("/litopis/examples/range.md");
 });
 
 test("integration pages mount their real package with the shared keyboard flow", async ({
@@ -172,20 +219,140 @@ test("integration pages mount their real package with the shared keyboard flow",
 });
 
 test("styling playground keeps one inline calendar while themes change", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
   await page.goto("./styling/");
   const playground = page.locator("[data-theme-playground]");
+  const input = playground.getByRole("combobox", { name: "Inline calendar preview" });
+  const selectedDay = playground.locator(".litopis-day[data-selected] .litopis-day-button");
 
-  await expect(playground.getByRole("combobox", { name: "Inline calendar preview" })).toBeVisible();
+  await expect(input).toBeVisible();
   await expect(playground.locator(".litopis")).toHaveAttribute("data-mode", "inline");
   await expect(playground.locator(".litopis-calendar")).toBeVisible();
+  await expect(selectedDay).toHaveCSS("background-color", "rgb(15, 118, 110)");
 
   await playground.getByRole("tab", { name: "Bootstrap" }).click();
   await expect(playground).toHaveAttribute("data-style-theme", "bootstrap");
   await expect(playground.getByRole("tabpanel")).toContainText("@litopis/dom/styles/bootstrap.css");
+  await expect(selectedDay).toHaveCSS("background-color", "rgb(13, 110, 253)");
 
   await playground.getByRole("tab", { name: "Bootstrap" }).press("Home");
   await expect(playground.getByRole("tab", { name: "Foundation" })).toBeFocused();
   await expect(playground).toHaveAttribute("data-style-theme", "foundation");
+
+  await playground.getByRole("tab", { name: "shadcn", exact: true }).click();
+  await expect(selectedDay).toHaveCSS("background-color", "rgb(24, 24, 27)");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(input).toBeVisible();
+});
+
+test("daisyUI recipe submits ISO form values and inherits the page theme", async ({ page }) => {
+  await page.goto("./integrations/daisyui/");
+  const demo = page.locator("[data-daisyui-demo]");
+  const output = demo.locator("[data-daisyui-value]");
+  const lightBackground = await demo.evaluate(
+    (element) => getComputedStyle(element).backgroundColor,
+  );
+
+  await demo.getByRole("button", { name: "Read form value" }).click();
+  await expect(output).toHaveText("No date selected");
+  await demo.getByRole("combobox", { name: "Appointment date" }).fill("2026-06-25");
+  await demo.getByRole("combobox", { name: "Appointment date" }).press("Escape");
+  await demo.getByRole("button", { name: "Read form value" }).click();
+  await expect(output).toHaveText("2026-06-25");
+
+  await expect(demo).not.toHaveAttribute("data-theme");
+  await expect(demo.getByRole("combobox", { name: "Theme", exact: true })).toHaveCount(0);
+  await page.locator("html").evaluate((element) => element.setAttribute("data-theme", "business"));
+  await expect(demo).not.toHaveCSS("background-color", lightBackground);
+  await expect(output).toHaveText("2026-06-25");
+
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+
+test("daisyUI preserves caller input styles across themes and states", async ({ page }) => {
+  await page.goto("./integrations/daisyui/");
+  const native = page.getByRole("textbox", { name: "daisyUI input", exact: true });
+  const picker = page.getByRole("combobox", { name: "Appointment date", exact: true });
+  await expect(picker).toHaveAttribute("slot", "input");
+  await expect(picker).toHaveAttribute("class", "input");
+  const properties = [
+    "height",
+    "width",
+    "font-size",
+    "font-family",
+    "font-weight",
+    "line-height",
+    "font-variant-numeric",
+    "background-color",
+    "color",
+    "border-top-width",
+    "border-top-color",
+    "border-top-left-radius",
+    "padding-top",
+    "padding-right",
+    "padding-bottom",
+    "padding-left",
+    "box-shadow",
+    "transition-duration",
+    "touch-action",
+    "cursor",
+  ];
+  const focusProperties = [...properties, "outline-color", "outline-width", "outline-offset"];
+  const classes = ["input", "input input-sm", "input input-lg", "input input-error"];
+
+  async function getStyles(
+    input: typeof native,
+    styleProperties: readonly string[],
+  ): Promise<Record<string, string>> {
+    return input.evaluate(
+      (element, properties) => {
+        const styles = getComputedStyle(element);
+        return Object.fromEntries(
+          properties.map((property) => [property, styles.getPropertyValue(property)]),
+        );
+      },
+      [...styleProperties],
+    );
+  }
+
+  for (const className of classes) {
+    await native.evaluate((element, value) => {
+      element.setAttribute("class", value);
+    }, className);
+    await picker.evaluate((element, value) => {
+      element.setAttribute("class", value);
+    }, className);
+    await expect(picker).toHaveAttribute("class", className);
+
+    for (const theme of ["corporate", "business"]) {
+      await page.locator("html").evaluate((element, value) => {
+        element.setAttribute("data-theme", value);
+      }, theme);
+
+      expect(await getStyles(picker, properties)).toEqual(await getStyles(native, properties));
+
+      await native.focus();
+      const nativeFocus = await getStyles(native, focusProperties);
+      await picker.focus();
+      expect(await getStyles(picker, focusProperties)).toEqual(nativeFocus);
+      await page.keyboard.press("Escape");
+
+      await native.evaluate((element) => {
+        element.setAttribute("disabled", "");
+      });
+      await picker.evaluate((element) => {
+        element.setAttribute("disabled", "");
+      });
+      expect(await getStyles(picker, properties)).toEqual(await getStyles(native, properties));
+      await native.evaluate((element) => {
+        element.removeAttribute("disabled");
+      });
+      await picker.evaluate((element) => {
+        element.removeAttribute("disabled");
+      });
+    }
+  }
 });
 
 test("integration index stays basic and links to independent framework guides", async ({
@@ -206,11 +373,18 @@ test("integration index stays basic and links to independent framework guides", 
   await expect(page.getByRole("heading", { name: /runtimes/i })).toHaveCount(0);
 });
 
-test("keyboard users can enter, navigate, and select in the calendar grid", async ({ page }) => {
+test("default homepage popover opens on click and closes after keyboard selection", async ({
+  page,
+}) => {
   await page.goto("./");
   const input = page.getByRole("combobox", { name: "Travel date" });
+  const picker = page.locator("[data-playground] .litopis");
 
-  await input.focus();
+  await expect(picker).toHaveAttribute("data-mode", "popover");
+  await expect(input).toHaveAttribute("slot", "input");
+  await expect(input).toHaveAttribute("class", "input w-full");
+  await input.click();
+  await expect(picker).toHaveAttribute("data-calendar-open", "true");
   await page.keyboard.press("ArrowDown");
 
   const focusedDay = page.locator(".litopis-day-button:focus");
@@ -222,7 +396,7 @@ test("keyboard users can enter, navigate, and select in the calendar grid", asyn
   await expect(
     page.locator(".litopis-day[aria-selected='true'] .litopis-day-button"),
   ).toHaveAttribute("aria-label", selectedLabel ?? "");
-  await expect(focusedDay).toHaveCount(1);
+  await expect(picker).toHaveAttribute("data-calendar-open", "false");
 });
 
 test("homepage playground mounts one responsive range calendar and updates native endpoint values", async ({
@@ -230,11 +404,19 @@ test("homepage playground mounts one responsive range calendar and updates nativ
 }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
 
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-layout]").selectOption("split");
   await playground.locator("[data-playground-panels]").selectOption("2");
+  await playground.locator("[data-playground-calendar]").selectOption("inline");
 
+  const code = playground.locator("[data-playground-code]");
+  await expect(code).toContainText('import { createDatePicker } from "@litopis/dom"');
+  await expect(code).toContainText('import "@litopis/dom/styles/daisyui.css"');
+  await expect(code).toContainText("panels: 2,");
+  await expect(code).not.toContainText('panels: "2"');
+  await expect(playground.locator(".litopis")).toHaveAttribute("data-mode", "inline");
   await expect(playground.locator(".litopis-calendar")).toHaveCount(1);
   await expect(playground.getByRole("combobox", { name: "From" })).toBeVisible();
   await expect(playground.getByRole("combobox", { name: "To" })).toBeVisible();
@@ -255,6 +437,7 @@ test("homepage playground mounts one responsive range calendar and updates nativ
 test("split range fields complete from one open calendar", async ({ page }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
 
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-layout]").selectOption("split");
@@ -297,6 +480,7 @@ test("split range fields complete from one open calendar", async ({ page }) => {
 test("playground can keep its popover open and clear the selected range", async ({ page }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
 
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-layout]").selectOption("split");
@@ -312,7 +496,16 @@ test("playground can keep its popover open and clear the selected range", async 
     .click();
 
   await expect(playground.locator(".litopis")).toHaveAttribute("data-calendar-open", "true");
-  await playground.getByRole("button", { name: "Clear" }).click();
+  const clearButton = playground.getByRole("button", { name: "Clear" });
+  const clearButtonBounds = await clearButton.evaluate((button) => {
+    const rect = button.getBoundingClientRect();
+
+    return { bottom: rect.bottom, top: rect.top, viewportHeight: window.innerHeight };
+  });
+
+  expect(clearButtonBounds.top).toBeGreaterThanOrEqual(0);
+  expect(clearButtonBounds.bottom).toBeLessThanOrEqual(clearButtonBounds.viewportHeight);
+  await clearButton.click();
 
   await expect(playground.getByRole("combobox", { name: "From" })).toHaveValue("");
   await expect(playground.getByRole("combobox", { name: "To" })).toHaveValue("");
@@ -322,6 +515,7 @@ test("playground can keep its popover open and clear the selected range", async 
 test("playground can hide the optional clear action", async ({ page }) => {
   await page.goto("/");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
 
   await playground.locator("[data-playground-clear-button]").uncheck();
 
@@ -329,11 +523,104 @@ test("playground can hide the optional clear action", async ({ page }) => {
   await expect(playground.locator("[data-playground-code]")).toContainText("clearButton: false");
 });
 
+test("playground keeps the clear action reachable in a short viewport", async ({ page }) => {
+  await page.setViewportSize({ height: 360, width: 1280 });
+  await page.goto("./");
+  const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
+  await playground.locator("[data-playground-selection]").selectOption("range");
+  await playground.locator("[data-playground-layout]").selectOption("split");
+  await playground.locator("[data-playground-calendar]").selectOption("popover");
+  await playground.locator("[data-playground-close-on-select]").uncheck();
+  await playground.getByRole("combobox", { name: "From" }).click();
+
+  const primaryGrid = playground.locator(".litopis-grid:not(.litopis-grid-secondary)");
+  await primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-12'] button")
+    .click();
+  await primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-18'] button")
+    .click();
+
+  const calendar = playground.locator(".litopis-calendar");
+  const dimensions = await calendar.evaluate((element) => ({
+    clientHeight: element.clientHeight,
+    scrollHeight: element.scrollHeight,
+  }));
+
+  expect(dimensions.clientHeight).toBeLessThan(dimensions.scrollHeight);
+
+  await playground.getByRole("button", { name: "Clear" }).click();
+
+  await expect(playground.getByRole("combobox", { name: "From" })).toHaveValue("");
+  await expect(playground.getByRole("combobox", { name: "To" })).toHaveValue("");
+  await expect(playground.locator(".litopis")).toHaveAttribute("data-range-complete", "false");
+});
+
+test("an open popover stays reachable after the viewport shrinks", async ({ page }) => {
+  await page.setViewportSize({ height: 900, width: 1280 });
+  await page.goto("./");
+  const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
+  await playground.locator("[data-playground-selection]").selectOption("range");
+  await playground.locator("[data-playground-layout]").selectOption("split");
+  await playground.locator("[data-playground-calendar]").selectOption("popover");
+  await playground.locator("[data-playground-close-on-select]").uncheck();
+  await playground.getByRole("combobox", { name: "From" }).click();
+
+  const primaryGrid = playground.locator(".litopis-grid:not(.litopis-grid-secondary)");
+  await primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-12'] button")
+    .click();
+  await primaryGrid
+    .locator(".litopis-day:not([data-outside-month])[data-iso-date$='-18'] button")
+    .click();
+
+  const calendar = playground.locator(".litopis-calendar");
+  const initialBounds = await calendar.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+
+    return { bottom: rect.bottom, top: rect.top, viewportHeight: window.innerHeight };
+  });
+
+  expect(initialBounds.top).toBeGreaterThanOrEqual(0);
+  expect(initialBounds.bottom).toBeLessThanOrEqual(initialBounds.viewportHeight);
+
+  await page.setViewportSize({ height: 300, width: 1280 });
+
+  await expect
+    .poll(async () =>
+      calendar.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+
+        return rect.top >= 0 && rect.bottom <= window.innerHeight;
+      }),
+    )
+    .toBe(true);
+
+  const resizedBounds = await calendar.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+
+    return { bottom: rect.bottom, top: rect.top, viewportHeight: window.innerHeight };
+  });
+
+  expect(resizedBounds.top).toBeGreaterThanOrEqual(0);
+  expect(resizedBounds.bottom).toBeLessThanOrEqual(resizedBounds.viewportHeight);
+
+  await playground.getByRole("button", { name: "Clear" }).click();
+
+  await expect(playground.getByRole("combobox", { name: "From" })).toHaveValue("");
+  await expect(playground.getByRole("combobox", { name: "To" })).toHaveValue("");
+  await expect(playground.locator(".litopis")).toHaveAttribute("data-range-complete", "false");
+});
+
 test("playground uses the browser locale in auto mode and exposes calendar settings", async ({
   page,
 }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
+  await playground.locator("[data-playground-calendar]").selectOption("inline");
   const locale = playground.locator("[data-playground-locale]");
   const caption = playground.locator(".litopis-caption-label");
   const todayIso = await playground
@@ -360,10 +647,10 @@ test("playground uses the browser locale in auto mode and exposes calendar setti
   await expect(locale).toHaveValue("auto");
   await expect(caption).toHaveText(browserCaption);
 
-  await locale.fill("en-US");
+  await locale.selectOption("en-US");
   await expect(caption).toHaveText(englishCaption);
 
-  await locale.fill("auto");
+  await locale.selectOption("auto");
   await playground.locator("[data-playground-first-day]").selectOption("0");
   await playground.locator("[data-playground-size]").selectOption("comfortable");
   await playground.locator("[data-playground-outside-days]").uncheck();
@@ -381,14 +668,18 @@ test("homepage playground masks a single range field and keeps its keyboard cont
 }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-layout]").selectOption("single");
   const input = playground.getByRole("combobox", { name: "Travel date" });
+  const picker = playground.locator(".litopis");
 
   await input.fill("1206202618062026");
   await expect(input).toHaveValue("12.06.2026 – 18.06.2026");
   await input.focus();
   await page.keyboard.press("ArrowDown");
+  await expect(picker).toHaveAttribute("data-mode", "popover");
+  await expect(picker).toHaveAttribute("data-calendar-open", "true");
   await expect(playground.locator(".litopis-day-button:focus")).toHaveCount(1);
 });
 
@@ -397,21 +688,81 @@ test("responsive range panels use available width without squeezing the month gr
 }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
   await playground.locator("[data-playground-selection]").selectOption("range");
+  await playground.locator("[data-playground-calendar]").selectOption("inline");
 
   await expect(playground.locator(".litopis-grid:visible")).toHaveCount(2);
   await page.setViewportSize({ height: 844, width: 390 });
   await expect(playground.locator(".litopis-grid:visible")).toHaveCount(1);
-  await expect(playground.locator(".litopis-week").first()).toHaveCSS("min-width", "280px");
+  const grid = playground.locator(".litopis-grid:visible");
+  await expect(grid.locator(".litopis-day-button").first()).toHaveCSS("width", "40px");
+  expect(await grid.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+});
+
+test("comfortable popup fits a narrow viewport without clipping the week", async ({ page }) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/elements/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <litopis-date-picker label="Date" mode="popover" size="comfortable"></litopis-date-picker>
+  `);
+  await page.getByRole("combobox", { name: "Date" }).click();
+  const grid = page.locator(".litopis-grid:visible");
+  expect(await grid.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  const day = grid.locator(".litopis-day-button").first();
+  await expect(day).toHaveCSS("width", "40px");
+  await expect(day).toHaveCSS("height", "40px");
+});
+
+test("a narrow inline container reduces padding before the day size", async ({ page }) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/elements/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.setViewportSize({ width: 900, height: 844 });
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <litopis-date-picker label="Date" mode="inline" size="comfortable" style="width: 296px"></litopis-date-picker>
+  `);
+  const calendar = page.locator(".litopis-calendar");
+  await expect(calendar).toHaveCSS("padding-left", "8px");
+  await expect(calendar.locator(".litopis-day-button").first()).toHaveCSS("width", "40px");
+});
+
+test("two comfortable months reduce their gap before shrinking days", async ({ page }) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/elements/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.setViewportSize({ width: 900, height: 844 });
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <litopis-date-picker label="Dates" mode="inline" selection="range" panels="2" size="comfortable" style="width: 640px"></litopis-date-picker>
+  `);
+  const grids = page.locator(".litopis-grid:visible");
+  await expect(grids).toHaveCount(2);
+  for (const grid of await grids.all()) {
+    await expect(grid.locator(".litopis-day-button").first()).toHaveCSS("width", "44px");
+    expect(await grid.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  }
 });
 
 test("inline range picker fills its container for either panel count", async ({ page }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
   const picker = playground.locator(".litopis");
 
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-panels]").selectOption("1");
+  await playground.locator("[data-playground-calendar]").selectOption("inline");
   const onePanel = await picker.evaluate((element) => ({
     width: element.getBoundingClientRect().width,
     parentWidth: element.parentElement
@@ -441,12 +792,24 @@ test("inline range picker fills its container for either panel count", async ({ 
   expect(Math.abs(twoPanels.width - onePanel.width)).toBeLessThan(1);
 });
 
-test("range highlights start and end at the center of their cells", async ({ page }) => {
+test("range highlights start and end at the center of their buttons", async ({ page }) => {
   await page.goto("./");
   const playground = page.locator("[data-playground]");
 
+  await playground.locator("[data-playground-advanced] > summary").click();
   await playground.locator("[data-playground-selection]").selectOption("range");
+  await playground.locator("[data-playground-calendar]").selectOption("inline");
   await playground.getByRole("combobox", { name: "Travel date" }).fill("08.07.2026 – 18.07.2026");
+
+  const week = playground.locator(".litopis-week").filter({
+    has: page.locator('.litopis-day[data-iso-date="2026-07-08"]'),
+  });
+  const start = (await week.locator(".litopis-day").first().getAttribute("data-iso-date"))!;
+  const end = (await week.locator(".litopis-day").last().getAttribute("data-iso-date"))!;
+  const format = (value: string) => value.split("-").reverse().join(".");
+  await playground
+    .getByRole("combobox", { name: "Travel date" })
+    .fill(`${format(start)} – ${format(end)}`);
 
   const endpointGeometry = await playground
     .locator(".litopis-day[data-range-start], .litopis-day[data-range-end]")
@@ -463,27 +826,102 @@ test("range highlights start and end at the center of their cells", async ({ pag
           cellRight: cellRect.right,
           cellTop: cellRect.top,
           left: buttonRect?.left ?? 0,
-          pseudoWidth: Number.parseFloat(getComputedStyle(cell, "::before").width),
+          isStart: cell.hasAttribute("data-range-start"),
+          pseudoStart: Number.parseFloat(getComputedStyle(cell, "::before").insetInlineStart),
+          pseudoEnd: Number.parseFloat(getComputedStyle(cell, "::before").insetInlineEnd),
           right: buttonRect?.right ?? 0,
           top: buttonRect?.top ?? 0,
-          width: cellRect.width,
         };
       }),
     );
 
   expect(endpointGeometry).toHaveLength(2);
   for (const endpoint of endpointGeometry) {
-    expect(endpoint.pseudoWidth).toBeCloseTo(endpoint.width / 2, 0);
-    expect(endpoint.left).toBeGreaterThanOrEqual(endpoint.cellLeft);
-    expect(endpoint.right).toBeLessThanOrEqual(endpoint.cellRight);
+    const buttonCenter = (endpoint.left + endpoint.right) / 2;
+    const highlightCenter = endpoint.isStart
+      ? endpoint.cellLeft + endpoint.pseudoStart
+      : endpoint.cellRight - endpoint.pseudoEnd;
+    expect(highlightCenter).toBeCloseTo(buttonCenter, 0);
+    expect(endpoint.left).toBeGreaterThanOrEqual(endpoint.cellLeft - 0.01);
+    expect(endpoint.right).toBeLessThanOrEqual(endpoint.cellRight + 0.01);
     expect(endpoint.top).toBeGreaterThanOrEqual(endpoint.cellTop);
     expect(endpoint.bottom).toBeLessThanOrEqual(endpoint.cellBottom);
+  }
+});
+
+test("calendar edge buttons have equal insets and align with weekdays", async ({ page }) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/elements/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <litopis-date-picker label="Date" mode="inline"></litopis-date-picker>
+  `);
+
+  const picker = page.locator("litopis-date-picker");
+  for (const direction of ["ltr", "rtl"]) {
+    await page
+      .locator("html")
+      .evaluate((element, value) => element.setAttribute("dir", value), direction);
+    for (const width of [320, 360]) {
+      await picker.evaluate((element, value) => (element.style.width = `${value}px`), width);
+      const geometry = await picker.evaluate((root) => {
+        const calendar = root.querySelector<HTMLElement>(".litopis-calendar")!;
+        const navigation = [...calendar.querySelectorAll<HTMLElement>(".litopis-nav-button")];
+        const weekdays = [...calendar.querySelectorAll<HTMLElement>(".litopis-weekday")];
+        const weeks = [
+          ...calendar.querySelectorAll<HTMLElement>(".litopis-week:not(.litopis-weekdays)"),
+        ];
+        const buttons = [...weeks[0]!.querySelectorAll<HTMLElement>(".litopis-day-button")];
+        const rect = (element: HTMLElement) => element.getBoundingClientRect();
+        const edges = (elements: HTMLElement[]) =>
+          elements.map(rect).sort((a, b) => a.left - b.left);
+        const bounds = rect(calendar);
+        const nav = edges(navigation);
+        const days = edges([buttons[0]!, buttons[buttons.length - 1]!]);
+        const labels = edges([weekdays[0]!, weekdays[weekdays.length - 1]!]);
+        return {
+          top: nav[0]!.top - bounds.top,
+          bottom: bounds.bottom - rect(weeks[weeks.length - 1]!).bottom,
+          navLeft: nav[0]!.left - bounds.left,
+          navRight: bounds.right - nav[1]!.right,
+          dayLeft: days[0]!.left - bounds.left,
+          dayRight: bounds.right - days[1]!.right,
+          leftCenters:
+            labels[0]!.left + labels[0]!.width / 2 - (days[0]!.left + days[0]!.width / 2),
+          rightCenters:
+            labels[1]!.left + labels[1]!.width / 2 - (days[1]!.left + days[1]!.width / 2),
+          navWidth: nav[0]!.width,
+          dayWidth: days[0]!.width,
+          dayHeight: days[0]!.height,
+        };
+      });
+      for (const inset of [
+        geometry.bottom,
+        geometry.navLeft,
+        geometry.navRight,
+        geometry.dayLeft,
+        geometry.dayRight,
+      ]) {
+        expect(inset).toBeCloseTo(geometry.top, 0);
+      }
+      expect(geometry.leftCenters).toBeCloseTo(0, 0);
+      expect(geometry.rightCenters).toBeCloseTo(0, 0);
+      expect(geometry.dayWidth).toBeCloseTo(geometry.navWidth, 0);
+      expect(geometry.dayHeight).toBeCloseTo(geometry.navWidth, 0);
+    }
   }
 });
 
 test("pointer selection does not scroll the document", async ({ page }) => {
   await page.setViewportSize({ height: 300, width: 1280 });
   await page.goto("./");
+  const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
+  await playground.locator("[data-playground-calendar]").selectOption("inline");
 
   const scrollPosition = await page.evaluate(() => {
     window.scrollTo(0, 0);
@@ -499,10 +937,13 @@ test("pointer selection does not scroll the document", async ({ page }) => {
 
 test("day focus indicator stays inside its grid cell", async ({ page }) => {
   await page.goto("./");
+  const picker = page.locator("[data-playground] .litopis");
   const input = page.getByRole("combobox", { name: "Travel date" });
 
+  await expect(picker).toHaveAttribute("data-mode", "popover");
   await input.focus();
   await page.keyboard.press("ArrowDown");
+  await expect(picker).toHaveAttribute("data-calendar-open", "true");
 
   const focusedDay = page.locator(".litopis-day-button:focus");
   const geometry = await focusedDay.evaluate((button) => {
@@ -533,7 +974,7 @@ test("day focus indicator stays inside its grid cell", async ({ page }) => {
 });
 
 test("Escape closes the popover and restores focus to its input", async ({ page }) => {
-  await page.goto("./guides/");
+  await page.goto("./styling/");
   const input = page.getByRole("combobox", { name: "Departure date" });
 
   await input.focus();
@@ -546,7 +987,7 @@ test("Escape closes the popover and restores focus to its input", async ({ page 
 });
 
 test("comfortable targets are at least 44 by 44 CSS pixels", async ({ page }) => {
-  await page.goto("./guides/");
+  await page.goto("./styling/");
   const picker = page.locator("[data-litopis-picker='popover']");
   const input = picker.getByRole("combobox", { name: "Departure date" });
 
@@ -564,7 +1005,7 @@ test("comfortable targets are at least 44 by 44 CSS pixels", async ({ page }) =>
 test("open popover and month selection states have no detectable violations", async ({ page }) => {
   test.setTimeout(extendedAccessibilityTimeout);
 
-  await page.goto("./guides/");
+  await page.goto("./styling/");
   const picker = page.locator("[data-litopis-picker='popover']");
   const input = picker.getByRole("combobox", { name: "Departure date" });
 
@@ -705,9 +1146,14 @@ test("popover fallback matches native dismiss behavior without the Popover API",
 });
 
 test("selected day, month and year keep the same selection styling", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("./examples/");
   const input = page.getByRole("combobox", { name: "Дата події" });
   const picker = input.locator("..");
+  await picker
+    .locator(".litopis-day:not([data-outside-month]) .litopis-day-button")
+    .first()
+    .click();
   const selectedDay = picker.locator(".litopis-day[data-selected] .litopis-day-button");
   const selectedBackground = await selectedDay.evaluate(
     (element) => getComputedStyle(element).backgroundColor,
@@ -731,7 +1177,7 @@ test("selected day, month and year keep the same selection styling", async ({ pa
   const yearChooser = picker.locator(".litopis-panel-title");
   const visibleYear = await yearChooser.textContent();
   await expect(yearChooser).toHaveAccessibleName(new RegExp(visibleYear ?? "^$"));
-  await expect(yearChooser).toHaveAccessibleDescription("Choose year");
+  await expect(yearChooser).toHaveAccessibleDescription("Вибрати рік");
   await yearChooser.click();
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
@@ -755,6 +1201,188 @@ test("the published browser bundle defines a working custom element", async ({ p
   `);
 
   await expect(page.getByRole("combobox", { name: "Bundle date" })).toBeVisible();
+});
+
+test("base styles preserve supplied typography and fit generated inputs to large text", async ({
+  page,
+}) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  const bundlePath = path.resolve("packages/elements/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <litopis-date-picker mode="popover" label="Large text date">
+      <input slot="input" style="font-size: 24px; font-family: Georgia" />
+    </litopis-date-picker>
+    <litopis-date-picker
+      mode="popover"
+      label="Large generated date"
+      style="--litopis-font-size: 24px; --litopis-font-family: Georgia"
+    ></litopis-date-picker>
+  `);
+  const suppliedInput = page.getByRole("combobox", { name: "Large text date" });
+  await expect(suppliedInput).toHaveCSS("font-size", "24px");
+  await expect(suppliedInput).toHaveCSS("font-family", "Georgia");
+
+  const generatedInput = page.getByRole("combobox", { name: "Large generated date" });
+  await expect(generatedInput).toHaveCSS("font-size", "24px");
+  await expect(generatedInput).toHaveCSS("font-family", "Georgia");
+  const fits = await generatedInput.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const contentHeight =
+      Number.parseFloat(style.lineHeight) +
+      Number.parseFloat(style.paddingTop) +
+      Number.parseFloat(style.paddingBottom) +
+      Number.parseFloat(style.borderTopWidth) +
+      Number.parseFloat(style.borderBottomWidth);
+    return element.getBoundingClientRect().height >= contentHeight;
+  });
+  expect(fits).toBe(true);
+});
+
+test("every stylesheet leaves controls outside library roots unchanged", async ({ page }) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const properties = [
+    "font",
+    "color",
+    "background-color",
+    "padding",
+    "border",
+    "box-shadow",
+    "width",
+    "height",
+    "opacity",
+  ];
+  for (const stylesheet of ["foundation", "base", "daisyui", "bootstrap", "shadcn"]) {
+    await page.goto(`/litopis/@fs${fixturePath}`);
+    await page.setContent(`
+      <style>body { font: 24px Georgia; }</style>
+      <section id="foreign-controls">
+        <input type="text" aria-label="Foreign input">
+        <button type="button">Foreign button</button>
+        <input class="litopis-input" aria-label="Escaped internal class">
+        <span class="litopis-label">Escaped label class</span>
+      </section>
+      <div class="litopis"><input class="litopis-input" aria-label="Library input"></div>
+    `);
+    const before = await page.locator("#foreign-controls > *").evaluateAll(
+      (elements, properties) =>
+        elements.map((element) => {
+          const style = getComputedStyle(element);
+          return properties.map((property) => style.getPropertyValue(property));
+        }),
+      properties,
+    );
+    const stylesheetPath = path.resolve(`packages/dom/styles/${stylesheet}.css`);
+    await page.addStyleTag({ url: `/litopis/@fs${stylesheetPath}` });
+    await expect(page.getByRole("textbox", { name: "Library input", exact: true })).toHaveCSS(
+      "appearance",
+      "none",
+    );
+    const after = await page.locator("#foreign-controls > *").evaluateAll(
+      (elements, properties) =>
+        elements.map((element) => {
+          const style = getComputedStyle(element);
+          return properties.map((property) => style.getPropertyValue(property));
+        }),
+      properties,
+    );
+    expect(after, `${stylesheet} must not style controls outside the library`).toEqual(before);
+  }
+});
+
+test("every stylesheet preserves host styles on supplied inputs", async ({ page }) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/elements/dist/index.global.js");
+  const properties = [
+    "appearance",
+    "background-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "border-top-width",
+    "box-shadow",
+    "box-sizing",
+    "color",
+    "cursor",
+    "font-family",
+    "font-size",
+    "font-variant-numeric",
+    "height",
+    "line-height",
+    "padding-bottom",
+    "padding-left",
+    "padding-right",
+    "padding-top",
+    "touch-action",
+    "transition-duration",
+    "width",
+  ];
+
+  for (const stylesheet of ["foundation", "base", "daisyui", "bootstrap", "shadcn"]) {
+    await page.goto(`/litopis/@fs${fixturePath}`);
+    const stylesheetPath = path.resolve(`packages/dom/styles/${stylesheet}.css`);
+    await page.setContent(`
+      <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+      <style>
+        html {
+          color: rgb(42, 53, 77);
+          font: 21px/1.4 Georgia, serif;
+        }
+        body { margin: 0; }
+        .app-input {
+          appearance: none;
+          background-color: rgb(255, 250, 240);
+          border: 2px solid rgb(72, 61, 139);
+          border-radius: 13px;
+          box-shadow: 0 2px 5px rgb(0 0 0 / 20%);
+          box-sizing: content-box;
+          color: inherit;
+          cursor: crosshair;
+          font: inherit;
+          font-variant-numeric: tabular-nums;
+          height: 38px;
+          padding: 6px 13px;
+          touch-action: pan-y;
+          transition: border-color 180ms ease;
+          width: 15rem;
+        }
+      </style>
+      <input id="host-reference" class="app-input" aria-label="Host reference">
+      <litopis-date-picker mode="popover" label="Host owned date">
+        <input id="host-supplied" slot="input" class="app-input" placeholder="Choose a date">
+      </litopis-date-picker>
+    `);
+
+    const reference = page.locator("#host-reference");
+    const supplied = page.locator("#host-supplied");
+    const before = await reference.evaluate((element, styleProperties) => {
+      const styles = getComputedStyle(element);
+      return Object.fromEntries(
+        styleProperties.map((property) => [property, styles.getPropertyValue(property)]),
+      );
+    }, properties);
+    expect(
+      await supplied.evaluate((element, styleProperties) => {
+        const styles = getComputedStyle(element);
+        return Object.fromEntries(
+          styleProperties.map((property) => [property, styles.getPropertyValue(property)]),
+        );
+      }, properties),
+    ).toEqual(before);
+
+    await page.addScriptTag({ url: `/litopis/@fs${bundlePath}` });
+    await expect(supplied).toHaveAttribute("role", "combobox");
+    await expect(supplied).toHaveAttribute("class", "app-input");
+    const after = await supplied.evaluate((element, styleProperties) => {
+      const styles = getComputedStyle(element);
+      return Object.fromEntries(
+        styleProperties.map((property) => [property, styles.getPropertyValue(property)]),
+      );
+    }, properties);
+    expect(after).toEqual(before);
+  }
 });
 
 test("the daisyUI adapter consumes semantic theme variables", async ({ page }) => {
@@ -785,17 +1413,41 @@ test("the daisyUI adapter consumes semantic theme variables", async ({ page }) =
   `);
 
   const calendar = page.locator(".litopis-calendar");
-  const input = page.getByRole("combobox", { name: "Daisy date" });
+  const previousButton = calendar.getByRole("button", { name: "Previous month" });
   const selectedDay = page.locator(".litopis-day[data-selected] .litopis-day-button");
 
   await expect(calendar).toHaveCSS("background-color", "rgb(255, 247, 237)");
   await expect(calendar).toHaveCSS("border-radius", "24px");
-  await expect(input).toHaveCSS("height", "48px");
-  await expect(input).toHaveCSS("border-top-width", "2px");
-  await input.focus();
-  await expect(input).toHaveCSS("outline-style", "solid");
-  await expect(input).toHaveCSS("outline-offset", "2px");
-  await expect(selectedDay).toHaveCSS("background-color", "rgb(194, 65, 12)");
+  await expect(previousButton).toHaveCSS("height", "48px");
+  await expect(previousButton).toHaveCSS("width", "48px");
+  await page.keyboard.press("Tab");
+  await previousButton.focus();
+  await expect(previousButton).toBeFocused();
+  await expect(previousButton).toHaveCSS("box-shadow", /67, 20, 7/);
+  await expect(selectedDay).toHaveCSS("background-color", "rgb(67, 20, 7)");
+  await expect(selectedDay).toHaveCSS("color", "rgb(255, 247, 237)");
+});
+
+test("disabled outside days use the same disabled color as other unavailable days", async ({
+  page,
+}) => {
+  const fixturePath = path.resolve("tests/browser/fixture.html");
+  const bundlePath = path.resolve("packages/elements/dist/index.global.js");
+  const stylesheetPath = path.resolve("packages/dom/styles/base.css");
+  await page.goto(`/litopis/@fs${fixturePath}`);
+  await page.setContent(`
+    <link rel="stylesheet" href="/litopis/@fs${stylesheetPath}">
+    <script src="/litopis/@fs${bundlePath}"></script>
+    <litopis-date-picker label="Date" value="2026-11-16" max="2026-11-25"></litopis-date-picker>
+  `);
+  const outside = page
+    .locator('.litopis-day[data-outside-month] .litopis-day-button[aria-disabled="true"]')
+    .first();
+  const current = page
+    .locator('.litopis-day:not([data-outside-month]) .litopis-day-button[aria-disabled="true"]')
+    .first();
+  const color = await current.evaluate((element) => getComputedStyle(element).color);
+  await expect(outside).toHaveCSS("color", color);
 });
 
 test("the shadcn adapter consumes semantic theme variables", async ({ page }) => {
@@ -814,7 +1466,6 @@ test("the shadcn adapter consumes semantic theme variables", async ({ page }) =>
         --border: #fde68a;
         --destructive: #b91c1c;
         --foreground: #451a03;
-        --input: #f59e0b;
         --muted: #fef3c7;
         --muted-foreground: #92400e;
         --popover: #ffffff;
@@ -830,12 +1481,10 @@ test("the shadcn adapter consumes semantic theme variables", async ({ page }) =>
   `);
 
   const calendar = page.locator(".litopis-calendar");
-  const input = page.getByRole("combobox", { name: "Shadcn date" });
   const selectedDay = page.locator(".litopis-day[data-selected] .litopis-day-button");
 
   await expect(calendar).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await expect(calendar).toHaveCSS("border-radius", "12px");
-  await expect(input).toHaveCSS("border-top-color", "rgb(245, 158, 11)");
   await expect(selectedDay).toHaveCSS("background-color", "rgb(180, 83, 9)");
 });
 
@@ -876,7 +1525,6 @@ test("the Bootstrap adapter follows Bootstrap color-mode variables", async ({ pa
   const selectedDay = page.locator(".litopis-day[data-selected] .litopis-day-button");
 
   await expect(calendar).toHaveCSS("border-radius", "8px");
-  await expect(input).toHaveCSS("height", "43px");
   await expect(input).toHaveCSS("border-top-width", "2px");
   await expect(input).toHaveCSS("border-top-color", "rgb(222, 226, 230)");
   await expect(selectedDay).toHaveCSS("background-color", "rgb(13, 110, 253)");

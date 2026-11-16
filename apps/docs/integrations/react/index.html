@@ -24,7 +24,7 @@
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link" href="/litopis/">Getting started</a>
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
-            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/guides/">Guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
             <div class="sidebar-subnav">
               <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
@@ -47,6 +47,7 @@
             </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/integrations/daisyui/">daisyUI</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
@@ -59,8 +60,11 @@
             </p>
           </section>
           <section id="install">
-            <h2>Installation</h2>
-            <div class="package-install" data-package-install="@litopis/react react react-dom">
+            <h2>Quick start</h2>
+            <div
+              class="package-install"
+              data-package-install="@litopis/react @litopis/dom react react-dom"
+            >
               <div class="package-install-tabs" role="tablist" aria-label="Package manager">
                 <button type="button" role="tab" aria-selected="true" data-package-manager="npm">
                   npm
@@ -77,17 +81,29 @@
               </div>
               <div class="language-sh vp-code-group" data-package-install-panel>
                 <span class="lang">sh</span>
-                <pre><code>npm install @litopis/react react react-dom</code></pre>
+                <pre><code>npm install @litopis/react @litopis/dom react react-dom</code></pre>
               </div>
             </div>
+            <p>
+              Add this component to <code>src/App.tsx</code>. It imports the picker and its base
+              stylesheet.
+            </p>
             <div class="language-tsx vp-code-group">
               <span class="lang">tsx</span>
               <pre><code>import { LitopisDatePicker } from "@litopis/react";
-import "@litopis/dom/styles/base.css";</code></pre>
+import "@litopis/dom/styles/base.css";
+
+export default function App() {
+  return (
+    &lt;main&gt;
+      &lt;LitopisDatePicker mode="popover" label="Appointment date" /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
             </div>
           </section>
           <section id="live-example">
-            <h2>Example</h2>
+            <h2>Interactive example</h2>
             <div class="demo-block integration-demo">
               <div data-integration-demo="react"></div>
               <p class="demo-value" data-integration-value aria-live="polite">
@@ -98,22 +114,26 @@ import "@litopis/dom/styles/base.css";</code></pre>
           <section id="controlled-value">
             <h2>Controlled value</h2>
             <p>
-              <code>value</code> accepts <code>LitopisDateValue | null</code>.
-              <code>onValueChange</code> receives the selected date.
+              Keep the selected date in React state. Pass it to the picker with its change handler.
             </p>
             <div class="language-tsx vp-code-group">
               <span class="lang">tsx</span>
               <pre><code>import { useState } from "react";
 import { LitopisDatePicker, type LitopisDateValue } from "@litopis/react";
+import "@litopis/dom/styles/base.css";
 
-const [date, setDate] = useState&lt;LitopisDateValue | null&gt;(null);
+function App() {
+  const [date, setDate] = useState&lt;LitopisDateValue | null&gt;(null);
 
-&lt;LitopisDatePicker
-  mode="popover"
-  label="Start date"
-  value={date}
-  onValueChange={setDate}
-/&gt;</code></pre>
+  return (
+    &lt;LitopisDatePicker
+      mode="popover"
+      label="Start date"
+      value={date}
+      onValueChange={setDate}
+    /&gt;
+  );
+}</code></pre>
             </div>
           </section>
           <section id="controller-ref">
@@ -177,8 +197,8 @@ const pickerRef = useRef&lt;DatePickerController | null&gt;(null);
         <aside class="page-outline" aria-label="On this page">
           <p>On this page</p>
           <nav aria-label="Page outline">
-            <a class="outline-link" href="#install">Installation</a>
-            <a class="outline-link" href="#live-example">Example</a>
+            <a class="outline-link" href="#install">Quick start</a>
+            <a class="outline-link" href="#live-example">Interactive example</a>
             <a class="outline-link" href="#controlled-value">Controlled value</a>
             <a class="outline-link" href="#controller-ref">Controller ref</a>
             <a class="outline-link" href="#range">Range</a>

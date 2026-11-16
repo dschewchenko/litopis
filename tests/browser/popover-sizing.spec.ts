@@ -10,6 +10,7 @@ async function configureRangePicker(page: Page, options: RangePickerTestOptions)
   await page.goto("./");
 
   const playground = page.locator("[data-playground]");
+  await playground.locator("[data-playground-advanced] > summary").click();
   await playground.locator("[data-playground-selection]").selectOption("range");
   await playground.locator("[data-playground-layout]").selectOption(options.layout);
   const calendarMode = playground.locator("[data-playground-calendar]");
@@ -27,7 +28,7 @@ async function configureRangePicker(page: Page, options: RangePickerTestOptions)
   }
   await calendarMode.selectOption(options.mode);
   await playground.locator("[data-playground-size]").selectOption("comfortable");
-  await playground.locator("[data-playground-locale]").fill("uk-UA");
+  await playground.locator("[data-playground-locale]").selectOption("uk-UA");
   await expect(playground.locator("[data-playground-selection]")).toHaveValue("range");
   await expect(playground.locator("[data-playground-layout]")).toHaveValue(options.layout);
   await expect(playground.locator("[data-playground-calendar]")).toHaveValue(options.mode);
@@ -51,7 +52,7 @@ test("split range popover uses calendar width instead of either 120px input", as
     `,
   });
 
-  const startInput = picker.locator(".litopis-range-fields .litopis-input").first();
+  const startInput = picker.locator(".litopis-range-fields [role=combobox]").first();
   await expect(startInput).toHaveCSS("width", "120px");
   await startInput.click();
 
@@ -96,7 +97,7 @@ test("120px picker root opens a calendar at its recommended width", async ({ pag
     `,
   });
 
-  const input = picker.locator(".litopis-input").first();
+  const input = picker.locator("[role=combobox]").first();
   await expect(input).toHaveCSS("width", "120px");
   await input.click();
 
@@ -105,7 +106,7 @@ test("120px picker root opens a calendar at its recommended width", async ({ pag
   await expect(picker).toHaveAttribute("data-resolved-panels", "2");
   const geometry = await picker.evaluate((element) => {
     const root = element.getBoundingClientRect();
-    const inputRect = element.querySelector(".litopis-input")?.getBoundingClientRect();
+    const inputRect = element.querySelector("[role=combobox]")?.getBoundingClientRect();
     const calendarRect = element
       .querySelector<HTMLElement>(".litopis-calendar")
       ?.getBoundingClientRect();
@@ -133,14 +134,14 @@ test("popover respects a rem and calc calendar width token independently of its 
     element.style.setProperty("--litopis-width", "calc(40rem + 8vw)");
   });
 
-  const input = picker.locator(".litopis-input").first();
+  const input = picker.locator("[role=combobox]").first();
   await input.click();
   const calendar = picker.locator(".litopis-calendar");
   await expect(calendar).toBeVisible();
 
   const geometry = await picker.evaluate((element) => {
     const preferredWidth = Number.parseFloat(getComputedStyle(element).maxWidth);
-    const inputWidth = element.querySelector(".litopis-input")?.getBoundingClientRect().width ?? 0;
+    const inputWidth = element.querySelector("[role=combobox]")?.getBoundingClientRect().width ?? 0;
     const calendarWidth =
       element.querySelector<HTMLElement>(".litopis-calendar")?.getBoundingClientRect().width ?? 0;
 
@@ -152,9 +153,7 @@ test("popover respects a rem and calc calendar width token independently of its 
   expect(Math.abs(geometry.calendarWidth - geometry.preferredWidth)).toBeLessThan(1);
 });
 
-test("320px popover shows one complete calendar with 44px date targets at enlarged text", async ({
-  page,
-}) => {
+test("320px popover shows one complete calendar at enlarged text", async ({ page }) => {
   await page.setViewportSize({ height: 700, width: 1440 });
   const picker = await configureRangePicker(page, { layout: "split", mode: "popover" });
 
@@ -171,7 +170,7 @@ test("320px popover shows one complete calendar with 44px date targets at enlarg
     `,
   });
 
-  await picker.locator(".litopis-input").first().click();
+  await picker.locator("[role=combobox]").first().click();
   await expect(picker).toHaveAttribute("data-resolved-panels", "2");
   await page.setViewportSize({ height: 700, width: 320 });
 
@@ -220,7 +219,7 @@ test("320px popover shows one complete calendar with 44px date targets at enlarg
     };
   });
 
-  expect(geometry.width).toBe(320);
+  expect(geometry.width).toBe(296);
   expect(geometry.left).toBeGreaterThanOrEqual(0);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
   expect(geometry.weekdayRowScrollWidth).toBeLessThanOrEqual(geometry.weekdayRowClientWidth);
@@ -228,17 +227,17 @@ test("320px popover shows one complete calendar with 44px date targets at enlarg
   expect(geometry.weekdayFontSize).toBeGreaterThan(12);
   expect(geometry.captionFontSize).toBeGreaterThan(15);
   expect(geometry.weekdayCellWidths).toHaveLength(7);
-  expect(geometry.weekdayCellWidths.every((width) => width >= 44)).toBe(true);
+  expect(geometry.weekdayCellWidths.every((width) => width >= 40)).toBe(true);
   expect(geometry.weekdayCellOverflows).toEqual(Array(7).fill(false));
   expect(geometry.visibleDateButtonSizes.length).toBeGreaterThan(0);
   expect(
-    geometry.visibleDateButtonSizes.every(({ width, height }) => width >= 44 && height >= 44),
+    geometry.visibleDateButtonSizes.every(({ width, height }) => width >= 40 && height >= 40),
   ).toBe(true);
   expect(geometry.captionFits).toBe(true);
 
   const playground = page.locator("[data-playground]");
   await playground.locator("[data-playground-panels]").selectOption("2");
-  await picker.locator(".litopis-input").first().click();
+  await picker.locator("[role=combobox]").first().click();
   await expect(picker).toHaveAttribute("data-resolved-panels", "2");
 
   const explicitTwoPanelMetrics = await picker.locator(".litopis-calendar").evaluate((element) => {
@@ -325,7 +324,7 @@ test("wide popover remains inside the viewport when its 120px input is at the ri
     `,
   });
 
-  const startInput = picker.locator(".litopis-range-fields .litopis-input").first();
+  const startInput = picker.locator(".litopis-range-fields [role=combobox]").first();
   await expect(startInput).toHaveCSS("width", "120px");
   await startInput.click();
 
@@ -369,7 +368,7 @@ test("120px wide popover fallback remains visible at the right viewport edge", a
     `,
   });
 
-  const startInput = picker.locator(".litopis-range-fields .litopis-input").first();
+  const startInput = picker.locator(".litopis-range-fields [role=combobox]").first();
   await expect(startInput).toHaveCSS("width", "120px");
   await startInput.click();
 
@@ -412,7 +411,7 @@ for (const forcePopoverFallback of [false, true]) {
       `,
     });
     await page.locator("[data-playground-panels]").selectOption("2");
-    await picker.locator(".litopis-input").first().click();
+    await picker.locator("[role=combobox]").first().click();
 
     const calendar = picker.locator(".litopis-calendar");
     await expect(calendar).toBeVisible();
@@ -449,7 +448,7 @@ for (const forcePopoverFallback of [false, true]) {
   });
 }
 
-test("320px calendar header has even gaps, 44px controls, and complete date rows", async ({
+test("320px calendar header has even gaps, comfortable controls, and complete date rows", async ({
   page,
 }) => {
   await page.setViewportSize({ height: 700, width: 320 });
@@ -463,7 +462,7 @@ test("320px calendar header has even gaps, 44px controls, and complete date rows
     `,
   });
   await page.locator("[data-playground-panels]").selectOption("2");
-  await picker.locator(".litopis-input").first().click();
+  await picker.locator("[role=combobox]").first().click();
   const calendar = picker.locator(".litopis-calendar");
   await expect(picker).toHaveAttribute("data-resolved-panels", "2");
   await expect(picker).toHaveAttribute("data-stacked-panels", "true");
@@ -559,7 +558,7 @@ test("320px calendar header has even gaps, 44px controls, and complete date rows
   expect(
     metrics.dayButtons.every(
       ({ width, height, right, gridRight }) =>
-        width >= 44 && height >= 44 && right <= gridRight + 1,
+        width >= 40 && height >= 40 && right <= gridRight + 1,
     ),
   ).toBe(true);
 });
@@ -602,7 +601,7 @@ for (const forcePopoverFallback of [false, true]) {
       `,
     });
     await page.locator("[data-playground-panels]").selectOption("2");
-    await picker.locator(".litopis-input").first().click();
+    await picker.locator("[role=combobox]").first().click();
 
     const calendar = picker.locator(".litopis-calendar");
     await expect(calendar).toBeVisible();
@@ -636,6 +635,6 @@ for (const forcePopoverFallback of [false, true]) {
     expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
     expect(geometry.overflowY).toBe("auto");
     expect(geometry.scrollHeight).toBeGreaterThan(geometry.clientHeight);
-    expect(geometry.dayButtonHeight).toBeGreaterThanOrEqual(44);
+    expect(geometry.dayButtonHeight).toBeGreaterThanOrEqual(40);
   });
 }

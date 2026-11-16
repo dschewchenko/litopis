@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Use Litopis date fields with daisyUI themes." />
+    <link rel="icon" href="/litopis/favicon.svg" type="image/svg+xml" />
+    <title>Litopis | daisyUI</title>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <header class="topbar">
+        <a class="brand" href="/litopis/">
+          <span class="brand-mark" aria-hidden="true">L</span>
+          <span>Litopis</span>
+        </a>
+        <a class="topbar-link" href="https://github.com/dschewchenko/litopis">GitHub</a>
+      </header>
+
+      <div class="docs-layout">
+        <aside class="sidebar" aria-label="Documentation sections">
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
+            <p class="sidebar-group">Litopis</p>
+            <a class="sidebar-link" href="/litopis/">Getting started</a>
+            <a class="sidebar-link" href="/litopis/examples/">Examples</a>
+            <a class="sidebar-link" href="/litopis/guides/">Guides</a>
+            <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
+            <div class="sidebar-subnav">
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
+                >Plain DOM</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/web-components/"
+                >Web Components</a
+              >
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/react/">React</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/vue/">Vue</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/solid/">Solid</a>
+              <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/svelte/"
+                >Svelte</a
+              >
+            </div>
+            <a class="sidebar-link" href="/litopis/api/">API reference</a>
+            <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link active" href="/litopis/integrations/daisyui/" aria-current="page"
+              >daisyUI</a
+            >
+            <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
+          </nav>
+        </aside>
+
+        <main class="vp-doc" tabindex="-1">
+          <section class="page-intro">
+            <h1>Use Litopis with daisyUI</h1>
+            <p>Add the Litopis calendar to your daisyUI input.</p>
+          </section>
+          <section id="try-it">
+            <h2>Try it</h2>
+            <p>Both fields use daisyUI's native <code>input</code> class.</p>
+            <div class="daisyui-demo" data-daisyui-demo>
+              <form data-daisyui-form>
+                <div class="daisyui-input-comparison">
+                  <label>
+                    <span>daisyUI input</span>
+                    <input class="input" type="text" placeholder="YYYY-MM-DD" />
+                  </label>
+                  <div data-daisyui-picker>
+                    <input slot="input" class="input" type="text" placeholder="Choose a date" />
+                  </div>
+                </div>
+                <button class="btn btn-neutral mt-4" type="submit">Read form value</button>
+                <output data-daisyui-value aria-live="polite">No date selected</output>
+              </form>
+            </div>
+          </section>
+          <section id="installation">
+            <h2>Installation</h2>
+            <p>Start with an app that uses daisyUI 5.</p>
+            <div class="language-sh vp-code-group">
+              <span class="lang">sh</span>
+              <pre><code>npm install @litopis/dom</code></pre>
+            </div>
+            <p>
+              Import the Litopis adapter in your JavaScript entry file. It styles the calendar and
+              maps it to daisyUI theme variables. Put daisyUI's <code>input</code> class on a
+              slotted input to use the native field style. Add <code>input-lg</code> for a larger
+              field or <code>validator</code> for the native invalid-state color.
+            </p>
+            <p>The adapter is maintained by Litopis. It needs your app's daisyUI styles.</p>
+          </section>
+          <section id="example">
+            <h2>Complete example</h2>
+            <p>Add this form to your page.</p>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;form id="booking"&gt;
+  &lt;div id="appointment"&gt;
+    &lt;input
+      slot="input"
+      class="input"
+      type="text"
+      placeholder="Choose a date"
+    /&gt;
+  &lt;/div&gt;
+  &lt;button class="btn btn-neutral"&gt;Read form value&lt;/button&gt;
+  &lt;output id="booking-value"&gt;No date selected&lt;/output&gt;
+&lt;/form&gt;</code></pre>
+            </div>
+            <p>Add this code to <code>main.js</code>.</p>
+            <div class="language-js vp-code-group">
+              <span class="lang">js</span>
+              <pre><code>import { createDatePicker } from "@litopis/dom";
+import "@litopis/dom/styles/daisyui.css";
+
+const form = document.querySelector("#booking");
+const root = document.querySelector("#appointment");
+const output = document.querySelector("#booking-value");
+
+if (form &amp;&amp; root &amp;&amp; output) {
+  createDatePicker(root, {
+    label: "Appointment date",
+    name: "appointment",
+    mode: "popover",
+    format: "yyyy-mm-dd",
+  });
+
+  form.addEventListener("submit", (event) =&gt; {
+    event.preventDefault();
+    const value = new FormData(form).get("appointment");
+    output.textContent = value || "No date selected";
+  });
+}</code></pre>
+            </div>
+            <p>
+              The field displays an ISO date. The form submits the same
+              <code>YYYY-MM-DD</code> value.
+            </p>
+          </section>
+          <section id="themes">
+            <h2>Themes</h2>
+            <p>
+              The calendar adapter reads daisyUI variables from its parent. Your existing
+              <code>data-theme</code> setting applies to it. DaisyUI styles the slotted field
+              through its native <code>input</code> class.
+            </p>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;div data-theme="business"&gt;
+  &lt;div id="appointment"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <p>
+              See <a href="/litopis/integrations/">framework guides</a> for React, Vue, Solid,
+              Svelte or Web Components. Use the daisyUI stylesheet in place of the base stylesheet.
+            </p>
+          </section>
+        </main>
+        <aside class="page-outline" aria-label="On this page">
+          <p>On this page</p>
+          <nav aria-label="Page outline">
+            <a class="outline-link" href="#try-it">Try it</a>
+            <a class="outline-link" href="#installation">Installation</a>
+            <a class="outline-link" href="#example">Complete example</a>
+            <a class="outline-link" href="#themes">Themes</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/integrations/daisyui.ts"></script>
+  </body>
+</html>

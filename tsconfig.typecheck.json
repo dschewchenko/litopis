@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "paths": {
       "@litopis/core": ["./packages/core/src/index.ts"],
       "@litopis/dom": ["./packages/dom/src/index.ts"],
@@ -8,7 +9,8 @@
       "@litopis/react": ["./packages/react/src/index.ts"],
       "@litopis/solid": ["./packages/solid/src/index.ts"],
       "@litopis/svelte": ["./packages/svelte/src/index.ts"],
-      "@litopis/vue": ["./packages/vue/src/index.ts"]
+      "@litopis/vue": ["./packages/vue/src/index.ts"],
+      "@litopis/dom/*": ["./packages/dom/*"]
     }
   },
   "include": ["apps/**/*.ts", "packages/**/*.ts", "tests/**/*.ts", "*.ts"],

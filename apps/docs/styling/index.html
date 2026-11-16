@@ -23,7 +23,7 @@
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link" href="/litopis/">Getting started</a>
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
-            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/guides/">Guides</a>
             <a class="sidebar-link" href="/litopis/integrations/">Integrations</a>
             <div class="sidebar-subnav">
               <a class="sidebar-link sidebar-sublink" href="/litopis/integrations/#plain-dom"
@@ -41,20 +41,20 @@
             </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link active" href="/litopis/styling/" aria-current="page">Styling</a>
+            <a class="sidebar-link" href="/litopis/integrations/daisyui/">daisyUI</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
 
         <main class="vp-doc" tabindex="-1">
           <section class="page-intro">
-            <p class="eyebrow">Make it yours</p>
             <h1>Styling</h1>
             <p>Choose Base, Foundation or an adapter for your UI library.</p>
           </section>
 
           <section id="theme-playground" class="theme-playground-section">
             <h2>Theme playground</h2>
-            <p>Select a stylesheet to see its field and calendar styles.</p>
+            <p>Select a stylesheet to see the generated field and calendar styles.</p>
             <div class="theme-playground" data-theme-playground data-style-theme="foundation">
               <div class="theme-playground-preview">
                 <div data-theme-picker></div>
@@ -144,13 +144,19 @@
               Importing Litopis JavaScript adds interaction and accessible semantics, not CSS. Add
               your own styles when the picker needs to follow an existing design system.
             </p>
+            <p>
+              The playground uses a Litopis-generated input. If you supply your own input with
+              <code>slot="input"</code>, Litopis keeps its classes and the host stylesheet styles
+              that field.
+            </p>
           </section>
 
           <section id="base-stylesheet">
             <h2>Four styling layers</h2>
             <p>
-              Choose one stylesheet. Base gives you a neutral default; Foundation lets you define
-              the tokens yourself; adapters match the theme variables from a supported UI library.
+              Choose one stylesheet. Base gives generated fields and the calendar neutral defaults.
+              Foundation lets you define calendar tokens. Adapters map the calendar to a supported
+              UI library's theme variables. Generated fields keep Litopis's generic field defaults.
             </p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
@@ -184,6 +190,10 @@
             <p>
               Use these variables for colours, borders, radius, spacing and motion. They let you
               tune the picker without replacing its stylesheet.
+            </p>
+            <p>
+              Input tokens apply to Litopis-generated fields. A slotted input keeps its host classes
+              and uses the host's input styling.
             </p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
@@ -259,6 +269,11 @@
                     <code>--litopis-day-size</code>, <code>--litopis-calendar-padding</code>
                   </td>
                   <td>Calendar width, hit areas, grid and spacing</td>
+                </tr>
+                <tr>
+                  <td>Input sizing</td>
+                  <td><code>--litopis-input-height</code></td>
+                  <td>Generated field height, independent of calendar buttons</td>
                 </tr>
                 <tr>
                   <td>Typography</td>
@@ -343,9 +358,10 @@
           <section id="theme-adapters">
             <h2>Theme adapters</h2>
             <p>
-              Each adapter matches Litopis controls to the variables already used by the selected UI
-              library, including its field radius, borders, focus treatment and colour modes. It
-              adds no JavaScript.
+              Each adapter maps the Litopis calendar to the selected UI library's theme variables.
+              It adds no JavaScript. Generated inputs use generic Litopis field defaults. A slotted
+              input keeps the host classes and field styles. For example, use DaisyUI's
+              <code>input</code> class directly on the supplied input.
             </p>
             <div class="language-css vp-code-group">
               <span class="lang">css</span>
@@ -366,9 +382,10 @@
             </div>
             <p>
               Import one adapter only. daisyUI maps <code>--color-*</code> and
-              <code>--radius-*</code>; shadcn maps semantic surface/foreground pairs such as
-              <code>--primary</code>, <code>--popover</code> and <code>--ring</code>; Bootstrap maps
-              <code>--bs-*</code> variables and follows <code>data-bs-theme</code> color modes.
+              <code>--radius-*</code>. The shadcn adapter maps semantic surface and foreground pairs
+              such as <code>--primary</code>, <code>--popover</code> and <code>--ring</code>. The
+              Bootstrap adapter maps <code>--bs-*</code> variables and follows
+              <code>data-bs-theme</code> color modes.
             </p>
           </section>
 
@@ -377,7 +394,8 @@
             <p>
               Use <code>--litopis-*</code> variables for colour and size. Use
               <code>.litopis-*</code> selectors and <code>data-*</code> states for structural
-              changes. Litopis does not emit daisyUI, shadcn or Bootstrap classes.
+              changes. Litopis does not add daisyUI, shadcn or Bootstrap classes. Add your UI
+              library's input class to a supplied input yourself.
             </p>
           </section>
         </main>

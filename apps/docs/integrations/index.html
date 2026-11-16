@@ -26,7 +26,7 @@
             <p class="sidebar-group">Litopis</p>
             <a class="sidebar-link" href="/litopis/">Getting started</a>
             <a class="sidebar-link" href="/litopis/examples/">Examples</a>
-            <a class="sidebar-link" href="/litopis/guides/">Date picker guides</a>
+            <a class="sidebar-link" href="/litopis/guides/">Guides</a>
             <a class="sidebar-link active" href="/litopis/integrations/" aria-current="page"
               >Integrations</a
             >
@@ -44,6 +44,7 @@
             </div>
             <a class="sidebar-link" href="/litopis/api/">API reference</a>
             <a class="sidebar-link" href="/litopis/styling/">Styling</a>
+            <a class="sidebar-link" href="/litopis/integrations/daisyui/">daisyUI</a>
             <a class="sidebar-link" href="/litopis/accessibility/">Accessibility</a>
           </nav>
         </aside>
@@ -51,7 +52,10 @@
         <main class="vp-doc" tabindex="-1">
           <section class="page-intro">
             <h1>Integrations</h1>
-            <p>Use <code>@litopis/dom</code> directly or install a package for your framework.</p>
+            <p>
+              Choose a package for your framework or use the DOM package directly. Each framework
+              guide starts with a complete component example.
+            </p>
           </section>
 
           <section id="choose">
@@ -69,7 +73,7 @@
           <section id="plain-dom">
             <h2>Plain DOM</h2>
             <p>
-              Install <code>@litopis/dom</code> and create a date picker on an existing element.
+              Install <code>@litopis/dom</code>. Add a container to your form and mount the picker.
             </p>
             <div class="package-install" data-package-install="@litopis/dom">
               <div class="package-install-tabs" role="tablist" aria-label="Package manager">
@@ -91,26 +95,50 @@
                 <pre><code>npm install @litopis/dom</code></pre>
               </div>
             </div>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;form&gt;
+  &lt;div id="appointment-picker"&gt;&lt;/div&gt;
+  &lt;button type="submit"&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+            </div>
             <div class="language-ts vp-code-group">
               <span class="lang">ts</span>
               <pre><code>import { createDatePicker } from "@litopis/dom";
 import "@litopis/dom/styles/base.css";
 
-const picker = createDatePicker(root, {
-  mode: "popover",
-  label: "Start date",
-});
+const root = document.querySelector&lt;HTMLElement&gt;("#appointment-picker");
 
-picker.getISOValue();</code></pre>
+if (root) {
+  const picker = createDatePicker(root, {
+    mode: "popover",
+    label: "Appointment date",
+    name: "appointment",
+  });
+
+  picker.getISOValue();
+}</code></pre>
             </div>
             <p>
-              To use your own field, place an input directly inside the root with
+              Place your input directly inside the root with
               <code>slot="input"</code> before calling <code>createDatePicker()</code>.
             </p>
             <div class="language-html vp-code-group">
               <span class="lang">html</span>
               <pre><code>&lt;div id="picker"&gt;
   &lt;input slot="input" class="my-input" placeholder="Choose a date" /&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <p>
+              Litopis keeps the supplied input and its classes. Put your UI library's input class on
+              this element to keep its native field styling. For DaisyUI, use <code>input</code> and
+              <code>input-lg</code> with <code>validator</code> for its invalid-state color. See the
+              <a href="/litopis/integrations/daisyui/">DaisyUI guide</a>.
+            </p>
+            <div class="language-html vp-code-group">
+              <span class="lang">html</span>
+              <pre><code>&lt;div id="picker"&gt;
+  &lt;input slot="input" class="input input-lg validator" placeholder="Choose a date" /&gt;
 &lt;/div&gt;</code></pre>
             </div>
             <p>

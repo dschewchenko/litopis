@@ -59,11 +59,14 @@ jobs:
 
       - name: Install browser dependencies
         timeout-minutes: 10
-        run: bunx --bun playwright install-deps chromium firefox webkit
+        run: bunx --bun playwright install-deps firefox webkit
+
+      - name: Verify system Chrome
+        run: google-chrome --version
 
       - name: Install browsers
         if: steps.playwright-browsers.outputs.cache-hit != 'true'
-        run: bunx --bun playwright install --only-shell chromium firefox webkit
+        run: bunx --bun playwright install --no-remove firefox webkit
 
       - name: Release checks
         run: bun run check:release

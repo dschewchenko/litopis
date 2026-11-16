@@ -10,6 +10,7 @@ coverage
 .vite
 .vitest
 .playwright-cli
+.playwright-mcp
 playwright-report
 test-results
 output

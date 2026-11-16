@@ -1,3 +1,4 @@
+import "@litopis/dom/styles/base.css";
 import { getToday, toIsoDate } from "@litopis/core";
 import type { DatePickerOptions, DateValue } from "@litopis/dom";
 

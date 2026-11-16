@@ -1,48 +1,26 @@
-import "@litopis/dom/styles/daisyui.css";
-import { createDatePicker } from "@litopis/dom";
-import {
-  addDays,
-  addMonths,
-  createCalendarState,
-  getToday,
-  moveFocus,
-  selectFocusedDate,
-  toIsoDate,
-} from "@litopis/core";
-import type { CalendarGranularity, CalendarMove, CalendarState } from "@litopis/core";
+import "@litopis/dom/styles/base.css";
+import { createDateField, createDatePicker } from "@litopis/dom";
+import { getToday } from "@litopis/core";
+import type { CalendarGranularity } from "@litopis/core";
 import type {
   DateFieldFormat,
-  DatePickerController,
+  DateFieldController,
   DatePickerOptions,
   DatePickerPanels,
-  DatePickerValue,
   DatePickerValueAs,
   DateValue,
 } from "@litopis/dom";
 import "./styles.css";
-
-type ThemePlaygroundStyle = "base" | "bootstrap" | "daisyui" | "foundation" | "shadcn";
-type PackageManager = "bun" | "npm" | "pnpm" | "yarn";
-type PlaygroundFirstDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-type PlaygroundPickerController = DatePickerController<DatePickerValueAs>;
-type PlaygroundPickerOptions = DatePickerOptions<DatePickerValueAs>;
-type PlaygroundPickerValue = DatePickerValue<DatePickerValueAs>;
-
-interface ThemePlaygroundContent {
-  readonly code: string;
-  readonly description: string;
-}
-
-interface PackageManagerDefinition {
-  readonly command: string;
-  readonly label: string;
-}
+import type {
+  PackageManager,
+  PackageManagerDefinition,
+  PlaygroundFirstDay,
+  PlaygroundPickerController,
+  PlaygroundPickerOptions,
+  PlaygroundPickerValue,
+} from "./types";
 
 const today = getToday();
-const minBookingDate = addDays(today, -15);
-const maxBookingDate = addDays(today, 15);
-const programmaticDate = addDays(today, 9);
-const programmaticMonth = startOfMonth(addMonths(today, 6));
 const playgroundEndLabel = "To";
 const playgroundEndName = "to";
 const playgroundFieldName = "period";
@@ -57,135 +35,7 @@ const packageManagers: Record<PackageManager, PackageManagerDefinition> = {
   yarn: { command: "yarn add", label: "yarn" },
 };
 
-const themePlaygroundContent: Record<ThemePlaygroundStyle, ThemePlaygroundContent> = {
-  base: {
-    code: `@import "@litopis/dom/styles/base.css";`,
-    description: "Neutral Litopis styles.",
-  },
-  bootstrap: {
-    code: `@import "bootstrap/dist/css/bootstrap.css";
-@import "@litopis/dom/styles/bootstrap.css";`,
-    description: "Bootstrap field sizing, radius, focus ring and data-bs-theme colour mode.",
-  },
-  daisyui: {
-    code: `@import "tailwindcss";
-@import "@litopis/dom/styles/daisyui.css";
-@plugin "daisyui";`,
-    description: "The active daisyUI theme controls the field, border, radius and focus outline.",
-  },
-  foundation: {
-    code: `@import "@litopis/dom/styles/foundation.css";
-
-.litopis {
-  --litopis-accent: var(--brand);
-  --litopis-background: var(--surface);
-}`,
-    description: "Set --litopis-* variables for your colours, spacing and type scale.",
-  },
-  shadcn: {
-    code: `@import "tailwindcss";
-@import "shadcn/tailwind.css";
-@import "@litopis/dom/styles/shadcn.css";`,
-    description: "Uses shadcn --primary, --popover and --ring tokens. Import it after the theme.",
-  },
-};
-
 const pickerOptions: Record<string, DatePickerOptions> = {
-  bounds: {
-    label: "Booking date",
-    max: maxBookingDate,
-    min: minBookingDate,
-    outsideDays: false,
-    today,
-  },
-  "example-basic": {
-    label: "Appointment date",
-    onValueChange: updateExampleValue("basic"),
-    selected: today,
-    today,
-  },
-  "example-bounds": {
-    label: "Booking date",
-    max: maxBookingDate,
-    min: minBookingDate,
-    onValueChange: updateExampleValue("bounds"),
-    outsideDays: false,
-    today,
-  },
-  "example-comfortable": {
-    format: "dd.mm.yyyy",
-    label: "Touch-friendly date",
-    onValueChange: updateExampleValue("comfortable"),
-    outsideDays: false,
-    season: true,
-    todayButton: true,
-    size: "comfortable",
-    today,
-  },
-  "example-format-eu": {
-    format: "dd.mm.yyyy",
-    label: "European format",
-    today,
-  },
-  "example-format-iso": {
-    format: "yyyy-mm-dd",
-    label: "ISO format",
-    today,
-  },
-  "example-format-us": {
-    format: "mm/dd/yyyy",
-    label: "US format",
-    today,
-  },
-  "example-locale-uk": {
-    format: "dd.mm.yyyy",
-    label: "Дата події",
-    locale: "uk-UA",
-    selected: today,
-    today,
-  },
-  "example-locale-us": {
-    firstDayOfWeek: 1,
-    format: "mm/dd/yyyy",
-    label: "Event date",
-    locale: "en-US",
-    selected: today,
-    today,
-  },
-  "example-popover": {
-    mode: "popover",
-    format: "dd.mm.yyyy",
-    label: "Departure date",
-    onValueChange: updateExampleValue("popover"),
-    outsideDays: false,
-    size: "comfortable",
-    today,
-  },
-  "example-programmatic": {
-    firstDayOfWeek: 1,
-    format: "dd.mm.yyyy",
-    label: "Managed date",
-    onValueChange: updateExampleValue("programmatic"),
-    outsideDays: false,
-    todayButton: true,
-    today,
-  },
-  overview: {
-    firstDayOfWeek: 1,
-    format: "dd.mm.yyyy",
-    label: "Travel date",
-    onValueChange: updateOverviewValue,
-    season: true,
-    today,
-  },
-  mobile: {
-    label: "Return date",
-    max: maxBookingDate,
-    min: minBookingDate,
-    outsideDays: false,
-    size: "comfortable",
-    today,
-  },
   popover: {
     mode: "popover",
     format: "dd.mm.yyyy",
@@ -193,25 +43,6 @@ const pickerOptions: Record<string, DatePickerOptions> = {
     outsideDays: false,
     season: true,
     size: "comfortable",
-    today,
-  },
-  programmatic: {
-    firstDayOfWeek: 1,
-    format: "dd.mm.yyyy",
-    label: "Managed date",
-    outsideDays: false,
-    todayButton: true,
-    today,
-  },
-  single: {
-    firstDayOfWeek: 0,
-    label: "Appointment date",
-    today,
-  },
-  weekStart: {
-    firstDayOfWeek: 6,
-    format: "mm/dd/yyyy",
-    label: "Weekend trip",
     today,
   },
   styling: {
@@ -222,38 +53,64 @@ const pickerOptions: Record<string, DatePickerOptions> = {
   },
 };
 
-const controllers = new Map<string, ReturnType<typeof createDatePicker>>();
-let programmaticSeason = false;
-
 setupDaisyClasses();
-setupThemePlayground();
+void setupThemePlayground();
 setupPackageManagerTabs();
 setupCodeBlocks();
 setupScrollableTables();
 setupExampleTabs();
-setupCoreExample();
-setupPlayground();
+void setupPlayground();
+setupMarkdownLink();
 
-for (const root of document.querySelectorAll<HTMLElement>("[data-litopis-picker]")) {
-  const preset = root.dataset.litopisPicker;
+function setupMarkdownLink(): void {
+  const header = document.querySelector(".topbar");
+  const github = header?.querySelector(".topbar-link");
+  if (!header || !github) return;
 
-  if (preset && pickerOptions[preset]) {
-    const controller = createDatePicker(root, pickerOptions[preset]);
-    const exampleOutput = root
-      .closest<HTMLElement>(".example-card")
-      ?.querySelector<HTMLElement>("[data-example-value]");
+  const link = document.createElement("a");
+  const pagePath = window.location.pathname.replace(/\/index\.html$/, "").replace(/\/$/, "");
+  link.className = "topbar-link";
+  link.href = pagePath === "/litopis" ? "/litopis/index.md" : `${pagePath}.md`;
+  link.textContent = "Markdown";
+  link.setAttribute("aria-label", "Read page as Markdown");
+  const links = document.createElement("div");
+  links.className = "topbar-links";
+  links.append(link, github);
+  header.append(links);
 
-    controllers.set(preset, controller);
-
-    if (exampleOutput) {
-      exampleOutput.textContent = `Value: ${controller.getISOValue() || "none"}`;
-    }
+  for (const card of document.querySelectorAll<HTMLElement>("article.example-card[id]")) {
+    const recipeLink = document.createElement("a");
+    recipeLink.className = "example-markdown";
+    recipeLink.href = `/litopis/examples/${card.id}.md`;
+    recipeLink.textContent = "Markdown";
+    recipeLink.setAttribute(
+      "aria-label",
+      `Read ${card.querySelector("h2")?.textContent} as Markdown`,
+    );
+    card.querySelector(".example-card-header")?.append(recipeLink);
   }
 }
 
-function setupPlayground(): void {
+for (const root of document.querySelectorAll<HTMLElement>("[data-litopis-picker]")) {
+  const preset = root.dataset.litopisPicker;
+  if (preset && pickerOptions[preset]) createDatePicker(root, pickerOptions[preset]);
+}
+
+async function setupPlayground(): Promise<void> {
   const playground = document.querySelector<HTMLElement>("[data-playground]");
   if (!playground) return;
+
+  await import("@litopis/dom/styles/daisyui.css");
+
+  const dateFields: DateFieldController[] = [];
+  for (const root of playground.querySelectorAll<HTMLElement>("[data-playground-date-field]")) {
+    const label = root.dataset.label;
+    if (!label) continue;
+    const field = createDateField(root, { label, format: "yyyy-mm-dd" });
+    const input = root.querySelector("input");
+    input?.setAttribute(`data-playground-${root.dataset.playgroundDateField}`, "");
+    dateFields.push(field);
+  }
 
   const controlsForm = playground.querySelector<HTMLFormElement>("[data-playground-form]");
   const nativeForm = playground.querySelector<HTMLFormElement>("[data-playground-native-form]");
@@ -267,7 +124,7 @@ function setupPlayground(): void {
   const calendar = playground.querySelector<HTMLSelectElement>("[data-playground-calendar]");
   const format = playground.querySelector<HTMLSelectElement>("[data-playground-format]");
   const size = playground.querySelector<HTMLSelectElement>("[data-playground-size]");
-  const locale = playground.querySelector<HTMLInputElement>("[data-playground-locale]");
+  const locale = playground.querySelector<HTMLSelectElement>("[data-playground-locale]");
   const firstDay = playground.querySelector<HTMLSelectElement>("[data-playground-first-day]");
   const outsideDays = playground.querySelector<HTMLInputElement>("[data-playground-outside-days]");
   const season = playground.querySelector<HTMLInputElement>("[data-playground-season]");
@@ -348,6 +205,10 @@ function setupPlayground(): void {
     playgroundPanels.disabled = !isRange;
     playgroundEndValue.disabled = !isRange;
     playgroundCloseOnSelect.disabled = !isPopover;
+    playgroundLayout.closest("label")?.toggleAttribute("hidden", !isRange);
+    playgroundPanels.closest("label")?.toggleAttribute("hidden", !isRange);
+    playgroundEndValue.closest("[data-playground-date-field]")?.toggleAttribute("hidden", !isRange);
+    playgroundCloseOnSelect.closest("label")?.toggleAttribute("hidden", !isPopover);
 
     const initialStart = getPlaygroundDate(playgroundStartValue.value);
     const initialEnd = getPlaygroundDate(playgroundEndValue.value);
@@ -411,7 +272,10 @@ function setupPlayground(): void {
   }
 
   playgroundControlsForm.addEventListener("input", mount);
-  playgroundControlsForm.addEventListener("reset", () => window.setTimeout(mount));
+  playgroundControlsForm.addEventListener("reset", () => {
+    for (const field of dateFields) field.setDate(null);
+    window.setTimeout(mount);
+  });
   playgroundNativeForm.addEventListener("reset", () => window.setTimeout(updatePlaygroundFormData));
   mount();
 }
@@ -493,66 +357,6 @@ function getPackageManager(value: string | undefined | null): PackageManager | n
   return value && value in packageManagers ? (value as PackageManager) : null;
 }
 
-function setupThemePlayground(): void {
-  const playground = document.querySelector<HTMLElement>("[data-theme-playground]");
-  if (!playground) return;
-
-  const pickerRoot = playground.querySelector<HTMLElement>("[data-theme-picker]");
-  const description = playground.querySelector<HTMLElement>("[data-theme-description]");
-  const code = playground.querySelector<HTMLElement>("[data-theme-code]");
-  const panel = playground.querySelector<HTMLElement>("[role='tabpanel']");
-  const tabs = [...playground.querySelectorAll<HTMLButtonElement>("[data-style-theme-tab]")];
-
-  if (!pickerRoot || !description || !code || !panel || tabs.length === 0) return;
-
-  createDatePicker(pickerRoot, {
-    clearButton: true,
-    label: "Inline calendar preview",
-    selected: today,
-    today,
-  });
-
-  for (const tab of tabs) {
-    tab.addEventListener("click", () =>
-      activateThemePlaygroundTab(tab, tabs, playground, panel, description, code),
-    );
-    tab.addEventListener("keydown", (event) => {
-      const currentIndex = tabs.indexOf(tab);
-      const nextIndex = getNextTabIndex(event.key, currentIndex, tabs.length);
-
-      if (nextIndex === null) return;
-
-      event.preventDefault();
-      const nextTab = tabs[nextIndex]!;
-      activateThemePlaygroundTab(nextTab, tabs, playground, panel, description, code);
-      nextTab.focus();
-    });
-  }
-}
-
-function activateThemePlaygroundTab(
-  activeTab: HTMLButtonElement,
-  tabs: readonly HTMLButtonElement[],
-  playground: HTMLElement,
-  panel: HTMLElement,
-  description: HTMLElement,
-  code: HTMLElement,
-): void {
-  const theme = getThemePlaygroundStyle(activeTab.dataset.styleThemeTab);
-  const content = themePlaygroundContent[theme];
-
-  playground.dataset.styleTheme = theme;
-  panel.setAttribute("aria-labelledby", activeTab.id);
-  description.textContent = content.description;
-  code.textContent = content.code;
-
-  for (const tab of tabs) {
-    const isActive = tab === activeTab;
-    tab.setAttribute("aria-selected", String(isActive));
-    tab.tabIndex = isActive ? 0 : -1;
-  }
-}
-
 function getNextTabIndex(key: string, currentIndex: number, count: number): number | null {
   switch (key) {
     case "ArrowLeft":
@@ -568,22 +372,17 @@ function getNextTabIndex(key: string, currentIndex: number, count: number): numb
   }
 }
 
-function getThemePlaygroundStyle(value: string | undefined): ThemePlaygroundStyle {
-  if (
-    value === "base" ||
-    value === "bootstrap" ||
-    value === "daisyui" ||
-    value === "foundation" ||
-    value === "shadcn"
-  ) {
-    return value;
-  }
+async function setupThemePlayground(): Promise<void> {
+  if (!document.querySelector("[data-theme-playground]")) return;
 
-  return "foundation";
+  const themePreview = await import("./theme-preview");
+  themePreview.setupThemePlayground(today);
 }
 
 function getPlaygroundCode(options: PlaygroundPickerOptions): string {
   const lines = [
+    `label: ${JSON.stringify(options.label)},`,
+    `name: ${JSON.stringify(options.name)},`,
     `mode: "${options.mode}",`,
     `selection: "${options.selection}",`,
     `granularity: "${options.granularity}",`,
@@ -605,7 +404,7 @@ function getPlaygroundCode(options: PlaygroundPickerOptions): string {
   if (options.selection === "range") {
     lines.push(
       `layout: "${options.layout}",`,
-      `panels: "${options.panels}",`,
+      `panels: ${JSON.stringify(options.panels)},`,
       `range: { start: ${formatPlaygroundDate(options.range?.start) ?? "null"}, end: ${formatPlaygroundDate(options.range?.end) ?? "null"} },`,
     );
   } else {
@@ -616,7 +415,22 @@ function getPlaygroundCode(options: PlaygroundPickerOptions): string {
     lines.push(`closeOnSelect: ${options.closeOnSelect},`);
   }
 
-  return `createDatePicker(root, {\n  ${lines.join("\n  ")}\n});`;
+  return `import { createDatePicker } from "@litopis/dom";
+import "@litopis/dom/styles/daisyui.css";
+
+const form = document.querySelector<HTMLFormElement>("#travel-form")!;
+const root = document.querySelector<HTMLElement>("#travel-date")!;
+const output = document.querySelector<HTMLOutputElement>("#travel-value")!;
+
+createDatePicker(root, {
+  ${lines.join("\n  ")}
+});
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const values = Object.fromEntries(new FormData(form));
+  output.textContent = JSON.stringify(values, null, 2);
+});`;
 }
 
 function addOptionalPlaygroundCodeLine(
@@ -708,40 +522,15 @@ function formatFormDataValue(value: FormDataEntryValue): string {
   return value instanceof File ? value.name : value;
 }
 
-for (const action of document.querySelectorAll<HTMLButtonElement>("[data-litopis-action]")) {
-  action.addEventListener("click", () => {
-    const controller = controllers.get(action.dataset.litopisTarget ?? "");
-
-    if (!controller) {
-      return;
-    }
-
-    switch (action.dataset.litopisAction) {
-      case "clear":
-        controller.setDate(null);
-        break;
-      case "jump":
-        controller.setVisibleMonth(programmaticMonth);
-        break;
-      case "today":
-        controller.goToToday();
-        break;
-      case "season":
-        programmaticSeason = !programmaticSeason;
-        controller.setOptions({ season: programmaticSeason });
-        break;
-      case "set-date":
-        controller.setDate(programmaticDate);
-        break;
-    }
-  });
-}
-
-function startOfMonth(value: DateValue): DateValue {
-  return { day: 1, month: value.month, year: value.year };
-}
-
 function setupDaisyClasses(): void {
+  for (const select of document.querySelectorAll("select")) {
+    select.classList.add("select", "select-sm");
+  }
+
+  for (const checkbox of document.querySelectorAll("input[type='checkbox']")) {
+    checkbox.classList.add("checkbox", "checkbox-sm");
+  }
+
   for (const tabList of document.querySelectorAll<HTMLElement>(".example-tabs")) {
     tabList.classList.add("tabs", "tabs-border");
   }
@@ -867,56 +656,4 @@ function activateExampleTab(
       panel.hidden = !isActive;
     }
   }
-}
-
-function setupCoreExample(): void {
-  const demo = document.querySelector<HTMLElement>("[data-core-example]");
-
-  if (!demo) {
-    return;
-  }
-
-  let state: CalendarState = createCalendarState({ selected: today, today });
-  const output = demo.querySelector<HTMLElement>("[data-core-state]");
-  const movements: Record<string, CalendarMove> = {
-    day: "next-day",
-    month: "next-month",
-    week: "next-week",
-  };
-
-  const render = (): void => {
-    if (!output) {
-      return;
-    }
-
-    output.textContent = `Focused: ${toIsoDate(state.focusedDate)}\nSelected: ${state.selected ? toIsoDate(state.selected) : "none"}`;
-  };
-
-  for (const action of demo.querySelectorAll<HTMLButtonElement>("[data-core-action]")) {
-    action.addEventListener("click", () => {
-      const movement = movements[action.dataset.coreAction ?? ""];
-      state = movement ? moveFocus(state, movement) : selectFocusedDate(state);
-      render();
-    });
-  }
-
-  render();
-}
-
-function updateOverviewValue(value: DateValue | null): void {
-  const output = document.querySelector<HTMLElement>("[data-overview-value]");
-
-  if (output) {
-    output.textContent = value ? `Selected value: ${toIsoDate(value)}` : "No date selected";
-  }
-}
-
-function updateExampleValue(example: string): (value: DateValue | null) => void {
-  return (value) => {
-    const output = document.querySelector<HTMLElement>(`[data-example-value="${example}"]`);
-
-    if (output) {
-      output.textContent = value ? `Value: ${toIsoDate(value)}` : "Value: none";
-    }
-  };
 }
