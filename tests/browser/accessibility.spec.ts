@@ -306,7 +306,8 @@ test("daisyUI preserves caller input styles across themes and states", async ({ 
     styleProperties: readonly string[],
   ): Promise<Record<string, string>> {
     return input.evaluate(
-      (element, properties) => {
+      async (element, properties) => {
+        await Promise.all(element.getAnimations().map((animation) => animation.finished));
         const styles = getComputedStyle(element);
         return Object.fromEntries(
           properties.map((property) => [property, styles.getPropertyValue(property)]),
@@ -330,6 +331,8 @@ test("daisyUI preserves caller input styles across themes and states", async ({ 
         element.setAttribute("data-theme", value);
       }, theme);
 
+      await native.blur();
+      await picker.blur();
       expect(await getStyles(picker, properties)).toEqual(await getStyles(native, properties));
 
       await native.focus();
@@ -1155,6 +1158,9 @@ test("selected day, month and year keep the same selection styling", async ({ pa
     .first()
     .click();
   const selectedDay = picker.locator(".litopis-day[data-selected] .litopis-day-button");
+  await selectedDay.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
   const selectedBackground = await selectedDay.evaluate(
     (element) => getComputedStyle(element).backgroundColor,
   );
