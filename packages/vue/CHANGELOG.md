@@ -1,5 +1,12 @@
 # @litopis/vue
 
+## 0.5.2
+
+### Patch Changes
+
+- Updated dependencies [61676b0]
+  - @litopis/dom@0.5.2
+
 ## 0.5.1
 
 ### Patch Changes
