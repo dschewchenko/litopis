@@ -20,6 +20,11 @@ export type LitopisDatePickerOptions = Omit<
   "onRangeChange" | "onValueChange" | "onVisibleMonthChange" | "range" | "selected"
 >;
 
+/** Vue can supply explicit `undefined` values for unset option props. */
+export type LitopisDatePickerRawOptions = {
+  readonly [Key in keyof LitopisDatePickerOptions]?: LitopisDatePickerOptions[Key] | undefined;
+};
+
 export type LitopisDatePickerControllerOptions = DatePickerOptions<
   DatePickerValueAs,
   DatePickerSelection

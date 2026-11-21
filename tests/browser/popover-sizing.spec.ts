@@ -20,8 +20,10 @@ async function configureRangePicker(page: Page, options: RangePickerTestOptions)
       const nativeCssSupports = CSS.supports.bind(CSS);
       CSS.supports = new Proxy(nativeCssSupports, {
         apply(target, thisArgument, argumentsList) {
-          if (argumentsList[0] === "top" && argumentsList[1] === "anchor(bottom)") return false;
-          return Reflect.apply(target, thisArgument, argumentsList);
+          if (argumentsList[0] === "top" && argumentsList[1] === "anchor(bottom)") {
+            return false;
+          }
+          return target(...(argumentsList as Parameters<typeof CSS.supports>));
         },
       });
     });
@@ -62,9 +64,12 @@ test("split range popover uses calendar width instead of either 120px input", as
 
   const geometry = await calendar.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const grids = [...element.querySelectorAll<HTMLElement>(".litopis-grid")]
-      .filter((grid) => !grid.hidden)
-      .map((grid) => ({ clientWidth: grid.clientWidth, scrollWidth: grid.scrollWidth }));
+    const grids: Array<{ clientWidth: number; scrollWidth: number }> = [];
+    for (const grid of element.querySelectorAll<HTMLElement>(".litopis-grid")) {
+      if (!grid.hidden) {
+        grids.push({ clientWidth: grid.clientWidth, scrollWidth: grid.scrollWidth });
+      }
+    }
 
     return {
       left: rect.left,
@@ -209,12 +214,13 @@ test("320px popover shows one complete calendar at enlarged text", async ({ page
       ),
       weekdayCellWidths: weekdayCells.map((cell) => cell.getBoundingClientRect().width),
       weekdayCellOverflows: weekdayCells.map((cell) => cell.scrollWidth > cell.clientWidth),
-      visibleDateButtonSizes: dateButtons
-        .filter((button) => button.getClientRects().length > 0)
-        .map((button) => {
-          const rect = button.getBoundingClientRect();
-          return { width: rect.width, height: rect.height };
-        }),
+      visibleDateButtonSizes: dateButtons.flatMap((button) => {
+        if (button.getClientRects().length === 0) {
+          return [];
+        }
+        const rect = button.getBoundingClientRect();
+        return [{ width: rect.width, height: rect.height }];
+      }),
       captionFits: captionLabel !== null && captionLabel.scrollWidth <= captionLabel.clientWidth,
     };
   });

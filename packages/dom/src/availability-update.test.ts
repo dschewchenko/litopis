@@ -6,7 +6,7 @@ describe("availability refresh navigation", () => {
   it("keeps the displayed month when an asynchronous availability snapshot arrives", () => {
     const root = document.createElement("div");
     const today: DateValue = { day: 25, month: 6, year: 2026 };
-    const visibleMonths: DateValue[] = [];
+    const visibleMonths: Array<DateValue> = [];
     const onVisibleMonthChange = (value: DateValue) => visibleMonths.push(value);
     const picker = createDatePicker(root, { today, locale: "en-US", onVisibleMonthChange });
     try {

@@ -1,5 +1,5 @@
 import { addDays, addMonths, getToday, startOfMonth } from "@litopis/core";
-import { createDatePicker, type DatePickerController } from "@litopis/dom";
+import { createDatePicker } from "@litopis/dom";
 import "@litopis/dom/styles/base.css";
 
 const root = document.querySelector<HTMLElement>("#controller-picker")!;
@@ -11,12 +11,11 @@ const seasonButton = document.querySelector<HTMLButtonElement>("#controller-seas
 const clearButton = document.querySelector<HTMLButtonElement>("#controller-clear")!;
 const today = getToday();
 
-let picker: DatePickerController;
 function updateValue(): void {
   output.value = picker.getISOValue() || "Value: none";
 }
 
-picker = createDatePicker(root, {
+const picker = createDatePicker(root, {
   label: "Programmatic date",
   onValueChange: updateValue,
   today,

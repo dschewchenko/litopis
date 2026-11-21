@@ -37,20 +37,21 @@
     "@changesets/cli": "^3.0.3",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
+    "@nkzw/oxlint-config": "3.0.0",
     "@playwright/test": "^1.65.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "happy-dom": "^21.0.4",
     "lefthook": "^2.2.2",
-    "oxfmt": "^0.74.0",
-    "oxlint": "^1.89.0",
-    "oxlint-tsgolint": "^0.23.0",
+    "oxfmt": "0.79.0",
+    "oxlint": "1.94.0",
+    "oxlint-tsgolint": "7.0.2007",
     "publint": "^0.3.25",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "solid-js": "^1.9.17",
     "tsdown": "^0.22.14",
-    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
+    "tsrs": "0.25.0-ts7.1.0-beta",
     "typescript": "7.0.2",
     "vite": "^8.3.5",
     "vitest": "^4.1.12",
@@ -68,5 +69,5 @@
     "bun": ">=1.3.0",
     "node": ">=22.0.0"
   },
-  "packageManager": "bun@1.4.4"
+  "packageManager": "bun@1.4.5"
 }

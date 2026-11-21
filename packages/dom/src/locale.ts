@@ -12,7 +12,7 @@ const ENGLISH_SEASONS: DatePickerSeasonMessages = {
   winter: "Winter",
 };
 
-const DATE_PICKER_MESSAGES: Readonly<Record<string, DatePickerMessages>> = {
+const DATE_PICKER_MESSAGES = {
   de: {
     clear: "Löschen",
     chooseMonth: "Monat auswählen",
@@ -164,7 +164,11 @@ const DATE_PICKER_MESSAGES: Readonly<Record<string, DatePickerMessages>> = {
     start: "Початок",
     today: "Сьогодні",
   },
-};
+} satisfies Readonly<Record<string, DatePickerMessages>>;
+
+function isDatePickerMessageLanguage(value: string): value is keyof typeof DATE_PICKER_MESSAGES {
+  return Object.hasOwn(DATE_PICKER_MESSAGES, value);
+}
 
 export function resolveDatePickerMessages(
   locale: string | undefined,
@@ -172,7 +176,9 @@ export function resolveDatePickerMessages(
 ): DatePickerMessages {
   const resolvedLocale = resolveLocale(locale);
   const language = resolvedLocale.toLowerCase().split("-")[0]!;
-  const defaults = DATE_PICKER_MESSAGES[language] ?? DATE_PICKER_MESSAGES.en!;
+  const defaults = isDatePickerMessageLanguage(language)
+    ? DATE_PICKER_MESSAGES[language]
+    : DATE_PICKER_MESSAGES.en;
 
   return {
     clear: resolveValue(overrides?.clear, defaults.clear),

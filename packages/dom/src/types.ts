@@ -107,7 +107,7 @@ export interface DatePickerOptions<
   readonly todayButton?: boolean;
   readonly size?: DatePickerSize;
   readonly todayLabel?: string;
-  readonly disabledDates?: readonly DateValue[];
+  readonly disabledDates?: ReadonlyArray<DateValue>;
   readonly isDateDisabled?: DateDisabledPredicate;
   /** Chooses DateValue objects or native local Date instances for selection APIs. */
   readonly valueAs?: ValueAs;

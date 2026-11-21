@@ -31,11 +31,11 @@ export interface CalendarGridCell {
 
 export interface CalendarGrid {
   readonly label: string;
-  readonly weeks: readonly (readonly CalendarGridCell[])[];
+  readonly weeks: ReadonlyArray<ReadonlyArray<CalendarGridCell>>;
 }
 
 export interface CalendarStateOptions {
-  readonly disabledDates?: readonly DateValue[];
+  readonly disabledDates?: ReadonlyArray<DateValue>;
   readonly firstDayOfWeek?: FirstDayOfWeek;
   readonly isDateDisabled?: DateDisabledPredicate;
   readonly locale?: string;
@@ -48,7 +48,7 @@ export interface CalendarStateOptions {
 }
 
 export interface CalendarState {
-  readonly disabledDates: readonly DateValue[];
+  readonly disabledDates: ReadonlyArray<DateValue>;
   readonly firstDayOfWeek: FirstDayOfWeek;
   readonly focusedDate: DateValue;
   readonly grid: CalendarGrid;

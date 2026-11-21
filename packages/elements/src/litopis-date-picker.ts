@@ -19,7 +19,7 @@ type ElementPanels = DatePickerPanels;
 type ElementGranularity = "day" | "month" | "year";
 type ElementSelection = "single" | "range";
 
-const dateFieldFormats: readonly ElementDateFieldFormat[] = [
+const dateFieldFormats: ReadonlyArray<ElementDateFieldFormat> = [
   "dd.mm.yyyy",
   "dd/mm/yyyy",
   "mm/dd/yyyy",
@@ -46,7 +46,7 @@ export class LitopisDatePickerElement extends HTMLElement {
   #range: DateRange = { end: null, start: null };
   #value: DateValue | null = null;
 
-  static get observedAttributes(): string[] {
+  static get observedAttributes(): Array<string> {
     return [
       "mode",
       "clear-button",
@@ -167,8 +167,11 @@ export class LitopisDatePickerElement extends HTMLElement {
   set label(value: string | DatePickerRangeLabels | null) {
     if (typeof value === "string" || value === null) {
       this.#rangeLabels = null;
-      if (value === null) this.removeAttribute("label");
-      else this.setAttribute("label", value);
+      if (value === null) {
+        this.removeAttribute("label");
+      } else {
+        this.setAttribute("label", value);
+      }
       return;
     }
 
@@ -184,8 +187,11 @@ export class LitopisDatePickerElement extends HTMLElement {
   set name(value: string | DatePickerRangeNames | null) {
     if (typeof value === "string" || value === null) {
       this.#rangeNames = null;
-      if (value === null) this.removeAttribute("name");
-      else this.setAttribute("name", value);
+      if (value === null) {
+        this.removeAttribute("name");
+      } else {
+        this.setAttribute("name", value);
+      }
       return;
     }
 
@@ -231,51 +237,93 @@ export class LitopisDatePickerElement extends HTMLElement {
     const layout = getFieldLayout(this.getAttribute("layout"));
     const panels = getVisiblePanels(this.getAttribute("panels"));
 
-    return {
-      ...(mode === undefined ? {} : { mode }),
-      ...(this.hasAttribute("clear-button")
-        ? { clearButton: getBooleanAttribute(this.getAttribute("clear-button")) }
-        : {}),
-      ...(this.getAttribute("clear-label") === null
-        ? {}
-        : { clearLabel: this.getAttribute("clear-label") ?? "Clear" }),
-      ...(this.hasAttribute("close-on-select")
-        ? { closeOnSelect: getBooleanAttribute(this.getAttribute("close-on-select")) }
-        : {}),
-      ...(firstDayOfWeek === undefined ? {} : { firstDayOfWeek }),
-      ...(format === undefined ? {} : { format }),
-      ...(selection === undefined ? {} : { selection }),
-      ...(granularity === undefined ? {} : { granularity }),
-      ...(layout === undefined ? {} : { layout }),
-      ...(panels === undefined ? {} : { panels }),
-      ...(this.name === null ? {} : { name: this.name }),
-      ...(this.label === null ? {} : { label: this.label }),
-      ...(locale === null ? {} : { locale }),
-      ...(max === undefined ? {} : { max }),
-      ...(min === undefined ? {} : { min }),
-      onValueChange: (value) => {
+    const options: DatePickerOptions = {};
+
+    if (mode !== undefined) {
+      Object.assign(options, { mode });
+    }
+    if (this.hasAttribute("clear-button")) {
+      Object.assign(options, {
+        clearButton: getBooleanAttribute(this.getAttribute("clear-button")),
+      });
+    }
+    if (this.getAttribute("clear-label") !== null) {
+      Object.assign(options, { clearLabel: this.getAttribute("clear-label") ?? "Clear" });
+    }
+    if (this.hasAttribute("close-on-select")) {
+      Object.assign(options, {
+        closeOnSelect: getBooleanAttribute(this.getAttribute("close-on-select")),
+      });
+    }
+    if (firstDayOfWeek !== undefined) {
+      Object.assign(options, { firstDayOfWeek });
+    }
+    if (format !== undefined) {
+      Object.assign(options, { format });
+    }
+    if (selection !== undefined) {
+      Object.assign(options, { selection });
+    }
+    if (granularity !== undefined) {
+      Object.assign(options, { granularity });
+    }
+    if (layout !== undefined) {
+      Object.assign(options, { layout });
+    }
+    if (panels !== undefined) {
+      Object.assign(options, { panels });
+    }
+    if (this.name !== null) {
+      Object.assign(options, { name: this.name });
+    }
+    if (this.label !== null) {
+      Object.assign(options, { label: this.label });
+    }
+    if (locale !== null) {
+      Object.assign(options, { locale });
+    }
+    if (max !== undefined) {
+      Object.assign(options, { max });
+    }
+    if (min !== undefined) {
+      Object.assign(options, { min });
+    }
+
+    Object.assign(options, {
+      onValueChange: (value: DateValue | null) => {
         this.#value = value;
       },
-      onRangeChange: (value) => {
+      onRangeChange: (value: DateRange) => {
         this.#range = value;
       },
       range: this.#range.start || this.#range.end ? this.#range : getRangeAttributes(this),
       selected: this.#value,
-      ...(this.hasAttribute("outside-days")
-        ? { outsideDays: getBooleanAttribute(this.getAttribute("outside-days")) }
-        : {}),
-      ...(this.hasAttribute("season")
-        ? { season: getBooleanAttribute(this.getAttribute("season")) }
-        : {}),
-      ...(this.hasAttribute("today-button")
-        ? { todayButton: getBooleanAttribute(this.getAttribute("today-button")) }
-        : {}),
-      ...(size === undefined ? {} : { size }),
-      ...(this.getAttribute("today-label") === null
-        ? {}
-        : { todayLabel: this.getAttribute("today-label") ?? "Today" }),
-      ...(this.#messages === null ? {} : { messages: this.#messages }),
-    };
+    });
+
+    if (this.hasAttribute("outside-days")) {
+      Object.assign(options, {
+        outsideDays: getBooleanAttribute(this.getAttribute("outside-days")),
+      });
+    }
+    if (this.hasAttribute("season")) {
+      Object.assign(options, { season: getBooleanAttribute(this.getAttribute("season")) });
+    }
+    if (this.hasAttribute("today-button")) {
+      Object.assign(options, {
+        todayButton: getBooleanAttribute(this.getAttribute("today-button")),
+      });
+    }
+    if (size !== undefined) {
+      Object.assign(options, { size });
+    }
+    if (this.getAttribute("today-label") !== null) {
+      Object.assign(options, { todayLabel: this.getAttribute("today-label") ?? "Today" });
+    }
+    if (this.#messages !== null) {
+      Object.assign(options, { messages: this.#messages });
+    }
+
+    return options;
   }
 }
 
@@ -334,8 +382,12 @@ function getFieldLayout(value: string | null): ElementLayout | undefined {
 }
 
 function getVisiblePanels(value: string | null): ElementPanels | undefined {
-  if (value === "1") return 1;
-  if (value === "2") return 2;
+  if (value === "1") {
+    return 1;
+  }
+  if (value === "2") {
+    return 2;
+  }
   return value === "auto" ? "auto" : undefined;
 }
 
@@ -348,7 +400,9 @@ function getRangeAttributes(element: HTMLElement): DateRange {
 
 function getRangeAttribute(value: string): DateRange {
   const [start, end, extra] = value.split("/");
-  if (!start || !end || extra) return { end: null, start: null };
+  if (!start || !end || extra) {
+    return { end: null, start: null };
+  }
   return {
     end: parseDateFieldValue(end, "yyyy-mm-dd"),
     start: parseDateFieldValue(start, "yyyy-mm-dd"),
@@ -356,7 +410,9 @@ function getRangeAttribute(value: string): DateRange {
 }
 
 function getRangeValue(range: DateRange): string {
-  if (!range.start || !range.end) return "";
+  if (!range.start || !range.end) {
+    return "";
+  }
   return `${toIsoDate(range.start)}/${toIsoDate(range.end)}`;
 }
 
@@ -365,8 +421,14 @@ function isDateRange(value: DateValue | DateRange | null | undefined): value is 
 }
 
 function setRangeAttributes(element: HTMLElement, range: DateRange): void {
-  if (range.start) element.setAttribute("start", toIsoDate(range.start));
-  else element.removeAttribute("start");
-  if (range.end) element.setAttribute("end", toIsoDate(range.end));
-  else element.removeAttribute("end");
+  if (range.start) {
+    element.setAttribute("start", toIsoDate(range.start));
+  } else {
+    element.removeAttribute("start");
+  }
+  if (range.end) {
+    element.setAttribute("end", toIsoDate(range.end));
+  } else {
+    element.removeAttribute("end");
+  }
 }

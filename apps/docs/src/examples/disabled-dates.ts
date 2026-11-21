@@ -1,5 +1,5 @@
 import { addDays, getToday, toIsoDate } from "@litopis/core";
-import { createDatePicker, type DatePickerController } from "@litopis/dom";
+import { createDatePicker } from "@litopis/dom";
 import "@litopis/dom/styles/base.css";
 
 const root = document.querySelector<HTMLElement>("#disabled-dates-picker")!;
@@ -22,12 +22,11 @@ function updateUnavailableDates(): void {
   datesOutput.value = "Unavailable: " + dates.map(toIsoDate).join(", ");
 }
 
-let picker: DatePickerController;
 function updateSelectedValue(): void {
   valueOutput.value = picker.getISOValue() || "Value: none";
 }
 
-picker = createDatePicker(root, {
+const picker = createDatePicker(root, {
   disabledDates: getUnavailableDates(),
   label: "Arrival date",
   onValueChange: updateSelectedValue,

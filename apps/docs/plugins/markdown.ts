@@ -60,8 +60,9 @@ export function docsMarkdown(entries: Record<string, string>): Plugin {
                 const recipe = renderRecipes(html, htmlToMarkdown).find(
                   (item) => item.urlPath === path,
                 );
-                if (recipe) sendMarkdown(response, recipe.markdown);
-                else {
+                if (recipe) {
+                  sendMarkdown(response, recipe.markdown);
+                } else {
                   response.statusCode = 404;
                   response.end("Example not found");
                 }
@@ -122,7 +123,7 @@ export function docsMarkdown(entries: Record<string, string>): Plugin {
   };
 }
 
-function createEntries(entries: Record<string, string>): MarkdownEntry[] {
+function createEntries(entries: Record<string, string>): Array<MarkdownEntry> {
   if (!entries.index) {
     throw new Error('docsMarkdown requires the explicit Vite entry named "index".');
   }
@@ -166,14 +167,22 @@ function createEntries(entries: Record<string, string>): MarkdownEntry[] {
 }
 
 function markdownAssetPath(htmlPath: string): string {
-  if (htmlPath === "index.html") return "index.md";
-  if (htmlPath.endsWith("/index.html")) return `${htmlPath.slice(0, -11)}.md`;
+  if (htmlPath === "index.html") {
+    return "index.md";
+  }
+  if (htmlPath.endsWith("/index.html")) {
+    return `${htmlPath.slice(0, -11)}.md`;
+  }
   return `${htmlPath.slice(0, -5)}.md`;
 }
 
 function htmlUrl(htmlPath: string): string {
-  if (htmlPath === "index.html") return sitePath;
-  if (htmlPath.endsWith("/index.html")) return `${sitePath}${htmlPath.slice(0, -10)}`;
+  if (htmlPath === "index.html") {
+    return sitePath;
+  }
+  if (htmlPath.endsWith("/index.html")) {
+    return `${sitePath}${htmlPath.slice(0, -10)}`;
+  }
   return `${sitePath}${htmlPath.slice(0, -5)}`;
 }
 
@@ -182,7 +191,9 @@ function posix(path: string): string {
 }
 
 function requestPath(requestUrl: string | undefined): string | null {
-  if (!requestUrl) return null;
+  if (!requestUrl) {
+    return null;
+  }
   try {
     return new URL(requestUrl, "http://litopis.local").pathname;
   } catch {
@@ -191,10 +202,10 @@ function requestPath(requestUrl: string | undefined): string | null {
 }
 
 async function renderAllPages(
-  pages: MarkdownEntry[],
+  pages: Array<MarkdownEntry>,
   htmlToMarkdown: Map<string, string>,
   docsRoot: string,
-): Promise<MarkdownIndexEntry[]> {
+): Promise<Array<MarkdownIndexEntry>> {
   const rendered = await Promise.all(
     pages.map(async (page) => {
       const html = await readDocument(page.sourcePath, docsRoot);
@@ -208,10 +219,11 @@ async function renderAllPages(
     }),
   );
   const examples = pages.find((page) => page.htmlAssetPath === "examples/index.html");
-  if (examples)
+  if (examples) {
     rendered.push(
       ...renderRecipes(await readDocument(examples.sourcePath, docsRoot), htmlToMarkdown),
     );
+  }
   return rendered;
 }
 
@@ -234,7 +246,7 @@ async function inlineExampleSources(html: string, docsRoot: string): Promise<str
   return html;
 }
 
-function renderRecipes(html: string, links: Map<string, string>): MarkdownAsset[] {
+function renderRecipes(html: string, links: Map<string, string>): Array<MarkdownAsset> {
   const window = createWindow();
   try {
     const document = new window.DOMParser().parseFromString(html, "text/html");
@@ -276,30 +288,41 @@ function renderPage(html: string, htmlToMarkdown: Map<string, string>): Markdown
   try {
     const document = new window.DOMParser().parseFromString(html, "text/html");
     const main = document.querySelector("main.vp-doc");
-    if (!main) throw new Error('Documentation HTML must include a "main.vp-doc" element.');
+    if (!main) {
+      throw new Error('Documentation HTML must include a "main.vp-doc" element.');
+    }
 
     const markdown = renderBlocks([...main.childNodes], htmlToMarkdown)
       .join("\n\n")
       .trim();
     const title = cleanText(main.querySelector("h1")?.textContent ?? "Litopis");
-    const summary =
-      [...main.querySelectorAll("p")]
-        .filter((paragraph) => !paragraph.closest(".eyebrow"))
-        .map((paragraph) => cleanText(paragraph.textContent ?? ""))
-        .find(Boolean) ?? "";
+    let summary = "";
+    for (const paragraph of main.querySelectorAll("p")) {
+      if (paragraph.closest(".eyebrow")) {
+        continue;
+      }
+      summary = cleanText(paragraph.textContent ?? "");
+      if (summary) {
+        break;
+      }
+    }
     return { markdown: `${markdown}\n`, summary, title };
   } finally {
     void window.happyDOM.close();
   }
 }
 
-function renderBlocks(nodes: HtmlNode[], links: Map<string, string>): string[] {
-  const result: string[] = [];
+function renderBlocks(nodes: Array<HtmlNode>, links: Map<string, string>): Array<string> {
+  const result: Array<string> = [];
   for (const node of nodes) {
-    if (node.nodeType !== 1) continue;
+    if (node.nodeType !== 1) {
+      continue;
+    }
     const element = node as HtmlElement;
     const block = renderBlock(element, links);
-    if (block) result.push(block);
+    if (block) {
+      result.push(block);
+    }
   }
   return result;
 }
@@ -307,29 +330,44 @@ function renderBlocks(nodes: HtmlNode[], links: Map<string, string>): string[] {
 function renderBlock(element: HtmlElement, links: Map<string, string>): string {
   const content = renderElement(element, links);
   const id = element.getAttribute("id");
-  if (!content) return element.tagName === "A" && id ? `<a id="${id}"></a>` : "";
+  if (!content) {
+    return element.tagName === "A" && id ? `<a id="${id}"></a>` : "";
+  }
   return id ? `<a id="${id}"></a>\n\n${content}` : content;
 }
 
 function renderElement(element: HtmlElement, links: Map<string, string>): string {
-  if (ignoredTags.has(element.tagName) || element.getAttribute("aria-hidden") === "true") return "";
+  if (ignoredTags.has(element.tagName) || element.getAttribute("aria-hidden") === "true") {
+    return "";
+  }
   if (
     element.hasAttribute("data-playground") ||
     element.hasAttribute("data-daisyui-demo") ||
     element.classList.contains("integration-demo") ||
     element.classList.contains("theme-playground-preview")
-  )
+  ) {
     return "";
-  if (element.classList.contains("vp-code-group")) return renderCode(element);
+  }
+  if (element.classList.contains("vp-code-group")) {
+    return renderCode(element);
+  }
 
   if (/^H[1-6]$/.test(element.tagName)) {
     const level = Number(element.tagName.slice(1));
     return `${"#".repeat(level)} ${renderInline(element, links).trim()}`;
   }
-  if (element.tagName === "P") return renderInline(element, links).trim();
-  if (element.tagName === "PRE") return renderPre(element, "");
-  if (element.tagName === "UL" || element.tagName === "OL") return renderList(element, links, 0);
-  if (element.tagName === "TABLE") return renderTable(element, links);
+  if (element.tagName === "P") {
+    return renderInline(element, links).trim();
+  }
+  if (element.tagName === "PRE") {
+    return renderPre(element, "");
+  }
+  if (element.tagName === "UL" || element.tagName === "OL") {
+    return renderList(element, links, 0);
+  }
+  if (element.tagName === "TABLE") {
+    return renderTable(element, links);
+  }
   if (element.tagName === "BLOCKQUOTE") {
     return renderBlocks([...element.childNodes], links)
       .join("\n\n")
@@ -337,7 +375,9 @@ function renderElement(element: HtmlElement, links: Map<string, string>): string
       .map((line) => `> ${line}`)
       .join("\n");
   }
-  if (element.tagName === "HR") return "---";
+  if (element.tagName === "HR") {
+    return "---";
+  }
   return renderBlocks([...element.childNodes], links).join("\n\n");
 }
 
@@ -348,8 +388,10 @@ function renderCode(group: HtmlElement): string {
 
 function renderPre(pre: HtmlElement, language: string): string {
   const code = pre.querySelector("code") ?? pre;
-  const content = (code.textContent ?? "").replace(/\r\n?/g, "\n").replace(/\n+$/, "");
-  if (!content.trim()) return "";
+  const content = (code.textContent ?? "").replaceAll(/\r\n?/g, "\n").replace(/\n+$/, "");
+  if (!content.trim()) {
+    return "";
+  }
   const longestTicks = Math.max(0, ...(content.match(/`+/g) ?? []).map((run) => run.length));
   const fence = "`".repeat(Math.max(3, longestTicks + 1));
   return `${fence}${language}\n${content}\n${fence}`;
@@ -365,10 +407,12 @@ function renderList(list: HtmlElement, links: Map<string, string>, depth: number
     .map((item) => {
       const indent = "  ".repeat(depth);
       const marker = ordered ? `${number++}.` : "-";
-      const blocks: string[] = [];
+      const blocks: Array<string> = [];
       let text = "";
       const flush = () => {
-        if (text.trim()) blocks.push(text.trim());
+        if (text.trim()) {
+          blocks.push(text.trim());
+        }
         text = "";
       };
 
@@ -402,36 +446,62 @@ function renderList(list: HtmlElement, links: Map<string, string>, depth: number
 }
 
 function renderTable(table: HtmlElement, links: Map<string, string>): string {
-  const rows = [...table.querySelectorAll("tr")].map((row) =>
-    [...row.children]
-      .filter((cell) => cell.tagName === "TH" || cell.tagName === "TD")
-      .map((cell) => renderInline(cell, links).trim().replace(/\|/g, "\\|")),
-  );
-  if (!rows.length) return "";
+  const rows = [...table.querySelectorAll("tr")].map((row) => {
+    const cells: Array<string> = [];
+    for (const cell of row.children) {
+      if (cell.tagName === "TH" || cell.tagName === "TD") {
+        cells.push(
+          renderInline(cell, links)
+            .trim()
+            .replaceAll("|", String.raw`\|`),
+        );
+      }
+    }
+    return cells;
+  });
+  if (!rows.length) {
+    return "";
+  }
 
   const headers = rows.shift() ?? [];
   const columns = Math.max(1, headers.length, ...rows.map((row) => row.length));
-  const pad = (cells: string[]) =>
+  const pad = (cells: Array<string>) =>
     Array.from({ length: columns }, (_, index) => cells[index] ?? "");
   const lines = [
     `| ${pad(headers).join(" | ")} |`,
     `| ${Array.from({ length: columns }, () => "---").join(" | ")} |`,
   ];
-  for (const row of rows) lines.push(`| ${pad(row).join(" | ")} |`);
+  for (const row of rows) {
+    lines.push(`| ${pad(row).join(" | ")} |`);
+  }
   return lines.join("\n");
 }
 
 function renderInline(node: HtmlNode, links: Map<string, string>): string {
-  if (node.nodeType === 3) return inlineText(node.textContent ?? "");
-  if (node.nodeType !== 1) return "";
+  if (node.nodeType === 3) {
+    return inlineText(node.textContent ?? "");
+  }
+  if (node.nodeType !== 1) {
+    return "";
+  }
   const element = node as HtmlElement;
-  if (ignoredTags.has(element.tagName) || element.getAttribute("aria-hidden") === "true") return "";
+  if (ignoredTags.has(element.tagName) || element.getAttribute("aria-hidden") === "true") {
+    return "";
+  }
 
   const content = [...element.childNodes].map((child) => renderInline(child, links)).join("");
-  if (element.tagName === "BR") return "  \n";
-  if (element.tagName === "CODE" || element.tagName === "KBD") return inlineCode(content);
-  if (element.tagName === "STRONG" || element.tagName === "B") return `**${content}**`;
-  if (element.tagName === "EM" || element.tagName === "I") return `*${content}*`;
+  if (element.tagName === "BR") {
+    return "  \n";
+  }
+  if (element.tagName === "CODE" || element.tagName === "KBD") {
+    return inlineCode(content);
+  }
+  if (element.tagName === "STRONG" || element.tagName === "B") {
+    return `**${content}**`;
+  }
+  if (element.tagName === "EM" || element.tagName === "I") {
+    return `*${content}*`;
+  }
   if (element.tagName === "A") {
     const href = element.getAttribute("href");
     return href && content.trim() ? `[${content.trim()}](${markdownUrl(href, links)})` : content;
@@ -452,7 +522,7 @@ function inlineCode(content: string): string {
 }
 
 function inlineText(text: string): string {
-  return text.replace(/\s+/g, " ");
+  return text.replaceAll(/\s+/g, " ");
 }
 
 function cleanText(text: string): string {
@@ -460,10 +530,14 @@ function cleanText(text: string): string {
 }
 
 function markdownUrl(href: string, links: Map<string, string>): string {
-  if (href.startsWith("#")) return href;
+  if (href.startsWith("#")) {
+    return href;
+  }
   try {
     const url = new URL(href, "http://litopis.local");
-    if (url.origin !== "http://litopis.local") return href;
+    if (url.origin !== "http://litopis.local") {
+      return href;
+    }
     const mapped = links.get(url.pathname);
     return mapped ? `${mapped}${url.hash}` : href;
   } catch {
@@ -471,10 +545,14 @@ function markdownUrl(href: string, links: Map<string, string>): string {
   }
 }
 
-function renderLlmsIndex(pages: MarkdownIndexEntry[]): string {
+function renderLlmsIndex(pages: Array<MarkdownIndexEntry>): string {
   const sorted = [...pages].sort((left, right) => {
-    if (left.assetPath === "index.md") return -1;
-    if (right.assetPath === "index.md") return 1;
+    if (left.assetPath === "index.md") {
+      return -1;
+    }
+    if (right.assetPath === "index.md") {
+      return 1;
+    }
     return left.assetPath.localeCompare(right.assetPath);
   });
   const lines = [

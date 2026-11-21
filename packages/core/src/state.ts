@@ -101,7 +101,9 @@ export function moveFocus(state: CalendarState, move: CalendarMove): CalendarSta
 export function selectFocusedDate(state: CalendarState): CalendarState {
   const selected = state.focusedDate;
 
-  if (isCalendarDateExplicitlyDisabled(state, selected)) return state;
+  if (isCalendarDateExplicitlyDisabled(state, selected)) {
+    return state;
+  }
 
   return {
     ...state,
@@ -122,7 +124,9 @@ export function selectFocusedDate(state: CalendarState): CalendarState {
 }
 
 export function selectDate(state: CalendarState, value: DateValue | null): CalendarState {
-  if (value && isCalendarDateExplicitlyDisabled(state, value)) return state;
+  if (value && isCalendarDateExplicitlyDisabled(state, value)) {
+    return state;
+  }
   const focusedDate = value ? clampDate(value, state.min, state.max) : state.focusedDate;
   const visibleMonth = startOfMonth(focusedDate);
 
@@ -211,7 +215,7 @@ export function isCalendarDateExplicitlyDisabled(state: CalendarState, value: Da
 /** Tests both endpoints and every day in a complete range against calendar availability. */
 export function isCalendarRangeDisabled(
   range: CalendarState["range"],
-  disabledDates: readonly DateValue[] = [],
+  disabledDates: ReadonlyArray<DateValue> = [],
   predicate: CalendarState["isDateDisabled"] = null,
 ): boolean {
   const endpoints = [range.start, range.end].filter((value): value is DateValue => value !== null);
@@ -220,7 +224,9 @@ export function isCalendarRangeDisabled(
     return true;
   }
 
-  if (!range.start || !range.end) return false;
+  if (!range.start || !range.end) {
+    return false;
+  }
 
   const intervalStart = compareDates(range.start, range.end) <= 0 ? range.start : range.end;
   const intervalEnd = intervalStart === range.start ? range.end : range.start;
@@ -233,14 +239,20 @@ export function isCalendarRangeDisabled(
     return true;
   }
 
-  if (!predicate) return false;
+  if (!predicate) {
+    return false;
+  }
 
   let date = intervalStart;
 
   while (compareDates(date, intervalEnd) <= 0) {
-    if (predicate(date)) return true;
+    if (predicate(date)) {
+      return true;
+    }
     const nextDate = addDays(date, 1);
-    if (compareDates(nextDate, date) === 0) break;
+    if (compareDates(nextDate, date) === 0) {
+      break;
+    }
     date = nextDate;
   }
 
@@ -249,7 +261,7 @@ export function isCalendarRangeDisabled(
 
 function isExplicitlyDisabled(
   value: DateValue,
-  disabledDates: readonly DateValue[],
+  disabledDates: ReadonlyArray<DateValue>,
   predicate: CalendarState["isDateDisabled"],
 ): boolean {
   return (
@@ -262,7 +274,7 @@ function isDateDisabled(
   value: DateValue,
   min: DateValue | null,
   max: DateValue | null,
-  disabledDates: readonly DateValue[],
+  disabledDates: ReadonlyArray<DateValue>,
   predicate: CalendarState["isDateDisabled"],
 ): boolean {
   return isOutsideBounds(value, min, max) || isExplicitlyDisabled(value, disabledDates, predicate);

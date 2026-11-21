@@ -36,7 +36,7 @@ describe("createDatePicker", () => {
     input.setAttribute("aria-describedby", "appointment-help");
     input.setAttribute("slot", "input");
     root.append(input);
-    const changes: unknown[] = [];
+    const changes: Array<unknown> = [];
 
     const picker = createDatePicker(root, {
       mode: "popover",
@@ -147,7 +147,7 @@ describe("createDatePicker", () => {
 
   it("prevents unavailable dates from pointer, keyboard, typed or programmatic selection", () => {
     const root = document.createElement("div");
-    const changes: unknown[] = [];
+    const changes: Array<unknown> = [];
     const picker = createDatePicker(root, {
       disabledDates: [{ day: 26, month: 6, year: 2026 }],
       isDateDisabled: (date) => date.day === 28 && date.month === 6,
@@ -186,7 +186,7 @@ describe("createDatePicker", () => {
 
   it("rejects unavailable days within programmatic ranges and emits visible-month changes", () => {
     const root = document.createElement("div");
-    const visibleMonths: string[] = [];
+    const visibleMonths: Array<string> = [];
     const picker = createDatePicker(root, {
       disabledDates: [{ day: 26, month: 6, year: 2026 }],
       onVisibleMonthChange: (month) =>
@@ -214,7 +214,7 @@ describe("createDatePicker", () => {
 
   it("reconciles a selected value when reactive availability disables it", () => {
     const root = document.createElement("div");
-    const changes: unknown[] = [];
+    const changes: Array<unknown> = [];
     const picker = createDatePicker(root, {
       onValueChange: (value) => changes.push(value),
       selected: { day: 25, month: 6, year: 2026 },
@@ -417,7 +417,7 @@ describe("createDatePicker", () => {
     const day = root.querySelector<HTMLElement>(".litopis-day[data-iso-date='2026-06-26']")!;
     const button = day.querySelector<HTMLButtonElement>("button")!;
     const grid = root.querySelector<HTMLElement>(".litopis-grid")!;
-    const mutations: MutationRecord[] = [];
+    const mutations: Array<MutationRecord> = [];
     const observer = new MutationObserver((records) => mutations.push(...records));
     observer.observe(grid, { childList: true, subtree: true });
 
@@ -800,13 +800,15 @@ describe("createDatePicker", () => {
   it("accepts and emits local native Date values when valueAs is date", () => {
     const selected = new Date(2024, 1, 29, 8);
     const root = document.createElement("div");
-    const changes: Date[] = [];
+    const changes: Array<Date> = [];
     const picker = createDatePicker(root, {
       selected,
       today: { day: 29, month: 2, year: 2024 },
       valueAs: "date",
       onValueChange(value) {
-        if (value) changes.push(value);
+        if (value) {
+          changes.push(value);
+        }
       },
     });
 

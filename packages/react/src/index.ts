@@ -57,6 +57,7 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
       },
     });
     const valueRef = useRef<DateValue | null>(value ?? null);
+    const initialPickerOptionsRef = useRef(pickerOptions);
 
     useImperativeHandle(forwardedRef, () => handleRef.current, []);
 
@@ -67,7 +68,10 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
         return undefined;
       }
 
-      const controller = createDatePicker(root, getPickerOptions(valueRef.current));
+      const controller = createDatePicker(
+        root,
+        getPickerOptions(initialPickerOptionsRef.current, valueRef.current),
+      );
       controllerRefState.current = controller;
 
       return () => {
@@ -85,7 +89,7 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
     }, [controllerRef]);
 
     useEffect(() => {
-      controllerRefState.current?.setOptions(getPickerOptions(valueRef.current));
+      controllerRefState.current?.setOptions(getPickerOptions(pickerOptions, valueRef.current));
     }, [pickerOptions]);
 
     useEffect(() => {
@@ -94,12 +98,15 @@ export const LitopisDatePicker = forwardRef<DatePickerController, LitopisDatePic
     }, [value]);
 
     return createElement("div", { className, ref: rootRef }, children);
-
-    function getPickerOptions(selected: DateValue | null): DatePickerOptions {
-      return {
-        ...pickerOptions,
-        selected,
-      };
-    }
   },
 );
+
+function getPickerOptions(
+  options: DatePickerOptions,
+  selected: DateValue | null,
+): DatePickerOptions {
+  return {
+    ...options,
+    selected,
+  };
+}

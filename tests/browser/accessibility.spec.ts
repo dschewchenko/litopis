@@ -2,6 +2,10 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 
+function formatDottedDate(value: string): string {
+  return value.split("-").reverse().join(".");
+}
+
 const documentationPages = [
   "./",
   "./examples/",
@@ -131,7 +135,7 @@ test("example previews mount real pickers and expose keyboard-operated code tabs
   await expect(basicCard.getByRole("tabpanel", { name: "Code" })).toBeVisible();
   await expect(basicCard.getByRole("button", { name: "Copy code" })).toHaveCount(2);
   await expect(basicCard.locator("[data-source-code]")).toContainText(
-    'import { createDatePicker, type DatePickerController } from "@litopis/dom"',
+    'import { createDatePicker } from "@litopis/dom"',
   );
 });
 
@@ -303,7 +307,7 @@ test("daisyUI preserves caller input styles across themes and states", async ({ 
 
   async function getStyles(
     input: typeof native,
-    styleProperties: readonly string[],
+    styleProperties: ReadonlyArray<string>,
   ): Promise<Record<string, string>> {
     return input.evaluate(
       async (element, properties) => {
@@ -809,10 +813,9 @@ test("range highlights start and end at the center of their buttons", async ({ p
   });
   const start = (await week.locator(".litopis-day").first().getAttribute("data-iso-date"))!;
   const end = (await week.locator(".litopis-day").last().getAttribute("data-iso-date"))!;
-  const format = (value: string) => value.split("-").reverse().join(".");
   await playground
     .getByRole("combobox", { name: "Travel date" })
-    .fill(`${format(start)} – ${format(end)}`);
+    .fill(`${formatDottedDate(start)} – ${formatDottedDate(end)}`);
 
   const endpointGeometry = await playground
     .locator(".litopis-day[data-range-start], .litopis-day[data-range-end]")
@@ -879,16 +882,19 @@ test("calendar edge buttons have equal insets and align with weekdays", async ({
           ...calendar.querySelectorAll<HTMLElement>(".litopis-week:not(.litopis-weekdays)"),
         ];
         const buttons = [...weeks[0]!.querySelectorAll<HTMLElement>(".litopis-day-button")];
-        const rect = (element: HTMLElement) => element.getBoundingClientRect();
-        const edges = (elements: HTMLElement[]) =>
-          elements.map(rect).sort((a, b) => a.left - b.left);
-        const bounds = rect(calendar);
-        const nav = edges(navigation);
-        const days = edges([buttons[0]!, buttons[buttons.length - 1]!]);
-        const labels = edges([weekdays[0]!, weekdays[weekdays.length - 1]!]);
+        const bounds = calendar.getBoundingClientRect();
+        const nav = navigation
+          .map((element) => element.getBoundingClientRect())
+          .sort((a, b) => a.left - b.left);
+        const days = [buttons[0]!, buttons.at(-1)!]
+          .map((element) => element.getBoundingClientRect())
+          .sort((a, b) => a.left - b.left);
+        const labels = [weekdays[0]!, weekdays.at(-1)!]
+          .map((element) => element.getBoundingClientRect())
+          .sort((a, b) => a.left - b.left);
         return {
           top: nav[0]!.top - bounds.top,
-          bottom: bounds.bottom - rect(weeks[weeks.length - 1]!).bottom,
+          bottom: bounds.bottom - weeks.at(-1)!.getBoundingClientRect().bottom,
           navLeft: nav[0]!.left - bounds.left,
           navRight: bounds.right - nav[1]!.right,
           dayLeft: days[0]!.left - bounds.left,
@@ -1052,9 +1058,11 @@ test("popover fallback stays aligned when CSS anchors are unavailable", async ({
     const nativeCssSupports = CSS.supports.bind(CSS);
     CSS.supports = new Proxy(nativeCssSupports, {
       apply(target, thisArgument, argumentsList) {
-        if (argumentsList[0] === "top" && argumentsList[1] === "anchor(bottom)") return false;
+        if (argumentsList[0] === "top" && argumentsList[1] === "anchor(bottom)") {
+          return false;
+        }
 
-        return Reflect.apply(target, thisArgument, argumentsList);
+        return target(...(argumentsList as Parameters<typeof CSS.supports>));
       },
     });
   });
@@ -1065,7 +1073,9 @@ test("popover fallback stays aligned when CSS anchors are unavailable", async ({
   const offsets = await page.evaluate(() => {
     const input = document.querySelector(".litopis-input");
     const calendar = document.querySelector(".litopis-calendar");
-    if (!(input instanceof HTMLElement) || !(calendar instanceof HTMLElement)) return null;
+    if (!input || !calendar) {
+      return null;
+    }
     const inputRect = input.getBoundingClientRect();
     const calendarRect = calendar.getBoundingClientRect();
 

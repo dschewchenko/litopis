@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 interface AvailabilityTestWindow extends Window {
   availabilityPicker?: { destroy(): void; getISOValue(): string };
-  availabilityVisibleMonths?: string[];
+  availabilityVisibleMonths?: Array<string>;
 }
 
 test("unavailable dates stay unselectable through browser input, keyboard and navigation", async ({

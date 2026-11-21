@@ -74,7 +74,9 @@ const foundationVariables = `
 
 export function setupThemePlayground(today: DateValue): void {
   const playground = document.querySelector<HTMLElement>("[data-theme-playground]");
-  if (!playground) return;
+  if (!playground) {
+    return;
+  }
 
   const pickerRoot = playground.querySelector<HTMLElement>("[data-theme-picker]");
   const description = playground.querySelector<HTMLElement>("[data-theme-description]");
@@ -82,7 +84,9 @@ export function setupThemePlayground(today: DateValue): void {
   const panel = playground.querySelector<HTMLElement>("[role='tabpanel']");
   const tabs = [...playground.querySelectorAll<HTMLButtonElement>("[data-style-theme-tab]")];
 
-  if (!pickerRoot || !description || !code || !panel || tabs.length === 0) return;
+  if (!pickerRoot || !description || !code || !panel || tabs.length === 0) {
+    return;
+  }
 
   const preview = playground;
   const previewPanel = panel;
@@ -124,7 +128,9 @@ export function setupThemePlayground(today: DateValue): void {
       const currentIndex = tabs.indexOf(tab);
       const nextIndex = getNextTabIndex(event.key, currentIndex, tabs.length);
 
-      if (nextIndex === null) return;
+      if (nextIndex === null) {
+        return;
+      }
 
       event.preventDefault();
       const nextTab = tabs[nextIndex]!;

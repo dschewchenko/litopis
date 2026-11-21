@@ -48,4 +48,4 @@ if (errors.length > 0) {
   throw new Error(`Package manifest validation failed:\n${errors.join("\n")}`);
 }
 
-console.log(`Checked ${checkedPackages} publishable package manifests.`);
+process.stdout.write(`Checked ${checkedPackages} publishable package manifests.\n`);

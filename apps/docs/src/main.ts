@@ -35,7 +35,7 @@ const packageManagers: Record<PackageManager, PackageManagerDefinition> = {
   yarn: { command: "yarn add", label: "yarn" },
 };
 
-const pickerOptions: Record<string, DatePickerOptions> = {
+const pickerOptions = {
   popover: {
     mode: "popover",
     format: "dd.mm.yyyy",
@@ -51,21 +51,22 @@ const pickerOptions: Record<string, DatePickerOptions> = {
     season: true,
     today,
   },
-};
+} satisfies Readonly<Record<string, DatePickerOptions>>;
 
 setupDaisyClasses();
-void setupThemePlayground();
 setupPackageManagerTabs();
 setupCodeBlocks();
 setupScrollableTables();
 setupExampleTabs();
-void setupPlayground();
 setupMarkdownLink();
+await Promise.all([setupThemePlayground(), setupPlayground()]);
 
 function setupMarkdownLink(): void {
   const header = document.querySelector(".topbar");
   const github = header?.querySelector(".topbar-link");
-  if (!header || !github) return;
+  if (!header || !github) {
+    return;
+  }
 
   const link = document.createElement("a");
   const pagePath = window.location.pathname.replace(/\/index\.html$/, "").replace(/\/$/, "");
@@ -93,19 +94,25 @@ function setupMarkdownLink(): void {
 
 for (const root of document.querySelectorAll<HTMLElement>("[data-litopis-picker]")) {
   const preset = root.dataset.litopisPicker;
-  if (preset && pickerOptions[preset]) createDatePicker(root, pickerOptions[preset]);
+  if (preset === "popover" || preset === "styling") {
+    createDatePicker(root, pickerOptions[preset]);
+  }
 }
 
 async function setupPlayground(): Promise<void> {
   const playground = document.querySelector<HTMLElement>("[data-playground]");
-  if (!playground) return;
+  if (!playground) {
+    return;
+  }
 
   await import("@litopis/dom/styles/daisyui.css");
 
-  const dateFields: DateFieldController[] = [];
+  const dateFields: Array<DateFieldController> = [];
   for (const root of playground.querySelectorAll<HTMLElement>("[data-playground-date-field]")) {
     const label = root.dataset.label;
-    if (!label) continue;
+    if (!label) {
+      continue;
+    }
     const field = createDateField(root, { label, format: "yyyy-mm-dd" });
     const input = root.querySelector("input");
     input?.setAttribute(`data-playground-${root.dataset.playgroundDateField}`, "");
@@ -220,7 +227,7 @@ async function setupPlayground(): Promise<void> {
     const min = getPlaygroundDate(playgroundMinimum.value);
     const max = getPlaygroundDate(playgroundMaximum.value);
     const configuredToday = getPlaygroundDate(playgroundTodayReference.value);
-    const pickerOptions: PlaygroundPickerOptions = {
+    const pickerOptions = {
       clearButton: playgroundClearButton.checked,
       closeOnSelect: playgroundCloseOnSelect.checked,
       format: getPlaygroundFormat(playgroundFormat.value),
@@ -234,13 +241,33 @@ async function setupPlayground(): Promise<void> {
       size: playgroundSize.value === "comfortable" ? "comfortable" : "compact",
       todayButton: playgroundTodayButton.checked,
       valueAs: selectedValueAs,
-      ...(firstDayOfWeek === undefined ? {} : { firstDayOfWeek }),
-      ...(localeValue ? { locale: localeValue } : {}),
-      ...(max ? { max } : {}),
-      ...(min ? { min } : {}),
-      ...(isRange ? {} : { selected: initialStartValue }),
-      ...(configuredToday ? { today: configuredToday } : {}),
-      ...(isRange ? { range: { end: initialEndValue, start: initialStartValue } } : {}),
+    } satisfies PlaygroundPickerOptions;
+
+    if (firstDayOfWeek !== undefined) {
+      Object.assign(pickerOptions, { firstDayOfWeek });
+    }
+    if (localeValue) {
+      Object.assign(pickerOptions, { locale: localeValue });
+    }
+    if (max) {
+      Object.assign(pickerOptions, { max });
+    }
+    if (min) {
+      Object.assign(pickerOptions, { min });
+    }
+    if (!isRange) {
+      Object.assign(pickerOptions, { selected: initialStartValue });
+    }
+    if (configuredToday) {
+      Object.assign(pickerOptions, { today: configuredToday });
+    }
+    if (isRange) {
+      Object.assign(pickerOptions, {
+        range: { end: initialEndValue, start: initialStartValue },
+      });
+    }
+
+    Object.assign(pickerOptions, {
       label:
         isRange && playgroundLayout.value === "split"
           ? { end: playgroundEndLabel, start: playgroundStartLabel }
@@ -255,7 +282,7 @@ async function setupPlayground(): Promise<void> {
       onValueChange() {
         updatePlaygroundFormData();
       },
-    };
+    });
 
     controller?.destroy();
     controller = createDatePicker(playgroundPickerRoot, pickerOptions);
@@ -264,16 +291,21 @@ async function setupPlayground(): Promise<void> {
   }
 
   function updatePlaygroundFormData(): void {
-    const values = [...new FormData(playgroundNativeForm).entries()]
-      .filter(([, value]) => value !== "")
-      .map(([name, value]) => `${name}=${formatFormDataValue(value)}`)
-      .join(", ");
+    const completedValues: Array<string> = [];
+    for (const [name, value] of new FormData(playgroundNativeForm)) {
+      if (value !== "") {
+        completedValues.push(`${name}=${formatFormDataValue(value)}`);
+      }
+    }
+    const values = completedValues.join(", ");
     playgroundValueOutput.textContent = values ? `FormData: ${values}` : "No completed form value";
   }
 
   playgroundControlsForm.addEventListener("input", mount);
   playgroundControlsForm.addEventListener("reset", () => {
-    for (const field of dateFields) field.setDate(null);
+    for (const field of dateFields) {
+      field.setDate(null);
+    }
     window.setTimeout(mount);
   });
   playgroundNativeForm.addEventListener("reset", () => window.setTimeout(updatePlaygroundFormData));
@@ -290,7 +322,9 @@ function setupPackageManagerTabs(): void {
     const command = panel?.querySelector<HTMLElement>("code");
     const packages = install.dataset.packageInstall;
 
-    if (!panel || !command || !packages || tabs.length === 0) continue;
+    if (!panel || !command || !packages || tabs.length === 0) {
+      continue;
+    }
 
     const panelId = `package-install-${index}`;
     panel.id = panelId;
@@ -302,7 +336,9 @@ function setupPackageManagerTabs(): void {
       tab.addEventListener("keydown", (event) => {
         const nextIndex = getNextTabIndex(event.key, tabs.indexOf(tab), tabs.length);
 
-        if (nextIndex === null) return;
+        if (nextIndex === null) {
+          return;
+        }
 
         event.preventDefault();
         const nextTab = tabs[nextIndex]!;
@@ -317,11 +353,13 @@ function setupPackageManagerTabs(): void {
 
 function activatePackageManager(
   activeTab: HTMLButtonElement,
-  installs: readonly HTMLElement[],
+  installs: ReadonlyArray<HTMLElement>,
 ): void {
   const manager = getPackageManager(activeTab.dataset.packageManager);
 
-  if (!manager) return;
+  if (!manager) {
+    return;
+  }
 
   window.localStorage.setItem(packageManagerStorageKey, manager);
   activatePackageManagerByName(manager, installs);
@@ -329,7 +367,7 @@ function activatePackageManager(
 
 function activatePackageManagerByName(
   manager: PackageManager,
-  installs: readonly HTMLElement[],
+  installs: ReadonlyArray<HTMLElement>,
 ): void {
   const definition = packageManagers[manager];
 
@@ -337,7 +375,9 @@ function activatePackageManagerByName(
     const packages = install.dataset.packageInstall;
     const command = install.querySelector<HTMLElement>("[data-package-install-panel] code");
 
-    if (!packages || !command) continue;
+    if (!packages || !command) {
+      continue;
+    }
 
     command.textContent = `${definition.command} ${packages}`;
 
@@ -373,7 +413,9 @@ function getNextTabIndex(key: string, currentIndex: number, count: number): numb
 }
 
 async function setupThemePlayground(): Promise<void> {
-  if (!document.querySelector("[data-theme-playground]")) return;
+  if (!document.querySelector("[data-theme-playground]")) {
+    return;
+  }
 
   const themePreview = await import("./theme-preview");
   themePreview.setupThemePlayground(today);
@@ -434,30 +476,36 @@ form.addEventListener("submit", (event) => {
 }
 
 function addOptionalPlaygroundCodeLine(
-  lines: string[],
+  lines: Array<string>,
   name: string,
   value: number | string | undefined,
 ): void {
-  if (value === undefined) return;
+  if (value === undefined) {
+    return;
+  }
   const formattedValue = typeof value === "string" ? `"${value}"` : String(value);
   lines.push(`${name}: ${formattedValue},`);
 }
 
 function formatPlaygroundDate(value: PlaygroundPickerValue | null | undefined): string | undefined {
-  if (!value) return undefined;
-  if (value instanceof Date) {
+  if (!value) {
+    return undefined;
+  }
+  if ("getTime" in value) {
     return `new Date(${value.getFullYear()}, ${value.getMonth()}, ${value.getDate()})`;
   }
   return `{ year: ${value.year}, month: ${value.month}, day: ${value.day} }`;
 }
 
 function addOptionalPlaygroundDateCodeLine(
-  lines: string[],
+  lines: Array<string>,
   name: string,
   value: DateValue | null | undefined,
 ): void {
   const formattedValue = formatPlaygroundDate(value);
-  if (formattedValue) lines.push(`${name}: ${formattedValue},`);
+  if (formattedValue) {
+    lines.push(`${name}: ${formattedValue},`);
+  }
 }
 
 function getPlaygroundDate(value: string): DateValue | undefined {
@@ -481,24 +529,44 @@ function getPlaygroundPickerValue(
   value: DateValue | undefined,
   valueAs: DatePickerValueAs,
 ): PlaygroundPickerValue | null {
-  if (!value) return null;
-  if (valueAs === "date") return new Date(value.year, value.month - 1, value.day, 12);
+  if (!value) {
+    return null;
+  }
+  if (valueAs === "date") {
+    return new Date(value.year, value.month - 1, value.day, 12);
+  }
   return value;
 }
 
 function getPlaygroundFirstDayOfWeek(value: string): PlaygroundFirstDay | undefined {
-  if (value === "0") return 0;
-  if (value === "1") return 1;
-  if (value === "2") return 2;
-  if (value === "3") return 3;
-  if (value === "4") return 4;
-  if (value === "5") return 5;
-  if (value === "6") return 6;
+  if (value === "0") {
+    return 0;
+  }
+  if (value === "1") {
+    return 1;
+  }
+  if (value === "2") {
+    return 2;
+  }
+  if (value === "3") {
+    return 3;
+  }
+  if (value === "4") {
+    return 4;
+  }
+  if (value === "5") {
+    return 5;
+  }
+  if (value === "6") {
+    return 6;
+  }
   return undefined;
 }
 
 function getPlaygroundFormat(value: string): DateFieldFormat {
-  if (value === "yyyy-mm-dd" || value === "mm/dd/yyyy") return value;
+  if (value === "yyyy-mm-dd" || value === "mm/dd/yyyy") {
+    return value;
+  }
   return "dd.mm.yyyy";
 }
 
@@ -508,18 +576,24 @@ function getPlaygroundLocale(value: string): string | undefined {
 }
 
 function getPlaygroundGranularity(value: string): CalendarGranularity {
-  if (value === "month" || value === "year") return value;
+  if (value === "month" || value === "year") {
+    return value;
+  }
   return "day";
 }
 
 function getPlaygroundPanels(value: string): DatePickerPanels {
-  if (value === "2") return 2;
-  if (value === "auto") return "auto";
+  if (value === "2") {
+    return 2;
+  }
+  if (value === "auto") {
+    return "auto";
+  }
   return 1;
 }
 
 function formatFormDataValue(value: FormDataEntryValue): string {
-  return value instanceof File ? value.name : value;
+  return typeof value === "string" ? value : value.name;
 }
 
 function setupDaisyClasses(): void {
@@ -607,7 +681,7 @@ function setupExampleTabs(): void {
       tab.addEventListener("click", () => activateExampleTab(card, tabs, tab));
       tab.addEventListener("keydown", (event) => {
         const currentIndex = tabs.indexOf(tab);
-        let nextIndex = currentIndex;
+        let nextIndex: number;
 
         switch (event.key) {
           case "ArrowLeft":
@@ -640,7 +714,7 @@ function setupExampleTabs(): void {
 
 function activateExampleTab(
   card: HTMLElement,
-  tabs: readonly HTMLButtonElement[],
+  tabs: ReadonlyArray<HTMLButtonElement>,
   activeTab: HTMLButtonElement,
 ): void {
   for (const tab of tabs) {

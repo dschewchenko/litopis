@@ -27,17 +27,17 @@ export function createCalendarGrid(
   min: DateValue | null,
   max: DateValue | null,
   range: DateRange = { end: null, start: null },
-  disabledDates: readonly DateValue[] = [],
+  disabledDates: ReadonlyArray<DateValue> = [],
   isDateDisabledPredicate?: DateDisabledPredicate,
 ): CalendarGrid {
   const monthStart = startOfMonth(visibleMonth);
   const firstDayOffset = (toLocalDate(monthStart).getDay() - firstDayOfWeek + 7) % 7;
   const monthDays = getDaysInMonth(monthStart);
   const cellCount = Math.ceil((firstDayOffset + monthDays) / 7) * 7;
-  const weeks: CalendarGridCell[][] = [];
+  const weeks: Array<Array<CalendarGridCell>> = [];
 
   for (let cellIndex = 0; cellIndex < cellCount; cellIndex += 7) {
-    const week: CalendarGridCell[] = [];
+    const week: Array<CalendarGridCell> = [];
 
     for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
       const date = getGridDate(monthStart, cellIndex + dayIndex - firstDayOffset);

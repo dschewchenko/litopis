@@ -30,6 +30,7 @@ import type {
   LitopisDatePickerControllerOptions,
   LitopisDatePickerModelValue,
   LitopisDatePickerOptions,
+  LitopisDatePickerRawOptions,
   LitopisDatePickerRangeEndpoint,
 } from "./types";
 
@@ -43,7 +44,7 @@ const datePickerProps = {
   clearButton: optionalBooleanProp,
   clearLabel: String,
   closeOnSelect: optionalBooleanProp,
-  disabledDates: Array as PropType<readonly DateValue[]>,
+  disabledDates: Array as PropType<ReadonlyArray<DateValue>>,
   firstDayOfWeek: Number as PropType<FirstDayOfWeek>,
   format: String as PropType<DateFieldFormat>,
   from: Object as PropType<LitopisDatePickerRangeEndpoint>,
@@ -107,7 +108,7 @@ export const LitopisDatePicker = defineComponent({
         to,
         ...rawOptions
       } = props;
-      const options = omitUndefinedProperties(rawOptions) as LitopisDatePickerOptions;
+      const options = omitUndefinedProperties(rawOptions);
 
       if (props.selection === "range") {
         if (hasNamedRangeModel()) {
@@ -227,6 +228,8 @@ function isDateRange(
   return typeof value === "object" && value !== null && "start" in value && "end" in value;
 }
 
-function omitUndefinedProperties(value: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(value).filter(([, option]) => option !== undefined));
+function omitUndefinedProperties(value: LitopisDatePickerRawOptions): LitopisDatePickerOptions {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, option]) => option !== undefined),
+  ) as LitopisDatePickerOptions;
 }

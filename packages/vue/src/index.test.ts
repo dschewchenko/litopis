@@ -140,8 +140,8 @@ describe("LitopisDatePicker for Vue", () => {
   it("reactively applies disabled dates and emits visible-month changes", async () => {
     const host = document.createElement("div");
     const selected = ref<DateValue | null>({ day: 25, month: 6, year: 2026 });
-    const disabledDates = ref<DateValue[]>([]);
-    const visibleMonths: DateValue[] = [];
+    const disabledDates = ref<Array<DateValue>>([]);
+    const visibleMonths: Array<DateValue> = [];
 
     const app = createApp({
       render: () =>
@@ -189,5 +189,5 @@ function isDateRange(value: LitopisDatePickerModelValue): value is DateRange {
 function isDateValue(
   value: Exclude<LitopisDatePickerModelValue, DateRange | null>,
 ): value is DateValue {
-  return !(value instanceof Date);
+  return !("getTime" in value);
 }

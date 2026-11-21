@@ -15,10 +15,12 @@ export function LitopisDatePicker(props: LitopisDatePickerProps): JSX.Element {
   const root = document.createElement("div");
   const resolvedChildren = children(() => props.children);
   let controller: DatePickerController | null = null;
-  let appliedClassNames: string[] = [];
+  let appliedClassNames: Array<string> = [];
 
   for (const child of resolvedChildren.toArray()) {
-    if (child instanceof Node) root.append(child);
+    if (isDomNode(child)) {
+      root.append(child);
+    }
   }
 
   onMount(() => {
@@ -63,4 +65,15 @@ export function LitopisDatePicker(props: LitopisDatePickerProps): JSX.Element {
     appliedClassNames = (className ?? "").split(/\s+/).filter(Boolean);
     root.classList.add(...appliedClassNames);
   }
+}
+
+function isDomNode(value: JSX.Element): value is Node {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "nodeType" in value &&
+    typeof value.nodeType === "number" &&
+    "nodeName" in value &&
+    typeof value.nodeName === "string"
+  );
 }

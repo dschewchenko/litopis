@@ -152,7 +152,9 @@ export function createDatePicker<
 
   const input = suppliedInput ?? document.createElement("input");
   input.autocomplete ||= "off";
-  if (!suppliedInput) input.classList.add("litopis-input");
+  if (!suppliedInput) {
+    input.classList.add("litopis-input");
+  }
   input.id ||= `${id}-input`;
   input.inputMode ||= "numeric";
   input.removeAttribute("name");
@@ -176,7 +178,9 @@ export function createDatePicker<
   endInput.setAttribute("aria-autocomplete", "none");
   endInput.setAttribute("aria-controls", `${id}-grid`);
   endInput.setAttribute("aria-haspopup", "grid");
-  if (!suppliedEndInput) endInput.removeAttribute("slot");
+  if (!suppliedEndInput) {
+    endInput.removeAttribute("slot");
+  }
   endLabel.htmlFor = endInput.id;
 
   const fields = document.createElement("div");
@@ -314,7 +318,9 @@ export function createDatePicker<
     typeof ResizeObserver === "undefined"
       ? null
       : new ResizeObserver(() => {
-          if (syncPanelLayout()) render(state, "valid", true);
+          if (syncPanelLayout()) {
+            render(state, "valid", true);
+          }
         });
   resizeObserver?.observe(root);
   window.addEventListener("resize", onViewportResize);
@@ -358,11 +364,17 @@ export function createDatePicker<
 
   function resolvePanelCount(): 1 | 2 {
     const visiblePanels = getVisiblePanels(currentOptions);
-    if (visiblePanels === 1) return 1;
-    if (visiblePanels === 2) return 2;
+    if (visiblePanels === 1) {
+      return 1;
+    }
+    if (visiblePanels === 2) {
+      return 2;
+    }
 
     const availableWidth = getAvailableCalendarWidth();
-    if (availableWidth === 0) return 1;
+    if (availableWidth === 0) {
+      return 1;
+    }
     return availableWidth >= getMinimumCalendarWidth(2) ? 2 : 1;
   }
 
@@ -388,14 +400,18 @@ export function createDatePicker<
     );
     const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
     const preferredWidth = getCalendarWidth(calendarStyles);
-    if (inlineWidth) calendar.style.width = inlineWidth;
+    if (inlineWidth) {
+      calendar.style.width = inlineWidth;
+    }
 
     return Math.min(preferredWidth, Math.max(0, viewportWidth - viewportGap));
   }
 
   function getCalendarWidth(styles: CSSStyleDeclaration): number {
     const width = getCssPixelValue(styles.width, 0);
-    if (width > 0) return width;
+    if (width > 0) {
+      return width;
+    }
 
     const probe = document.createElement("div");
     probe.style.height = "0";
@@ -446,7 +462,9 @@ export function createDatePicker<
       return;
     }
 
-    if (calendarOpen) syncPopoverPosition();
+    if (calendarOpen) {
+      syncPopoverPosition();
+    }
   }
   function getFieldMessage(target: HTMLInputElement): HTMLParagraphElement {
     return target === endInput ? endFieldMessage : fieldMessage;
@@ -571,7 +589,9 @@ export function createDatePicker<
   }
 
   function getCalendarCaption(): string {
-    if (resolvedPanelCount === 1) return state.grid.label;
+    if (resolvedPanelCount === 1) {
+      return state.grid.label;
+    }
 
     const followingMonth = addMonths(state.visibleMonth, 1);
     if (followingMonth.year === state.visibleMonth.year) {
@@ -619,47 +639,6 @@ export function createDatePicker<
         dayIndex += 1;
       }
     }
-  }
-
-  function ensureDayGridStructure(target: HTMLElement, weekCount: number): void {
-    if (target.children.length === weekCount + 1) return;
-
-    const rows = [createWeekdaysRow()];
-
-    for (let weekIndex = 0; weekIndex < weekCount; weekIndex += 1) {
-      rows.push(createDayRow());
-    }
-
-    target.replaceChildren(...rows);
-  }
-
-  function createWeekdaysRow(): HTMLElement {
-    const row = document.createElement("div");
-    row.className = "litopis-week litopis-weekdays";
-    row.setAttribute("role", "row");
-
-    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
-      const weekday = document.createElement("div");
-      weekday.className = "litopis-weekday";
-      weekday.setAttribute("role", "columnheader");
-      row.append(weekday);
-    }
-
-    return row;
-  }
-
-  function createDayRow(): HTMLElement {
-    const row = document.createElement("div");
-    row.className = "litopis-week";
-    row.setAttribute("role", "row");
-
-    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
-      const day = document.createElement("div");
-      day.className = "litopis-day";
-      row.append(day);
-    }
-
-    return row;
   }
 
   function syncWeekdays(target: HTMLElement): void {
@@ -714,83 +693,11 @@ export function createDatePicker<
     }
   }
 
-  function clearDayCell(day: HTMLElement): void {
-    day.classList.add("litopis-day-empty");
-    setAttribute(day, "aria-hidden", "true");
-    setAttribute(day, "role", "presentation");
-    removeAttribute(day, "aria-selected");
-    delete day.dataset.isoDate;
-    setDataState(day, "inRange", false);
-    setDataState(day, "outsideMonth", false);
-    setDataState(day, "rangeEnd", false);
-    setDataState(day, "rangeStart", false);
-    setDataState(day, "selected", false);
-    setDataState(day, "today", false);
-
-    if (day.hasChildNodes()) {
-      day.replaceChildren();
-    }
-  }
-
-  function getDayButton(day: HTMLElement): HTMLButtonElement {
-    const existingButton = day.querySelector<HTMLButtonElement>(".litopis-day-button");
-    if (existingButton) return existingButton;
-
-    const button = document.createElement("button");
-    button.className = "litopis-day-button";
-    button.type = "button";
-    day.append(button);
-    return button;
-  }
-
-  function setDataState(
-    element: HTMLElement,
-    stateName: keyof DOMStringMap,
-    active: boolean,
-  ): void {
-    if (active) {
-      setDataValue(element, stateName, "");
-      return;
-    }
-
-    if (stateName in element.dataset) {
-      delete element.dataset[stateName];
-    }
-  }
-
-  function setDataValue(element: HTMLElement, name: keyof DOMStringMap, value: string): void {
-    if (element.dataset[name] !== value) {
-      element.dataset[name] = value;
-    }
-  }
-
-  function setText(element: HTMLElement, value: string): void {
-    if (element.textContent !== value) {
-      element.textContent = value;
-    }
-  }
-
-  function setAttribute(element: HTMLElement, name: string, value: string): void {
-    if (element.getAttribute(name) !== value) {
-      element.setAttribute(name, value);
-    }
-  }
-
-  function removeAttribute(element: HTMLElement, name: string): void {
-    if (element.hasAttribute(name)) {
-      element.removeAttribute(name);
-    }
-  }
-
-  function setDisabled(button: HTMLButtonElement, disabled: boolean): void {
-    if (button.disabled !== disabled) {
-      button.disabled = disabled;
-    }
-  }
-
   function renderMonthYearPanel(): void {
     monthYearPanel.hidden = !monthYearPanelOpen;
-    if (!monthYearPanelOpen) return;
+    if (!monthYearPanelOpen) {
+      return;
+    }
 
     const messages = resolveDatePickerMessages(state.locale, currentOptions.messages);
 
@@ -813,10 +720,12 @@ export function createDatePicker<
         ? "litopis-panel-grid litopis-month-grid"
         : "litopis-panel-grid litopis-year-grid";
 
-    if (panelGrid.className === panelClass && panelGrid.children.length === 12) return;
+    if (panelGrid.className === panelClass && panelGrid.children.length === 12) {
+      return;
+    }
 
     panelGrid.className = panelClass;
-    const buttons: HTMLButtonElement[] = [];
+    const buttons: Array<HTMLButtonElement> = [];
 
     for (let index = 0; index < 12; index += 1) {
       const button = document.createElement("button");
@@ -873,20 +782,6 @@ export function createDatePicker<
 
       syncPeriodSelection(yearButton, { day: 1, month: 1, year }, "year");
     }
-  }
-
-  function isMonthDisabled(month: number, year: number, calendarState: CalendarState): boolean {
-    if (year < MIN_YEAR || year > MAX_YEAR) {
-      return true;
-    }
-
-    const monthStart = { day: 1, month, year };
-    const monthEnd = { day: getDaysInMonth(monthStart), month, year };
-
-    return Boolean(
-      (calendarState.min && compareDates(monthEnd, calendarState.min) < 0) ||
-      (calendarState.max && compareDates(monthStart, calendarState.max) > 0),
-    );
   }
 
   function syncPeriodSelection(
@@ -967,7 +862,9 @@ export function createDatePicker<
   }
 
   function setSelectedDate(value: DateValue | null): boolean {
-    if (value && isCalendarDateExplicitlyDisabled(state, value)) return false;
+    if (value && isCalendarDateExplicitlyDisabled(state, value)) {
+      return false;
+    }
 
     if (isRangeSelection()) {
       return setSelectedRange(
@@ -1011,7 +908,9 @@ export function createDatePicker<
   function selectPeriod(value: DateValue): void {
     const normalized = normalizeDateForGranularity(value, getGranularity(currentOptions));
 
-    if (isCalendarDateExplicitlyDisabled(state, normalized)) return;
+    if (isCalendarDateExplicitlyDisabled(state, normalized)) {
+      return;
+    }
 
     if (isRangeSelection()) {
       const nextRange = selectDateRange(range, normalized, getGranularity(currentOptions));
@@ -1154,10 +1053,9 @@ export function createDatePicker<
   }
 
   function onGridClick(event: MouseEvent): void {
-    const button =
-      event.target instanceof Element ? event.target.closest(".litopis-day-button") : null;
+    const button = isElementNode(event.target) ? event.target.closest(".litopis-day-button") : null;
 
-    if (!(button instanceof HTMLButtonElement) || button.disabled) {
+    if (!isButtonElement(button) || button.disabled) {
       return;
     }
 
@@ -1172,18 +1070,19 @@ export function createDatePicker<
   }
 
   function onPeriodPanelClick(event: MouseEvent): void {
-    const button =
-      event.target instanceof Element
-        ? event.target.closest(".litopis-month-button, .litopis-year-button")
-        : null;
+    const button = isElementNode(event.target)
+      ? event.target.closest(".litopis-month-button, .litopis-year-button")
+      : null;
 
-    if (!(button instanceof HTMLButtonElement) || button.disabled) {
+    if (!isButtonElement(button) || button.disabled) {
       return;
     }
 
     if (panelMode === "month") {
       const month = Number(button.dataset.month);
-      if (!Number.isInteger(month)) return;
+      if (!Number.isInteger(month)) {
+        return;
+      }
 
       if (getGranularity(currentOptions) === "month") {
         selectPeriod({ day: 1, month, year: state.visibleMonth.year });
@@ -1196,7 +1095,9 @@ export function createDatePicker<
     }
 
     const year = Number(button.dataset.year);
-    if (!Number.isInteger(year)) return;
+    if (!Number.isInteger(year)) {
+      return;
+    }
 
     if (getGranularity(currentOptions) === "year") {
       selectPeriod({ day: 1, month: 1, year });
@@ -1226,7 +1127,9 @@ export function createDatePicker<
         getGranularity(currentOptions),
       );
       if (parsedRange) {
-        if (!setSelectedRange(parsedRange)) markUnavailableInput(target);
+        if (!setSelectedRange(parsedRange)) {
+          markUnavailableInput(target);
+        }
       }
       return;
     }
@@ -1256,7 +1159,9 @@ export function createDatePicker<
       }
 
       if (isRangeSelection()) {
-        if (!setSelectedRange({ ...range, [endpoint]: parsed })) markUnavailableInput(target);
+        if (!setSelectedRange({ ...range, [endpoint]: parsed })) {
+          markUnavailableInput(target);
+        }
       } else {
         const nextState = selectFocusedDate(focusDate(state, parsed));
         if (nextState === state) {
@@ -1350,7 +1255,7 @@ export function createDatePicker<
       return;
     }
 
-    let accepted = true;
+    let accepted: boolean;
     if (isDateRange(parsed)) {
       accepted = setSelectedRange(parsed);
     } else if (isRangeSelection()) {
@@ -1390,7 +1295,7 @@ export function createDatePicker<
     target: HTMLInputElement = input,
     endpoint: RangeEndpoint = "start",
   ): void {
-    if (event.relatedTarget instanceof Node && calendar.contains(event.relatedTarget)) {
+    if (isNode(event.relatedTarget) && calendar.contains(event.relatedTarget)) {
       return;
     }
 
@@ -1474,7 +1379,9 @@ export function createDatePicker<
   }
 
   function onPanelTitleClick(): void {
-    if (getGranularity(currentOptions) === "year") return;
+    if (getGranularity(currentOptions) === "year") {
+      return;
+    }
 
     panelMode = panelMode === "month" ? "year" : "month";
     yearPageStart = getYearPageStart(state.visibleMonth.year);
@@ -1673,7 +1580,9 @@ export function createDatePicker<
   }
 
   function positionFallbackPopover(): void {
-    if (!fallbackPositioningActive && !calendarOpen) return;
+    if (!fallbackPositioningActive && !calendarOpen) {
+      return;
+    }
 
     const inputRect = input.getBoundingClientRect();
     calendar.style.removeProperty("width");
@@ -1713,7 +1622,9 @@ export function createDatePicker<
   }
 
   function stopFallbackPositioning(): void {
-    if (!fallbackPositioningActive) return;
+    if (!fallbackPositioningActive) {
+      return;
+    }
 
     window.removeEventListener("scroll", positionFallbackPopover, true);
     fallbackPositioningActive = false;
@@ -1728,7 +1639,9 @@ export function createDatePicker<
       return;
     }
 
-    if (fallbackDismissActive) return;
+    if (fallbackDismissActive) {
+      return;
+    }
 
     if (activeFallbackPopoverClose && activeFallbackPopoverClose !== closeCalendar) {
       activeFallbackPopoverClose();
@@ -1741,20 +1654,26 @@ export function createDatePicker<
   }
 
   function onFallbackDocumentClick(event: MouseEvent): void {
-    if (event.target instanceof Node && root.contains(event.target)) return;
+    if (isNode(event.target) && root.contains(event.target)) {
+      return;
+    }
 
     closeCalendar();
   }
 
   function onFallbackDocumentKeydown(event: KeyboardEvent): void {
-    if (event.key !== "Escape" || event.defaultPrevented) return;
+    if (event.key !== "Escape" || event.defaultPrevented) {
+      return;
+    }
 
     event.preventDefault();
     closeCalendarAndFocusInput();
   }
 
   function stopFallbackDismiss(): void {
-    if (!fallbackDismissActive) return;
+    if (!fallbackDismissActive) {
+      return;
+    }
 
     document.removeEventListener("click", onFallbackDocumentClick, true);
     document.removeEventListener("keydown", onFallbackDocumentKeydown);
@@ -1826,8 +1745,12 @@ export function createDatePicker<
       stopFallbackDismiss();
       stopFallbackPositioning();
       hideNativePopover();
-      if (inputAttributes) restoreAttributes(input, inputAttributes);
-      if (endInputAttributes) restoreAttributes(endInput, endInputAttributes);
+      if (inputAttributes) {
+        restoreAttributes(input, inputAttributes);
+      }
+      if (endInputAttributes) {
+        restoreAttributes(endInput, endInputAttributes);
+      }
       root.replaceChildren(...initialChildren);
       root.classList.remove("litopis");
       delete root.dataset.calendarOpen;
@@ -1881,18 +1804,37 @@ function getCalendarStateOptions<ValueAs extends DatePickerValueAs>(
   options: DatePickerOptions<ValueAs>,
   selected = getInternalDate(options.selected ?? null),
 ): CalendarStateOptions {
-  return {
-    ...(options.firstDayOfWeek === undefined ? {} : { firstDayOfWeek: options.firstDayOfWeek }),
-    ...(options.locale === undefined ? {} : { locale: options.locale }),
-    ...(options.max === undefined ? {} : { max: options.max }),
-    ...(options.min === undefined ? {} : { min: options.min }),
-    ...(options.disabledDates === undefined ? {} : { disabledDates: options.disabledDates }),
-    ...(options.isDateDisabled === undefined ? {} : { isDateDisabled: options.isDateDisabled }),
-    ...(options.range === undefined ? {} : { range: getInternalRange(options.range) }),
+  const stateOptions: CalendarStateOptions = {
     selected,
     selectionMode: options.selection ?? "single",
-    ...(options.today === undefined ? {} : { today: options.today }),
   };
+
+  if (options.firstDayOfWeek !== undefined) {
+    Object.assign(stateOptions, { firstDayOfWeek: options.firstDayOfWeek });
+  }
+  if (options.locale !== undefined) {
+    Object.assign(stateOptions, { locale: options.locale });
+  }
+  if (options.max !== undefined) {
+    Object.assign(stateOptions, { max: options.max });
+  }
+  if (options.min !== undefined) {
+    Object.assign(stateOptions, { min: options.min });
+  }
+  if (options.disabledDates !== undefined) {
+    Object.assign(stateOptions, { disabledDates: options.disabledDates });
+  }
+  if (options.isDateDisabled !== undefined) {
+    Object.assign(stateOptions, { isDateDisabled: options.isDateDisabled });
+  }
+  if (options.range !== undefined) {
+    Object.assign(stateOptions, { range: getInternalRange(options.range) });
+  }
+  if (options.today !== undefined) {
+    Object.assign(stateOptions, { today: options.today });
+  }
+
+  return stateOptions;
 }
 
 function getSelectedDate(state: CalendarState): DateValue | null {
@@ -1900,7 +1842,9 @@ function getSelectedDate(state: CalendarState): DateValue | null {
 }
 
 function sameNullableDate(left: DateValue | null, right: DateValue | null): boolean {
-  if (left === null || right === null) return left === right;
+  if (left === null || right === null) {
+    return left === right;
+  }
   return isSameDate(left, right);
 }
 
@@ -1937,7 +1881,9 @@ function getStartLabel<ValueAs extends DatePickerValueAs>(
   messages: DatePickerMessages,
 ): string {
   if (options.selection === "range") {
-    if (typeof options.label === "object") return options.label.start;
+    if (typeof options.label === "object") {
+      return options.label.start;
+    }
     if (getFieldLayout(options) === "single" && typeof options.label === "string") {
       return options.label;
     }
@@ -1961,9 +1907,15 @@ function getDatePickerFieldError(
   max: DateValue | null,
   messages: DatePickerMessages,
 ): string {
-  if (!value) return messages.enterValidDate;
-  if (min && compareDates(value, min) < 0) return messages.dateOnOrAfter(toIsoDate(min));
-  if (max && compareDates(value, max) > 0) return messages.dateOnOrBefore(toIsoDate(max));
+  if (!value) {
+    return messages.enterValidDate;
+  }
+  if (min && compareDates(value, min) < 0) {
+    return messages.dateOnOrAfter(toIsoDate(min));
+  }
+  if (max && compareDates(value, max) > 0) {
+    return messages.dateOnOrBefore(toIsoDate(max));
+  }
   return "";
 }
 
@@ -1982,9 +1934,13 @@ function getFieldPlaceholder(
   format: DateFieldFormat,
   granularity: "day" | "month" | "year",
 ): string {
-  if (granularity === "year") return "YYYY";
+  if (granularity === "year") {
+    return "YYYY";
+  }
   if (granularity === "month") {
-    if (format === "yyyy-mm-dd") return "YYYY-MM";
+    if (format === "yyyy-mm-dd") {
+      return "YYYY-MM";
+    }
     return format === "dd/mm/yyyy" ? "MM/YYYY" : "MM.YYYY";
   }
   return getDateFieldPlaceholder(format);
@@ -1995,12 +1951,18 @@ function formatPeriodFieldValue(
   format: DateFieldFormat,
   granularity: "day" | "month" | "year",
 ): string {
-  if (granularity === "day") return formatDateFieldValue(value, format);
-  if (granularity === "year") return String(value.year).padStart(4, "0");
+  if (granularity === "day") {
+    return formatDateFieldValue(value, format);
+  }
+  if (granularity === "year") {
+    return String(value.year).padStart(4, "0");
+  }
 
   const year = String(value.year).padStart(4, "0");
   const month = String(value.month).padStart(2, "0");
-  if (format === "yyyy-mm-dd") return `${year}-${month}`;
+  if (format === "yyyy-mm-dd") {
+    return `${year}-${month}`;
+  }
   return format === "dd/mm/yyyy" ? `${month}/${year}` : `${month}.${year}`;
 }
 
@@ -2009,14 +1971,18 @@ function parsePeriodFieldValue(
   format: DateFieldFormat,
   granularity: "day" | "month" | "year",
 ): DateValue | null {
-  if (granularity === "day") return parseDateFieldValue(value, format);
-  const digits = value.replace(/\D/g, "");
+  if (granularity === "day") {
+    return parseDateFieldValue(value, format);
+  }
+  const digits = value.replaceAll(/\D/g, "");
 
   if (granularity === "year") {
     return digits.length === 4 ? { day: 1, month: 1, year: Number(digits) } : null;
   }
 
-  if (digits.length !== 6) return null;
+  if (digits.length !== 6) {
+    return null;
+  }
   const year = format === "yyyy-mm-dd" ? Number(digits.slice(0, 4)) : Number(digits.slice(2, 6));
   const month = format === "yyyy-mm-dd" ? Number(digits.slice(4, 6)) : Number(digits.slice(0, 2));
   return month >= 1 && month <= 12 ? { day: 1, month, year } : null;
@@ -2027,9 +1993,13 @@ function maskPeriodFieldEdit(
   format: DateFieldFormat,
   granularity: "day" | "month" | "year",
 ): string {
-  const digits = value.replace(/\D/g, "");
-  if (granularity === "day") return value;
-  if (granularity === "year") return digits.slice(0, 4);
+  const digits = value.replaceAll(/\D/g, "");
+  if (granularity === "day") {
+    return value;
+  }
+  if (granularity === "year") {
+    return digits.slice(0, 4);
+  }
   const clipped = digits.slice(0, 6);
   if (format === "yyyy-mm-dd") {
     return clipped.length > 4 ? `${clipped.slice(0, 4)}-${clipped.slice(4)}` : clipped;
@@ -2045,10 +2015,14 @@ function parseRangeFieldValue(
   granularity: "day" | "month" | "year",
 ): DateRange | null {
   const [start, end, extra] = value.split(/\s*[–—]\s*/);
-  if (!start || !end || extra) return null;
+  if (!start || !end || extra) {
+    return null;
+  }
   const parsedStart = parsePeriodFieldValue(start, format, granularity);
   const parsedEnd = parsePeriodFieldValue(end, format, granularity);
-  if (!parsedStart || !parsedEnd) return null;
+  if (!parsedStart || !parsedEnd) {
+    return null;
+  }
   return normalizeDateRange({ end: parsedEnd, start: parsedStart }, granularity);
 }
 
@@ -2058,16 +2032,19 @@ function maskRangeFieldEdit(
   granularity: "day" | "month" | "year",
 ): string {
   const width = granularity === "day" ? 8 : granularity === "month" ? 6 : 4;
-  const digits = value.replace(/\D/g, "").slice(0, width * 2);
+  const digits = value.replaceAll(/\D/g, "").slice(0, width * 2);
   const start = digits.slice(0, width);
   const end = digits.slice(width);
   const formatPartial = (part: string): string => {
-    if (granularity === "day")
+    if (granularity === "day") {
       return maskDateFieldEdit(part, format, part.length, part.length).value;
+    }
     return maskPeriodFieldEdit(part, format, granularity);
   };
 
-  if (!end) return formatPartial(start);
+  if (!end) {
+    return formatPartial(start);
+  }
   return `${formatPartial(start)} – ${formatPartial(end)}`;
 }
 
@@ -2076,7 +2053,7 @@ function getInternalDate(value: DateValue | Date | null): DateValue | null {
     return null;
   }
 
-  return value instanceof Date ? fromLocalDate(value) : value;
+  return isNativeDate(value) ? fromLocalDate(value) : value;
 }
 
 function getInternalRange(range: DatePickerRange<DatePickerValueAs> | DateRange): DateRange {
@@ -2141,7 +2118,9 @@ function getTargetSize<ValueAs extends DatePickerValueAs>(
 function getVisiblePanels<ValueAs extends DatePickerValueAs>(
   options: DatePickerOptions<ValueAs>,
 ): 1 | 2 | "auto" {
-  if (options.selection !== "range") return 1;
+  if (options.selection !== "range") {
+    return 1;
+  }
   return options.panels ?? "auto";
 }
 
@@ -2151,7 +2130,7 @@ function getYearPageStart(year: number): number {
 
 function getInputSlot(root: HTMLElement, slot: InputSlot): HTMLInputElement | null {
   for (const child of root.children) {
-    if (child instanceof HTMLInputElement && child.getAttribute("slot") === slot) {
+    if (isHtmlInputElement(child) && child.getAttribute("slot") === slot) {
       return child;
     }
   }
@@ -2159,11 +2138,186 @@ function getInputSlot(root: HTMLElement, slot: InputSlot): HTMLInputElement | nu
   return null;
 }
 
-function getAttributeSnapshot(element: HTMLElement): AttributeSnapshot[] {
+function createWeekdaysRow(): HTMLElement {
+  const row = document.createElement("div");
+  row.className = "litopis-week litopis-weekdays";
+  row.setAttribute("role", "row");
+
+  for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
+    const weekday = document.createElement("div");
+    weekday.className = "litopis-weekday";
+    weekday.setAttribute("role", "columnheader");
+    row.append(weekday);
+  }
+
+  return row;
+}
+
+function createDayRow(): HTMLElement {
+  const row = document.createElement("div");
+  row.className = "litopis-week";
+  row.setAttribute("role", "row");
+
+  for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
+    const day = document.createElement("div");
+    day.className = "litopis-day";
+    row.append(day);
+  }
+
+  return row;
+}
+
+function ensureDayGridStructure(target: HTMLElement, weekCount: number): void {
+  if (target.children.length === weekCount + 1) {
+    return;
+  }
+
+  const rows = [createWeekdaysRow()];
+  for (let weekIndex = 0; weekIndex < weekCount; weekIndex += 1) {
+    rows.push(createDayRow());
+  }
+
+  target.replaceChildren(...rows);
+}
+
+function getDayButton(day: HTMLElement): HTMLButtonElement {
+  const existingButton = day.querySelector<HTMLButtonElement>(".litopis-day-button");
+  if (existingButton) {
+    return existingButton;
+  }
+
+  const button = document.createElement("button");
+  button.className = "litopis-day-button";
+  button.type = "button";
+  day.append(button);
+  return button;
+}
+
+function setDataValue(element: HTMLElement, name: keyof DOMStringMap, value: string): void {
+  if (element.dataset[name] !== value) {
+    element.dataset[name] = value;
+  }
+}
+
+function setDataState(element: HTMLElement, stateName: keyof DOMStringMap, active: boolean): void {
+  if (active) {
+    setDataValue(element, stateName, "");
+    return;
+  }
+
+  if (stateName in element.dataset) {
+    delete element.dataset[stateName];
+  }
+}
+
+function clearDayCell(day: HTMLElement): void {
+  day.classList.add("litopis-day-empty");
+  setAttribute(day, "aria-hidden", "true");
+  setAttribute(day, "role", "presentation");
+  removeAttribute(day, "aria-selected");
+  delete day.dataset.isoDate;
+  setDataState(day, "inRange", false);
+  setDataState(day, "outsideMonth", false);
+  setDataState(day, "rangeEnd", false);
+  setDataState(day, "rangeStart", false);
+  setDataState(day, "selected", false);
+  setDataState(day, "today", false);
+
+  if (day.hasChildNodes()) {
+    day.replaceChildren();
+  }
+}
+
+function setText(element: HTMLElement, value: string): void {
+  if (element.textContent !== value) {
+    element.textContent = value;
+  }
+}
+
+function setAttribute(element: HTMLElement, name: string, value: string): void {
+  if (element.getAttribute(name) !== value) {
+    element.setAttribute(name, value);
+  }
+}
+
+function removeAttribute(element: HTMLElement, name: string): void {
+  if (element.hasAttribute(name)) {
+    element.removeAttribute(name);
+  }
+}
+
+function setDisabled(button: HTMLButtonElement, disabled: boolean): void {
+  if (button.disabled !== disabled) {
+    button.disabled = disabled;
+  }
+}
+
+function isMonthDisabled(month: number, year: number, calendarState: CalendarState): boolean {
+  if (year < MIN_YEAR || year > MAX_YEAR) {
+    return true;
+  }
+
+  const monthStart = { day: 1, month, year };
+  const monthEnd = { day: getDaysInMonth(monthStart), month, year };
+
+  return Boolean(
+    (calendarState.min && compareDates(monthEnd, calendarState.min) < 0) ||
+    (calendarState.max && compareDates(monthStart, calendarState.max) > 0),
+  );
+}
+
+function isNode(value: EventTarget | null): value is Node {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "nodeType" in value &&
+    typeof value.nodeType === "number" &&
+    "nodeName" in value &&
+    typeof value.nodeName === "string" &&
+    "contains" in value &&
+    typeof value.contains === "function"
+  );
+}
+
+function isElementNode(value: EventTarget | null): value is Element {
+  return (
+    isNode(value) &&
+    value.nodeType === 1 &&
+    "tagName" in value &&
+    typeof value.tagName === "string" &&
+    "closest" in value &&
+    typeof value.closest === "function"
+  );
+}
+
+function isButtonElement(value: Element | null): value is HTMLButtonElement {
+  return (
+    isElementNode(value) &&
+    value.tagName === "BUTTON" &&
+    "disabled" in value &&
+    typeof value.disabled === "boolean"
+  );
+}
+
+function isHtmlInputElement(value: Element): value is HTMLInputElement {
+  return (
+    value.tagName === "INPUT" &&
+    "value" in value &&
+    typeof value.value === "string" &&
+    "setSelectionRange" in value &&
+    typeof value.setSelectionRange === "function"
+  );
+}
+
+function isNativeDate(value: Date | DateValue): value is Date {
+  return "getTime" in value && typeof value.getTime === "function";
+}
+
+function getAttributeSnapshot(element: HTMLElement): Array<AttributeSnapshot> {
   return [...element.attributes].map(({ name, value }) => ({ name, value }));
 }
 
-function restoreAttributes(element: HTMLElement, snapshot: readonly AttributeSnapshot[]): void {
+function restoreAttributes(element: HTMLElement, snapshot: ReadonlyArray<AttributeSnapshot>): void {
   for (const attribute of getAttributeSnapshot(element)) {
     element.removeAttribute(attribute.name);
   }
@@ -2180,7 +2334,7 @@ function appendToken(value: string | null, token: string): string {
 }
 
 function supportsAnchorPositioning(): boolean {
-  return typeof globalThis.CSS !== "undefined" && globalThis.CSS.supports("top", "anchor(bottom)");
+  return globalThis.CSS !== undefined && globalThis.CSS.supports("top", "anchor(bottom)");
 }
 
 function getCssPixelValue(value: string, fallback: number): number {
@@ -2197,6 +2351,6 @@ function scheduleMicrotask(callback: VoidFunction): void {
   void Promise.resolve().then(callback);
 }
 
-function hasOwn(value: object, property: PropertyKey): boolean {
-  return Object.prototype.hasOwnProperty.call(value, property);
+function hasOwn<Value extends object>(value: Value, property: PropertyKey): boolean {
+  return Object.hasOwn(value, property);
 }

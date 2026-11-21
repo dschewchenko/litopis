@@ -112,7 +112,7 @@ export function parseDateFieldPreviewMonth(
   format: DateFieldFormat,
   fallbackYear: number,
 ): DateValue | null {
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replaceAll(/\D/g, "");
 
   switch (format) {
     case "dd.mm.yyyy":
@@ -193,12 +193,12 @@ function getValidPreviewMonth(month: number, year: number): DateValue | null {
   return { day: 1, month, year };
 }
 
-function joinDateParts(parts: readonly string[], separator: string): string {
+function joinDateParts(parts: ReadonlyArray<string>, separator: string): string {
   return parts.filter(Boolean).join(separator);
 }
 
 function getPartialFormatParts(value: string, format: DateFieldFormat): FormatParts {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
+  const digits = value.replaceAll(/\D/g, "").slice(0, 8);
 
   switch (format) {
     case "dd.mm.yyyy":
@@ -242,7 +242,7 @@ function normalizeCompletedParts(parts: FormatParts): FormatParts {
 }
 
 function getFormatParts(value: string, format: DateFieldFormat): FormatParts | null {
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replaceAll(/\D/g, "");
 
   if (digits.length !== 8) {
     return null;
@@ -280,7 +280,7 @@ function clampNumber(value: number, min: number, max: number): number {
 }
 
 function countDigitsBefore(value: string, position: number): number {
-  return value.slice(0, position).replace(/\D/g, "").length;
+  return value.slice(0, position).replaceAll(/\D/g, "").length;
 }
 
 function getCaretPositionForDigitIndex(value: string, digitIndex: number): number {
