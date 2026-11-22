@@ -29,7 +29,7 @@
     "test:headless": "bun scripts/check-headless-core.mjs",
     "check:release": "bun run check:release:base && bun run test:browser",
     "check:release:base": "bun run check && bun run build:docs && bun run test:headless && bun run pack:check && bun run audit",
-    "typecheck": "bun --bun tsrs --checkers 2 -p tsconfig.typecheck.json --noEmit --pretty false",
+    "typecheck": "bun --bun tsc -p tsconfig.typecheck.json --noEmit --pretty false",
     "version": "changeset version && bun install --lockfile-only"
   },
   "devDependencies": {
@@ -37,7 +37,7 @@
     "@changesets/cli": "^3.0.3",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
-    "@nkzw/oxlint-config": "3.0.0",
+    "@nkzw/oxlint-config": "3.0.2",
     "@playwright/test": "^1.65.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

@@ -9,7 +9,7 @@
         "@changesets/cli": "^3.0.3",
         "@commitlint/cli": "^21.2.4",
         "@commitlint/config-conventional": "^21.2.4",
-        "@nkzw/oxlint-config": "3.0.0",
+        "@nkzw/oxlint-config": "3.0.2",
         "@playwright/test": "^1.65.1",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
@@ -271,9 +271,9 @@
 
     "@manypkg/tools": ["@manypkg/tools@2.1.2", "", { "dependencies": { "jju": "^1.4.0", "tinyglobby": "^0.2.13", "yaml": "^2.9.0" } }, "sha512-6QEf6yqFbETdwGITKq57aYoPfX/3K8XFNwsAlx0C1M7o8cb79sv1M3w+tWuWvIcSbNqrLF7OD7YpZMVVz335hQ=="],
 
-    "@nkzw/eslint-plugin": ["@nkzw/eslint-plugin@2.0.0", "", { "peerDependencies": { "eslint": ">= 9" } }, "sha512-IoU8kOqHfnf7se2dGxMD/7RPm6WVjzjOjWSo7FulRx3lJzuZvXioSkT5Nd82l66DH3Pl2whw74lPT1di3KMwFA=="],
+    "@nkzw/eslint-plugin": ["@nkzw/eslint-plugin@3.0.0", "", { "peerDependencies": { "eslint": ">= 9" }, "optionalPeers": ["eslint"] }, "sha512-J6Ms/OzUxx7BNBggCKOqFWbESgAJYjvXvekCjjpxVJA2fBv5xOsC5P+2WDYqQUMCvDOU3GxBgG/jrmbqf+/wQA=="],
 
-    "@nkzw/oxlint-config": ["@nkzw/oxlint-config@3.0.0", "", { "dependencies": { "@nkzw/eslint-plugin": "^2.0.0", "eslint-plugin-no-only-tests": "^3.4.0", "eslint-plugin-perfectionist": "^5.14.0" }, "peerDependencies": { "oxlint": ">=1.94.0", "tsrs": ">=0.25.0-ts7.1.0-beta" } }, "sha512-eBLEwZp7Q0HMPr5ixSBH+Brv4+ZFUJkjSnrpBJNHjBzusi4uau91VWVlzFUePascXWAmv2LVR3emwE8666oViw=="],
+    "@nkzw/oxlint-config": ["@nkzw/oxlint-config@3.0.2", "", { "dependencies": { "@nkzw/eslint-plugin": "^3.0.0", "eslint-plugin-no-only-tests": "^3.4.0", "eslint-plugin-perfectionist": "^5.14.0" }, "peerDependencies": { "oxlint": ">=1.94.0", "tsrs": ">=0.25.0-ts7.1.0-beta || ^7.1.0-beta.tsrs2" } }, "sha512-Fummai9da8qs3hc2eSAMnMeLjvF43BTqcM2dpIDDWOi1Idmd/Jr7RA4y6iER2uZJynqDKM2E+9abbKt5uMVRSQ=="],
 
     "@oxc-project/types": ["@oxc-project/types@0.155.0", "", {}, "sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q=="],
 
