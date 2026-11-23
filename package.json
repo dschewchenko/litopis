@@ -27,6 +27,7 @@
     "test": "vitest run",
     "test:browser": "playwright test",
     "test:headless": "bun scripts/check-headless-core.mjs",
+    "check:release:artifacts": "bun run format:check && bun run lint && bun run typecheck && bun run build:docs && bun run pack:check && bun run audit",
     "check:release": "bun run check:release:base && bun run test:browser",
     "check:release:base": "bun run check && bun run build:docs && bun run test:headless && bun run pack:check && bun run audit",
     "typecheck": "bun --bun tsc -p tsconfig.typecheck.json --noEmit --pretty false",
